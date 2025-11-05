@@ -12,10 +12,6 @@ class Cursos extends Model
     protected $table = 'cursos';
     protected $primaryKey = 'id_curso';
     
-    // Definir nombres de columnas de timestamp personalizadas
-    const CREATED_AT = 'fecha_creacion';
-    const UPDATED_AT = 'fecha_actualizacion';
-    
     protected $fillable = [
         'nombre',
         'descripcion',

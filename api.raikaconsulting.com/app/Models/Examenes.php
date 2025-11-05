@@ -12,10 +12,6 @@ class Examenes extends Model
     protected $table = 'examenes';
     protected $primaryKey = 'id_examen';
     
-    // Definir nombre de columna de timestamp personalizada
-    const CREATED_AT = 'fecha_creacion';
-    const UPDATED_AT = null; // No hay columna updated_at en esta tabla
-    
     protected $fillable = [
         'nombre',
         'puntaje_total',
