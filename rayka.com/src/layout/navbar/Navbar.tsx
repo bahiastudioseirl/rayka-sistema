@@ -42,7 +42,7 @@ export const Navbar: FC<NavbarProps> = ({
         <div className="flex items-center gap-3">
           {userName && (
             <div className="hidden sm:flex flex-col text-right leading-tight">
-              <span className="text-xs text-slate-500">Bienvenido,</span>
+              <span className="text-xs text-slate-500">Bienvenido, Hola</span>
               <span className="text-sm font-medium text-slate-900">{userName}</span>
             </div>
           )}
