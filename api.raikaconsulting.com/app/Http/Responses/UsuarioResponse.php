@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Responses\Usuarios;
+
+use App\Models\Usuarios;
+use Illuminate\Http\JsonResponse;
+
+class UsuarioResponse
+{
+
+    public static function usuarioCreado(Usuarios $usuario): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario administrador creado exitosamente',
+            'data' => [
+                'usuario' => [
+                    'id' => $usuario->id_usuario,
+                    'nombre' => $usuario->nombre,
+                    'apellido' => $usuario->apellido,
+                    'correo' => $usuario->correo,
+                    'activo' => $usuario->activo,
+                    'rol' => [
+                        'nombre' => $usuario->rol->nombre ?? null
+                    ],
+                    'fecha_creacion' => $usuario->fecha_creacion?->format('Y-m-d H:i:s'),
+                    'fecha_actualizacion' => $usuario->fecha_actualizacion?->format('Y-m-d H:i:s')
+                ]
+            ]
+        ], 201);
+    }
+
+}
