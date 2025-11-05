@@ -4,16 +4,25 @@ import { LazyWrapper } from './components/LazyWrapper';
 import { ProtectedRoute } from './guard/ProtectedRoute';
 import { AdminLayout } from '../../layout/components/AdminLayout';
 
-// Lazy loading de las páginas principales
-const Cursos = lazy(() => 
-  import('../../pages/cursos/cursos').then((module) => ({ default: module.CursosPage }))
-);
-
+// LOGIN FORM
 const LoginForm = lazy(() => 
   import('../components/auth/LoginForm').then((module) => ({ default: module.LoginForm }))
 );
 
-// Lazy loading de las páginas administrativas
+// PAGINAS USUARIO
+const HomePage = lazy(() => 
+  import('../../pages/HomePage').then((module) => ({ default: module.default }))
+);
+
+const Cursos = lazy(() => 
+  import('../../pages/cursos/CursosPage').then((module) => ({ default: module.default }))
+);
+
+const CursoContenido = lazy(() => 
+  import('../../pages/cursos/CursoContenido').then((module) => ({ default: module.default }))
+);
+
+// ADMINISTRATIVO
 const Banners = lazy(() => 
   import('../../admin/features/bannerAdmin/pages/bannerAdmin').then((module) => ({ default: module.Banners }))
 );
@@ -23,9 +32,21 @@ const Profesores = lazy(() =>
 );
 
 export const routes = [
+  // RUTAS PÚBLICAS - PÁGINAS DE USUARIO
+  
   // Ruta principal - Página de inicio
   {
     path: '/',
+    element: (
+      <LazyWrapper>
+        <HomePage />
+      </LazyWrapper>
+    ),
+  },
+
+  // Cursos - Página de cursos disponibles
+  {
+    path: '/cursos',
     element: (
       <LazyWrapper>
         <Cursos />
@@ -33,7 +54,17 @@ export const routes = [
     ),
   },
 
-  // Login - Página de autenticación para administradores
+  // Curso Individual - Vista detallada de un curso específico
+  {
+    path: '/cursos/:cursoId',
+    element: (
+      <LazyWrapper>
+        <CursoContenido />
+      </LazyWrapper>
+    ),
+  },
+
+  // RUTAS ADMINISTRATIVAS  // Login - Página de autenticación para administradores
   {
     path: '/admin',
     element: (
