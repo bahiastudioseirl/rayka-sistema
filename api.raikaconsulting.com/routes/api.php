@@ -27,4 +27,6 @@ Route::middleware('auth.admin')->group(function () {
     Route::get('usuarios/ver-estudiantes', [UsuarioController::class, 'listarEstudiantes']);
     Route::get('usuarios/ver-administradores', [UsuarioController::class, 'listarAdministradores']);
     Route::patch('usuarios/{id}/cambiar-estado', [UsuarioController::class, 'cambiarEstado']);
+    Route::patch('usuarios/{id}', [UsuarioController::class, 'actualizarUsuario']);
+    Route::patch('usuarios/{id}/actualizar-contrasenia', [UsuarioController::class, 'actualizarContrasenia']);
 });

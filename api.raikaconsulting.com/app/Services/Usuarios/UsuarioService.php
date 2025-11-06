@@ -110,6 +110,53 @@ class UsuarioService
         return $this->usuarioRepository->obtenerPorId($id);
     }
 
+    public function actualizarUsuario(int $id, array $datos): Usuarios
+    {
+        $usuario = $this->usuarioRepository->obtenerPorId($id);
+        if (!$usuario) {
+            throw new ModelNotFoundException('Usuario no encontrado');
+        }
+
+        $actualizado = $this->usuarioRepository->actualizar($id, $datos);
+        
+        if (!$actualizado) {
+            throw new \Exception('Error al actualizar el usuario');
+        }
+
+        return $this->usuarioRepository->obtenerPorId($id);
+    }
+
+    public function actualizarContrasenia(int $id, string $nuevaContrasenia): Usuarios
+    {
+        $usuario = $this->usuarioRepository->obtenerPorId($id);
+        if (!$usuario) {
+            throw new ModelNotFoundException('Usuario no encontrado');
+        }
+
+        $contraseniaHasheada = bcrypt($nuevaContrasenia);
+        
+        $actualizado = $this->usuarioRepository->actualizar($id, ['contrasenia' => $contraseniaHasheada]);
+        
+        if (!$actualizado) {
+            throw new \Exception('Error al actualizar la contraseña del usuario');
+        }
+
+        return $this->usuarioRepository->obtenerPorId($id);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Enviar credenciales por correo al estudiante

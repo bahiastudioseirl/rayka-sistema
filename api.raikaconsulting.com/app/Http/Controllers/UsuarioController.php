@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Usuarios\ActualizarUsuarioDTO;
 use App\Http\Request\Usuarios\CrearAdministradorRequest;
 use App\Http\Request\Usuarios\CrearEstudianteRequest;
 use App\DTOs\Usuarios\CrearAdministradorDTO;
 use App\DTOs\Usuarios\CrearEstudianteDTO;
+use App\Http\Request\Usuarios\ActualizarContrasenia;
+use App\Http\Request\Usuarios\ActualizarContraseniaRequest;
+use App\Http\Request\Usuarios\ActualizarUsuarioRequest;
 use App\Services\Usuarios\UsuarioService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -125,4 +129,55 @@ class UsuarioController extends Controller
             ], 500);
         }
     }
+
+    public function actualizarUsuario(int $id, ActualizarUsuarioRequest $request): JsonResponse
+    {
+        try {
+            $dto = ActualizarUsuarioDTO::fromRequest($request->validated());
+            $usuario = $this->usuarioService->actualizarUsuario($id, $dto->toArray());
+            
+            return response()->json([
+                'message' => 'Usuario actualizado exitosamente',
+                'data' => $usuario
+            ], 200);
+            
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar usuario: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function actualizarContrasenia(int $id, ActualizarContraseniaRequest $request): JsonResponse
+    {
+        try {
+            $nuevaContrasenia = $request->input('contrasenia');
+            $usuario = $this->usuarioService->actualizarContrasenia($id, $nuevaContrasenia);
+            
+            return response()->json([
+                'message' => 'Contraseña actualizada exitosamente',
+                'data' => $usuario
+            ], 200);
+            
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar contraseña del usuario: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }
