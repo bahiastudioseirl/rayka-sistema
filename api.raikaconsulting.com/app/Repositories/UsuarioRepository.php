@@ -20,4 +20,31 @@ class UsuarioRepository
         return Usuarios::create($datos);
     }
 
+    public function obtenerPorId(int $id): ?Usuarios
+    {
+        return Usuarios::with('rol')->find($id);
+    }
+
+    public function listarPorRol(int $idRol): Collection
+    {
+        return Usuarios::with('rol')
+            ->where('id_rol', $idRol)
+            ->get();
+    }
+
+    public function listarTodos(): Collection
+    {
+        return Usuarios::with('rol')->get();
+    }
+
+    public function actualizar(int $id, array $datos): bool
+    {
+        return Usuarios::where('id_usuario', $id)->update($datos);
+    }
+
+    public function eliminar(int $id): bool
+    {
+        return Usuarios::where('id_usuario', $id)->delete();
+    }
+
 }

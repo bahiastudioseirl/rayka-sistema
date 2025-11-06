@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'jwt.auth' => \App\Http\Middleware\JWTAuthMiddleware::class,
             'admin' => \App\Http\Middleware\AdminRoleMiddleware::class,
+            'auth.admin' => \App\Http\Middleware\AuthAdminMiddleware::class,
         ]);
         
         // BLOQUEAR COMPLETAMENTE todos los middleware automáticos de JWT

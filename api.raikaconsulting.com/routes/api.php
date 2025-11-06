@@ -16,10 +16,15 @@ use App\Http\Controllers\UsuarioController;
 // Rutas de autenticación
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
-    // LOGOUT SIN MIDDLEWARE - maneja autenticación internamente
     Route::post('logout', [AuthController::class, 'logout']);
     Route::middleware('jwt.auth')->post('refresh', [AuthController::class, 'refresh']);
 });
 
-// Rutas para administradores - SIN MIDDLEWARE, maneja autenticación internamente
-Route::post('usuarios/administrador', [UsuarioController::class, 'crearAdministrador']);
+// Rutas para administradores autenticados
+Route::middleware('auth.admin')->group(function () {
+    Route::post('usuarios/administrador', [UsuarioController::class, 'crearAdministrador']);
+    Route::post('usuarios/estudiante', [UsuarioController::class, 'crearEstudiante']);
+    Route::get('usuarios/ver-estudiantes', [UsuarioController::class, 'listarEstudiantes']);
+    Route::get('usuarios/ver-administradores', [UsuarioController::class, 'listarAdministradores']);
+    Route::patch('usuarios/{id}/cambiar-estado', [UsuarioController::class, 'cambiarEstado']);
+});
