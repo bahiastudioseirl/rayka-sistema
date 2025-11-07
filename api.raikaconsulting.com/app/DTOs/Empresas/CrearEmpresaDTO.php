@@ -30,6 +30,7 @@ class CrearEmpresaDTO
         return [
             'nombre' => $this->nombre,
             'creado_por' => $this->creado_por,
+            'fecha_creacion' => now(),
         ];
     }
 }
