@@ -15,7 +15,8 @@ class Empresas extends Model
     
     protected $fillable = [
         'nombre',
-        'creado_por'
+        'creado_por',
+        'fecha_creacion'
     ];
 
     protected $casts = [
