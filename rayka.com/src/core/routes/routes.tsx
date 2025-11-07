@@ -68,7 +68,7 @@ export const routes = [
   {
     path: '/administrator',
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requiredRole="Administrador">
         <AdminLayout />
       </ProtectedRoute>
     ),

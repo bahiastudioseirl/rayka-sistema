@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LogoRayka from '../../../assets/LogoRayka.png';  
+import LogoRayka from '../../../assets/LogoRayka.png';
+import { iniciarSesion } from './services/IniciarSesion';
+import { AuthStore } from './services/AuthStore';
+import type { LoginRequest } from './schemas/LoginSchema';
 
 export const LoginForm = () => {
-  const [credentials, setCredentials] = useState({
-    username: '',
-    password: ''
+  const [credentials, setCredentials] = useState<LoginRequest>({
+    correo: '',
+    contrasenia: ''
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -16,20 +19,37 @@ export const LoginForm = () => {
     setIsLoading(true);
     setError('');
 
-    // Simulamos un pequeño delay para la experiencia de usuario
-    setTimeout(() => {
-      if (credentials.username === 'admin123' && credentials.password === 'admin123') {
-        // Guardamos el estado de autenticación
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userRole', 'administrator');
-        
-        // Redirigimos al panel administrativo
+    try {
+      const response = await iniciarSesion(credentials);
+      
+      // Limpiar tokens antiguos primero (por si quedaron de sesiones anteriores)
+      AuthStore.clearAll();
+      
+      // Solo guardar el token en localStorage
+      localStorage.setItem('authToken', response.access_token);
+      
+      // Guardar datos del usuario en sessionStorage (más seguro)
+      AuthStore.setUser(response.usuario);
+      
+      // Redirigir según el rol
+      if (response.usuario.rol.nombre === 'Administrador') {
         navigate('/administrator');
       } else {
-        setError('Credenciales incorrectas. Usa admin123 / admin123');
+        navigate('/');
       }
+    } catch (err: any) {
+      console.error('Error en login:', err);
+      
+      if (err.response?.status === 401) {
+        setError('Credenciales incorrectas. Verifica tu correo y contraseña.');
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Error al iniciar sesión. Intenta nuevamente.');
+      }
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,7 +68,7 @@ export const LoginForm = () => {
           {/* Header */}
           <div className="text-center">
             <div className="mx-auto h-20 w-40 rounded-full flex items-center justify-center mb-2">
-              <img src={LogoRayka } alt="Logo Rayka" />
+              <img src={LogoRayka} alt="Logo Rayka" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900">Panel Administrativo</h2>
             <p className="mt-2 text-sm text-gray-600">
@@ -60,31 +80,31 @@ export const LoginForm = () => {
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Usuario
+                <label htmlFor="correo" className="block text-sm font-medium text-gray-700 mb-1">
+                  Correo Electrónico
                 </label>
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
+                  id="correo"
+                  name="correo"
+                  type="email"
                   required
-                  value={credentials.username}
+                  value={credentials.correo}
                   onChange={handleChange}
                   className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#224666] focus:border-[#224666] focus:z-10 sm:text-sm"
-                  placeholder="Ingresa tu usuario"
+                  placeholder="admin@rayka.com"
                 />
               </div>
               
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="contrasenia" className="block text-sm font-medium text-gray-700 mb-1">
                   Contraseña
                 </label>
                 <input
-                  id="password"
-                  name="password"
+                  id="contrasenia"
+                  name="contrasenia"
                   type="password"
                   required
-                  value={credentials.password}
+                  value={credentials.contrasenia}
                   onChange={handleChange}
                   className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#224666] focus:border-[#224666] focus:z-10 sm:text-sm"
                   placeholder="Ingresa tu contraseña"
@@ -123,7 +143,7 @@ export const LoginForm = () => {
             {/* Demo Info */}
             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <p className="text-xs text-gray-600 text-center">
-                <strong>Demo:</strong> Usuario: admin123 | Contraseña: admin123
+                <strong>Demo:</strong> admin@rayka.com | admin@rayka.com
               </p>
             </div>
           </form>
