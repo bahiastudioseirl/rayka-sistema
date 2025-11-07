@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id('id_usuario');
             $table->string('nombre');
             $table->string('apellido');
-            $table->string('correo')->unique();
-            $table->string('contrasenia');
+            $table->string('num_documento')->unique()->nullable();
+            $table->string('correo')->nullable()->unique(); 
+            $table->string('contrasenia')->nullable(); 
             $table->boolean('activo')->default(true);
             $table->unsignedBigInteger('id_rol');
-
             $table->timestamp('fecha_creacion')->useCurrent();
-            $table->timestamp('fecha_actualizacion')->nullable();
+            $table->timestamp('fecha_actualizacion')->useCurrent()->useCurrentOnUpdate();
 
             $table->foreign('id_rol')->references('id_rol')->on('roles');
         });

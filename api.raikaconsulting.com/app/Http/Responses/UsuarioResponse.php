@@ -12,15 +12,17 @@ class UsuarioResponse
     {
         return response()->json([
             'success' => true,
-            'message' => 'Usuario administrador creado exitosamente',
+            'message' => 'Usuario creado exitosamente',
             'data' => [
                 'usuario' => [
                     'id' => $usuario->id_usuario,
                     'nombre' => $usuario->nombre,
                     'apellido' => $usuario->apellido,
+                    'num_documento' => $usuario->num_documento,
                     'correo' => $usuario->correo,
                     'activo' => $usuario->activo,
                     'rol' => [
+                        'id' => $usuario->rol->id_rol ?? null,
                         'nombre' => $usuario->rol->nombre ?? null
                     ],
                     'fecha_creacion' => $usuario->fecha_creacion?->format('Y-m-d H:i:s'),
@@ -40,8 +42,13 @@ class UsuarioResponse
                     'id' => $usuario->id_usuario,
                     'nombre' => $usuario->nombre,
                     'apellido' => $usuario->apellido,
+                    'num_documento' => $usuario->num_documento,
                     'correo' => $usuario->correo,
                     'activo' => $usuario->activo,
+                    'rol' => [
+                        'id' => $usuario->rol->id_rol ?? null,
+                        'nombre' => $usuario->rol->nombre ?? null
+                    ],
                     'fecha_creacion' => $usuario->fecha_creacion?->format('Y-m-d H:i:s'),
                     'fecha_actualizacion' => $usuario->fecha_actualizacion?->format('Y-m-d H:i:s')
                 ]

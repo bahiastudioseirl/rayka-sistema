@@ -11,24 +11,33 @@ class Cursos extends Model
 
     protected $table = 'cursos';
     protected $primaryKey = 'id_curso';
+    public $timestamps = false;
     
     protected $fillable = [
-        'nombre',
-        'descripcion',
-        'activo'
+        'titulo',
+        'contenido',
+        'tipo_contenido',
+        'activo',
+        'creado_por',
+        'fecha_creacion'
     ];
 
-    // Un curso tiene muchos módulos
-    public function modulos()
+    protected $casts = [
+        'activo' => 'boolean',
+        'fecha_creacion' => 'datetime',
+        'tipo_contenido' => 'string'
+    ];
+
+    // Un curso pertenece a un creador (usuario administrador)
+    public function creador()
     {
-        return $this->hasMany(Modulos::class, 'id_curso', 'id_curso');
+        return $this->belongsTo(Usuarios::class, 'creado_por', 'id_usuario');
     }
 
-    // Un curso puede tener muchos usuarios inscritos (relación muchos a muchos)
-    public function usuarios()
+    // Un curso puede estar en muchas capacitaciones
+    public function capacitaciones()
     {
-        return $this->belongsToMany(Usuarios::class, 'usuariosxcursos', 'id_curso', 'id_usuario')
-                    ->withTimestamps();
+        return $this->belongsToMany(Capacitaciones::class, 'capacitaciones_cursos', 'id_curso', 'id_capacitacion');
     }
 
     // Un curso tiene muchos progresos

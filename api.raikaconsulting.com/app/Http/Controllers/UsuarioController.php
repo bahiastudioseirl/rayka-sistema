@@ -10,7 +10,7 @@ use App\DTOs\Usuarios\CrearEstudianteDTO;
 use App\Http\Request\Usuarios\ActualizarContrasenia;
 use App\Http\Request\Usuarios\ActualizarContraseniaRequest;
 use App\Http\Request\Usuarios\ActualizarUsuarioRequest;
-use App\Services\Usuarios\UsuarioService;
+use App\Services\UsuarioService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
@@ -108,6 +108,26 @@ class UsuarioController extends Controller
             ], 500);
         }
     }
+
+    public function listarUsuarioPorNumDocumento(string $numDocumento): JsonResponse
+    {
+        try {
+            $usuario = $this->usuarioService->verUsuarioPorNumDocumento($numDocumento);
+
+            return response()->json([
+                'message' => 'Usuario obtenido exitosamente',
+                'data' => $usuario
+            ], 200);
+            
+        } catch (\Exception $e) {
+            Log::error('Error al obtener usuario por número de documento: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     public function cambiarEstado(int $id): JsonResponse
     {

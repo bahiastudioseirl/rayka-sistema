@@ -7,6 +7,7 @@ class ActualizarUsuarioDTO
     public function __construct(
         public readonly ?string $nombre = null,
         public readonly ?string $apellido = null,
+        public readonly ?string $num_documento = null,
         public readonly ?string $correo = null,
         public readonly ?string $contrasenia = null,
     ) {}
@@ -16,6 +17,7 @@ class ActualizarUsuarioDTO
         return new self(
             nombre: isset($data['nombre']) ? trim($data['nombre']) : null,
             apellido: isset($data['apellido']) ? trim($data['apellido']) : null,
+            num_documento: isset($data['num_documento']) ? trim($data['num_documento']) : null,
             correo: isset($data['correo']) ? strtolower(trim($data['correo'])) : null,
             contrasenia: $data['contrasenia'] ?? null,
         );
@@ -34,6 +36,9 @@ class ActualizarUsuarioDTO
         }
         if ($this->apellido !== null) {
             $result['apellido'] = $this->apellido;
+        }
+        if ($this->num_documento !== null) {
+            $result['num_documento'] = $this->num_documento;
         }
         if ($this->correo !== null) {
             $result['correo'] = $this->correo;

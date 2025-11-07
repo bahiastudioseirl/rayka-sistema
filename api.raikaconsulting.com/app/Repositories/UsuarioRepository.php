@@ -15,6 +15,13 @@ class UsuarioRepository
             ->first();
     }
 
+    public function obtenerPorNumDocumento(string $numDocumento): ?Usuarios
+    {
+        return Usuarios::with('rol')
+            ->where('num_documento', $numDocumento)
+            ->first();
+    }
+
     public function crear(array $datos): Usuarios
     {
         return Usuarios::create($datos);
@@ -30,11 +37,6 @@ class UsuarioRepository
         return Usuarios::with('rol')
             ->where('id_rol', $idRol)
             ->get();
-    }
-
-    public function listarTodos(): Collection
-    {
-        return Usuarios::with('rol')->get();
     }
 
     public function actualizar(int $id, array $datos): bool

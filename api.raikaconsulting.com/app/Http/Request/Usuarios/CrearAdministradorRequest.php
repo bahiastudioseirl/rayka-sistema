@@ -29,6 +29,13 @@ class CrearAdministradorRequest extends FormRequest
                 'min:2',
                 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'
             ],
+            'num_documento' => [
+                'sometimes',
+                'string',
+                'max:50',
+                'min:5',
+                'unique:usuarios,num_documento'
+            ],
             'correo' => [
                 'required',
                 'string',
@@ -59,6 +66,10 @@ class CrearAdministradorRequest extends FormRequest
             'apellido.min' => 'El apellido debe tener al menos 2 caracteres.',
             'apellido.max' => 'El apellido no puede exceder 255 caracteres.',
             'apellido.regex' => 'El apellido solo puede contener letras, espacios y acentos.',
+            
+            'num_documento.min' => 'El número de documento debe tener al menos 5 caracteres.',
+            'num_documento.max' => 'El número de documento no puede exceder 50 caracteres.',
+            'num_documento.unique' => 'Este número de documento ya está registrado.',
             
             'correo.required' => 'El correo electrónico es obligatorio.',
             'correo.email' => 'El correo electrónico debe tener un formato válido.',

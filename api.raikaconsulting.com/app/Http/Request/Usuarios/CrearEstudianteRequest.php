@@ -29,12 +29,12 @@ class CrearEstudianteRequest extends FormRequest
                 'min:2',
                 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/'
             ],
-            'correo' => [
+            'num_documento' => [
                 'required',
                 'string',
-                'email:rfc,dns',
-                'max:255',
-                'unique:usuarios,correo'
+                'max:50',
+                'min:5',
+                'unique:usuarios,num_documento'
             ]
         ];
     }
@@ -52,10 +52,10 @@ class CrearEstudianteRequest extends FormRequest
             'apellido.max' => 'El apellido no puede exceder 255 caracteres.',
             'apellido.regex' => 'El apellido solo puede contener letras, espacios y acentos.',
             
-            'correo.required' => 'El correo es obligatorio.',
-            'correo.email' => 'El correo debe ser una dirección de correo válida.',
-            'correo.max' => 'El correo no puede exceder 255 caracteres.',
-            'correo.unique' => 'El correo ya está registrado.'
+            'num_documento.required' => 'El número de documento es obligatorio.',
+            'num_documento.min' => 'El número de documento debe tener al menos 5 caracteres.',
+            'num_documento.max' => 'El número de documento no puede exceder 50 caracteres.',
+            'num_documento.unique' => 'Este número de documento ya está registrado.'
         ];
     }
 }

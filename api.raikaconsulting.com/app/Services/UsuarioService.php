@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Usuarios;
+namespace App\Services;
 
 use App\DTOs\Usuarios\CrearAdministradorDTO;
 use App\DTOs\Usuarios\CrearEstudianteDTO;
@@ -10,8 +10,6 @@ use App\Repositories\UsuarioRepository;
 use App\Utils\RolesEnum;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class UsuarioService
@@ -25,6 +23,12 @@ class UsuarioService
         if ($this->usuarioRepository->obtenerPorCorreo($dto->correo)) {
             throw ValidationException::withMessages([
                 'correo' => ['El correo electrónico ya está registrado.']
+            ]);
+        }
+
+        if ($this->usuarioRepository->obtenerPorNumDocumento($dto->num_documento)) {
+            throw ValidationException::withMessages([
+                'num_documento' => ['El número de documento ya está registrado.']
             ]);
         }
 
@@ -45,9 +49,9 @@ class UsuarioService
     public function crearEstudiante(CrearEstudianteDTO $dto): Usuarios
     {
         return DB::transaction(function () use ($dto) {
-            if ($this->usuarioRepository->obtenerPorCorreo($dto->correo)) {
+            if ($this->usuarioRepository->obtenerPorNumDocumento($dto->num_documento)) {
                 throw ValidationException::withMessages([
-                    'correo' => ['El correo electrónico ya está registrado.']
+                    'num_documento' => ['El número de documento ya está registrado.']
                 ]);
             }
             
@@ -62,11 +66,7 @@ class UsuarioService
                 ]);
             }
 
-            $usuario = $this->usuarioRepository->crear($dto->toArray());
-            
-            $this->enviarCredencialesPorCorreo($usuario, $dto->contrasenia);
-
-            return $usuario;
+            return $this->usuarioRepository->crear($dto->toArray());
         });
     }
 
@@ -144,41 +144,13 @@ class UsuarioService
         return $this->usuarioRepository->obtenerPorId($id);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Enviar credenciales por correo al estudiante
-     */
-    private function enviarCredencialesPorCorreo(Usuarios $usuario, string $contrasenia): void
+    public function verUsuarioPorNumDocumento(string $numDocumento): Usuarios
     {
-        try {
-            Mail::send('emails.credenciales-estudiante', [
-                'nombre' => $usuario->nombre,
-                'apellido' => $usuario->apellido,
-                'correo' => $usuario->correo,
-                'contrasenia' => $contrasenia,
-                'url_login' => config('app.frontend_url', 'http://localhost:3000') . '/login'
-            ], function ($message) use ($usuario) {
-                $message->to($usuario->correo, $usuario->nombre . ' ' . $usuario->apellido)
-                       ->subject('Bienvenido a Rayka - Credenciales de acceso');
-            });
-        } catch (\Exception $e) {
-            Log::error('Error enviando credenciales por correo: ' . $e->getMessage(), [
-                'usuario_id' => $usuario->id_usuario,
-                'correo' => $usuario->correo
-            ]);
+        $usuario = $this->usuarioRepository->obtenerPorNumDocumento($numDocumento);
+        if (!$usuario) {
+            throw new ModelNotFoundException('Usuario no encontrado');
         }
+
+        return $usuario;
     }
 }

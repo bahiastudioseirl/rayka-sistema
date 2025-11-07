@@ -16,17 +16,11 @@ class UsuariosSeeder extends Seeder
             [
                 'nombre' => 'Admin',
                 'apellido' => 'Test',
+                'num_documento' => '00000000',
                 'correo' => 'admin@rayka.com',
                 'contrasenia' => 'admin@rayka.com',
                 'id_rol' => 1
-            ],
-            [
-                'nombre' => 'Daniel',
-                'apellido' => 'Carrasco',
-                'correo' => 'daniel@bahia.pe',
-                'contrasenia' => 'daniel@bahia.pe', 
-                'id_rol' => 2,
-            ],
+            ]
         ];
 
         foreach ($usuarios as $usuario) {

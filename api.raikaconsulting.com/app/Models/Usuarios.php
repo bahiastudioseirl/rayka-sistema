@@ -20,23 +20,18 @@ class Usuarios extends Authenticatable implements JWTSubject
     
     protected $fillable = [
         'nombre',
-        'apellido', 
+        'apellido',
+        'num_documento', 
         'correo',
         'contrasenia',
         'activo',
         'id_rol'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     */
     protected $hidden = [
         'contrasenia',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     */
     protected function casts(): array
     {
         return [
@@ -53,9 +48,6 @@ class Usuarios extends Authenticatable implements JWTSubject
         return $this->contrasenia;
     }
 
-    /**
-     * Get the username attribute name for authentication.
-     */
     public function getAuthIdentifierName()
     {
         return 'correo';
@@ -67,11 +59,10 @@ class Usuarios extends Authenticatable implements JWTSubject
         return $this->belongsTo(Roles::class, 'id_rol', 'id_rol');
     }
 
-    // Un usuario puede estar inscrito en muchos cursos (relación muchos a muchos)
-    public function cursos()
+    // Un usuario puede estar en muchas capacitaciones
+    public function capacitaciones()
     {
-        return $this->belongsToMany(Cursos::class, 'usuariosxcursos', 'id_usuario', 'id_curso')
-                    ->withTimestamps();
+        return $this->belongsToMany(Capacitaciones::class, 'usuarios_capacitaciones', 'id_usuario', 'id_capacitacion');
     }
 
     // Un usuario tiene muchos progresos
@@ -80,23 +71,24 @@ class Usuarios extends Authenticatable implements JWTSubject
         return $this->hasMany(Progresos::class, 'id_usuario', 'id_usuario');
     }
 
-    // Un usuario tiene muchos resultados de exámenes
-    public function resultadosExamenes()
+    // Un administrador puede crear muchas empresas
+    public function empresasCreadas()
     {
-        return $this->hasMany(ResultadosExamenes::class, 'id_usuario', 'id_usuario');
+        return $this->hasMany(Empresas::class, 'creado_por', 'id_usuario');
     }
 
-    /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     */
+    // Un administrador puede crear muchos cursos
+    public function cursosCreados()
+    {
+        return $this->hasMany(Cursos::class, 'creado_por', 'id_usuario');
+    }
+
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
 
-    /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
-     */
     public function getJWTCustomClaims()
     {
         return [

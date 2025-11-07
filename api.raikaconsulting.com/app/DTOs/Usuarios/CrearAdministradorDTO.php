@@ -9,6 +9,7 @@ class CrearAdministradorDTO
     public function __construct(
         public readonly string $nombre,
         public readonly string $apellido,
+        public readonly string $num_documento,
         public readonly string $correo,
         public readonly string $contrasenia,
         public readonly bool $activo = true,
@@ -20,6 +21,7 @@ class CrearAdministradorDTO
         return new self(
             nombre: trim($validatedData['nombre']),
             apellido: trim($validatedData['apellido']),
+            num_documento: trim($validatedData['num_documento']),
             correo: strtolower(trim($validatedData['correo'])),
             contrasenia: $validatedData['contrasenia'],
             activo: $validatedData['activo'] ?? true,
@@ -37,6 +39,7 @@ class CrearAdministradorDTO
         return [
             'nombre' => $this->nombre,
             'apellido' => $this->apellido,
+            'num_documento' => $this->num_documento,
             'correo' => $this->correo,
             'contrasenia' => $this->contrasenia,
             'activo' => $this->activo,
