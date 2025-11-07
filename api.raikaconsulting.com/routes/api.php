@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\SolicitanteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,5 +44,18 @@ Route::middleware('auth.admin')->group(function () {
     
     // Ruta para servir archivos de cursos (privados pero autenticados)
     Route::get('cursos/archivos/{filename}', [CursoController::class, 'servirArchivoCurso'])->where('filename', '.*');
+
+    //Empresas endpoints para administradores
+    Route::post('empresas', [EmpresaController::class, 'crearEmpresa']);
+    Route::patch('empresas/{id}', [EmpresaController::class, 'actualizarEmpresa']);
+    Route::get('empresas', [EmpresaController::class, 'listarEmpresas']);
+    Route::get('empresas/{id}', [EmpresaController::class, 'obtenerEmpresaPorId']);
+
+    //Solicitantes endpoints para administradores
+    Route::post('solicitantes', [SolicitanteController::class, 'crearSolicitante']);
+    Route::patch('solicitantes/{id}', [SolicitanteController::class, 'actualizarSolicitante']);
+    Route::get('solicitantes/{id}', [SolicitanteController::class, 'obtenerSolicitantePorId']);
+    Route::get('solicitantes', [SolicitanteController::class, 'listarSolicitantes']);
+    Route::get('empresas/{empresaId}/solicitantes', [SolicitanteController::class, 'listarSolicitantesPorEmpresa']);
 
 });

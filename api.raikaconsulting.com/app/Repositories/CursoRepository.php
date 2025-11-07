@@ -32,10 +32,5 @@ class CursoRepository
         return Cursos::with('creador')->orderBy('fecha_creacion', 'desc')->get();
     }
 
-    public function eliminar(int $id): bool
-    {
-        return Cursos::where('id_curso', $id)->delete();
-    }
-
     
 }
