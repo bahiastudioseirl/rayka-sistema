@@ -10,10 +10,6 @@ const LoginForm = lazy(() =>
 );
 
 // PAGINAS USUARIO
-const HomePage = lazy(() => 
-  import('../../pages/HomePage').then((module) => ({ default: module.default }))
-);
-
 const Cursos = lazy(() => 
   import('../../pages/cursos/CursosPage').then((module) => ({ default: module.default }))
 );
@@ -23,30 +19,22 @@ const CursoContenido = lazy(() =>
 );
 
 // ADMINISTRATIVO
-const Banners = lazy(() => 
-  import('../../admin/features/bannerAdmin/pages/bannerAdmin').then((module) => ({ default: module.Banners }))
+const CursosAdmin = lazy(() => 
+  import('../../admin/features/cursosAdmin/pages/CursosAdmin').then((module) => ({ default: module.default }))
 );
-
-const Profesores = lazy(() => 
-  import('../../admin/features/profesoresAdmin/pages/profesoresAdmin').then((module) => ({ default: module.Profesores }))
+const EmpresaAdmin = lazy(() => 
+  import('../../admin/features/empresaAdmin/pages/EmpresaAdmin').then((module) => ({ default: module.default }))
+);
+const CapacitacionAdmin = lazy(() => 
+  import('../../admin/features/capacticacionAdmin/pages/CapactitacionAdmin').then((module) => ({ default: module.default }))
 );
 
 export const routes = [
   // RUTAS PÚBLICAS - PÁGINAS DE USUARIO
   
-  // Ruta principal - Página de inicio
+  // Ruta principal - Página de cursos (pantalla principal)
   {
     path: '/',
-    element: (
-      <LazyWrapper>
-        <HomePage />
-      </LazyWrapper>
-    ),
-  },
-
-  // Cursos - Página de cursos disponibles
-  {
-    path: '/cursos',
     element: (
       <LazyWrapper>
         <Cursos />
@@ -64,7 +52,9 @@ export const routes = [
     ),
   },
 
-  // RUTAS ADMINISTRATIVAS  // Login - Página de autenticación para administradores
+  // RUTAS ADMINISTRATIVAS
+  
+  // Login - Página de autenticación para administradores
   {
     path: '/admin',
     element: (
@@ -85,22 +75,30 @@ export const routes = [
     children: [
       {
         index: true,
-        element: <Navigate to="/administrator/banners" replace />,
+        element: <Navigate to="/administrator/cursos" replace />,
       },
       // Gestión de Contenido
       {
-        path: 'banners',
+        path: 'cursos',
         element: (
           <LazyWrapper>
-            <Banners />
+            <CursosAdmin />
           </LazyWrapper>
         ),
       },
       {
-        path: 'profesores',
+        path: 'empresa',
         element: (
           <LazyWrapper>
-            <Profesores />
+            <EmpresaAdmin />
+          </LazyWrapper>
+        ),
+      },
+        {
+        path: 'capacitacion',
+        element: (
+          <LazyWrapper>
+            <CapacitacionAdmin />
           </LazyWrapper>
         ),
       },

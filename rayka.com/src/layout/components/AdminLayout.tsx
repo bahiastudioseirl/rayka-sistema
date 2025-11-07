@@ -17,20 +17,20 @@ export const AdminLayout = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-[#132436] shadow-sm border-b border-gray-200">
           <div className="flex justify-between items-center px-6 py-4">
             <div>
-              <h1 className="text-xl font-semibold text-gray-800">
+              <h1 className="text-xl font-semibold text-white">
                 Panel de Administración
               </h1>
-              <p className="text-sm text-gray-600">
-                Gestión de Escuela D Fitness
+              <p className="text-sm text-white">
+                Gestión de Rayka
               </p>
             </div>
             
             {/* User Actions */}
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <div className="flex items-center space-x-2 text-sm text-white">
                 <User className="w-4 h-4" />
                 <span>Administrador</span>
               </div>

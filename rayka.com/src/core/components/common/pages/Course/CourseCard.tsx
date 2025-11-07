@@ -6,7 +6,7 @@ export interface CourseCardProps {
   description: string
   progressPct: number // 0 - 100
   modules: number
-  sessions: number
+
   ctaText?: string
   onClick?: () => void
 }
@@ -16,7 +16,6 @@ export const CourseCard: FC<CourseCardProps> = ({
   description,
   progressPct,
   modules,
-  sessions,
   ctaText = "Continuar",
   onClick,
 }) => {
@@ -25,7 +24,7 @@ export const CourseCard: FC<CourseCardProps> = ({
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden w-full max-w-md">
       {/* Banda superior tipo cover */}
-      <div className="h-20 bg-gradient-to-r from-emerald-500 to-blue-500" />
+      <div className="h-20 bg-linear-to-r  bg-[#224666]" />
 
       {/* Contenido */}
       <div className="p-5">
@@ -36,11 +35,11 @@ export const CourseCard: FC<CourseCardProps> = ({
         <div className="mt-5">
           <div className="flex items-center justify-between text-sm">
             <span className="text-slate-700">Progreso</span>
-            <span className="font-semibold text-emerald-700">{pct}%</span>
+            <span className="font-semibold text-slate-900">{pct}%</span>
           </div>
-          <div className="mt-2 h-2.5 w-full rounded-full bg-emerald-100">
+          <div className="mt-2 h-2.5 w-full rounded-full bg-blue-100">
             <div
-              className="h-2.5 rounded-full bg-emerald-600 transition-[width]"
+              className="h-2.5 rounded-full bg-[#224666] transition-[width]"
               style={{ width: `${pct}%` }}
               aria-label={`Progreso ${pct}%`}
               role="progressbar"
@@ -55,15 +54,14 @@ export const CourseCard: FC<CourseCardProps> = ({
         <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
           <Info className="h-4 w-4" aria-hidden />
           <span>
-            {modules} módulo{modules !== 1 ? "s" : ""} · {sessions} sesión
-            {sessions !== 1 ? "es" : ""}
+            {modules} módulo{modules !== 1 ? "s" : ""} 
           </span>
         </div>
 
         {/* CTA */}
         <button
           onClick={onClick}
-          className="mt-5 w-full rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-800 active:translate-y-px"
+          className="mt-5 w-full rounded-lg bg-[#132436] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#224666] active:translate-y-px"
         >
           {ctaText}
         </button>

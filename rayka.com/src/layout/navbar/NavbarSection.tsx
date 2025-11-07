@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useLocation } from "react-router-dom"
 import Navbar from "./Navbar"
 import { MobileMenu } from "./MobileMenu"
-import { homeTabs, appTabs } from "./navLinks"
+import { homeTabs} from "./navLinks"
 
 
 export const NavbarSection = () => {
@@ -11,12 +11,14 @@ export const NavbarSection = () => {
 
   // Determinar qué tabs mostrar según la página actual
   const getTabsForCurrentPage = () => {
-    // Si estamos en la página home, no mostrar tabs
+    // Si estamos en la página principal (lista de cursos), no mostrar tabs
     if (location.pathname === '/') {
       return homeTabs // Array vacío
     }
-    // En cualquier otra página, mostrar navegación completa
-    return appTabs
+    // Si estamos dentro de un curso, mostrar navegación con "Mis Cursos"
+    
+    // Por defecto, no mostrar tabs
+    return homeTabs
   }
 
   const currentTabs = getTabsForCurrentPage()

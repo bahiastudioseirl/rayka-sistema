@@ -1,6 +1,7 @@
 import type { FC } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { LogOut } from "lucide-react"
+import LogoRayka from "../../assets/LogoRayka.png"
 
 export interface NavbarProps {
   appName: string
@@ -13,7 +14,6 @@ export interface NavbarProps {
 
 export const Navbar: FC<NavbarProps> = ({
   appName,
-  subtitle,
   logoSrc,
   userName,
   onLogout,
@@ -29,7 +29,7 @@ export const Navbar: FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <Link to="/" className="shrink-0">
-            <img src={logoSrc} alt="logo" className="h-9 w-9 rounded-md" />
+            <img src={LogoRayka} alt="logo" className="h-10 w-25" />
           </Link>
           <div className="truncate">
             <div className="flex items-center gap-2">
@@ -46,13 +46,10 @@ export const Navbar: FC<NavbarProps> = ({
               <span className="text-sm font-medium text-slate-900">{userName}</span>
             </div>
           )}
-          {/* Avatar dummy (puedes reemplazar por <img src=.../> ) */}
-          <div className="h-9 w-9 rounded-full bg-slate-200 grid place-content-center text-slate-600">
-            🙂
-          </div>
+        
           <button
             onClick={onLogout}
-            className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="bg-[#CD321A] inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium text-white hover:bg-[#CD321A]/80"
           >
             <LogOut className="h-4 w-4" />
             <span>Salir</span>

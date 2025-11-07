@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { menuItems, type MenuItem, type SubMenuItem } from '../context/items-sidebar';
+import logoRayka from '../../assets/LogoRayka.png';
 
 export const Sidebar = () => {
   const location = useLocation();
@@ -33,8 +34,10 @@ export const Sidebar = () => {
     <div className="w-64 bg-white shadow-lg h-full border-r border-gray-200">
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800">Escuela D Fitness</h2>
-        <p className="text-sm text-gray-600">Panel Administrativo</p>
+        <div className="mx-auto h-10 w-40 rounded-full flex items-center justify-center">
+              <img src={logoRayka} alt="Logo Rayka" />
+            </div>
+        <p className="text-sm text-gray-600 text-center">Panel Administrativo</p>
       </div>
 
       {/* Menu Items */}
@@ -49,7 +52,7 @@ export const Sidebar = () => {
                   to={item.link}
                   className={`flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isItemActive(item)
-                      ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
+                      ? 'bg-[#224666]/20 text-[#132436] border-l-4 border-red-600'
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                 >
@@ -62,7 +65,7 @@ export const Sidebar = () => {
                   onClick={() => toggleExpand(item.titulo)}
                   className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isItemActive(item)
-                      ? 'bg-blue-50 text-blue-700'
+                      ? 'bg-[#224666]/20 text-[#132436]'
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                 >
@@ -87,7 +90,7 @@ export const Sidebar = () => {
                         to={subItem.link}
                         className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${
                           isItemActive(subItem)
-                            ? 'bg-blue-100 text-blue-700 border-l-2 border-blue-500'
+                            ? 'bg-[#224666]/20 text-[#132436] border-l-2 border-[#CD321A]'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
                         }`}
                       >
