@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('capacitacion_solicitantes', function (Blueprint $table) {
+            $table->id('id_capacitacion_solicitante');
+            $table->timestamp('fecha_inicio');
+            $table->timestamp('fecha_fin');
+            $table->text('observaciones')->nullable();
+            $table->unsignedBigInteger('id_solicitante');
+            $table->unsignedBigInteger('id_capacitacion');
+            
+            $table->foreign('id_solicitante')->references('id_solicitante')->on('solicitantes');
+            $table->foreign('id_capacitacion')->references('id_capacitacion')->on('capacitaciones');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('capacitacion_solicitantes');
+    }
+};
