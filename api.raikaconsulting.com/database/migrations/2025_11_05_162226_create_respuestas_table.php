@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('texto');
             $table->boolean('es_correcta');
             $table->unsignedBigInteger('id_pregunta');
-            $table->timestamp('fecha_creacion')->useCurrent();
 
             $table->foreign('id_pregunta')->references('id_pregunta')->on('preguntas');
         });

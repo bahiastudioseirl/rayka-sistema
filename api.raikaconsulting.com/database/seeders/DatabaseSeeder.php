@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Roles;
-use App\Models\User;
+use App\Models\Usuarios;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

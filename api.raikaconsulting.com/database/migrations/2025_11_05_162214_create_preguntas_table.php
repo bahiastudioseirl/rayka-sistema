@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id('id_pregunta');
             $table->string('texto');
             $table->unsignedBigInteger('id_examen');
-            $table->timestamp('fecha_creacion')->useCurrent();
 
             $table->foreign('id_examen')->references('id_examen')->on('examenes');
         });

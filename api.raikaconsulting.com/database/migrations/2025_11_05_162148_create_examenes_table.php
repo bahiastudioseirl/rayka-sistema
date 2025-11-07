@@ -13,12 +13,9 @@ return new class extends Migration
     {
         Schema::create('examenes', function (Blueprint $table) {
             $table->id('id_examen');
-            $table->string('nombre');
-            $table->integer('puntaje_total')->default(20);
+            $table->string('titulo');
             $table->unsignedBigInteger('id_curso');            
-
-            $table->timestamp('fecha_creacion')->useCurrent();
-
+            
             $table->foreign('id_curso')->references('id_curso')->on('cursos');
 
         });

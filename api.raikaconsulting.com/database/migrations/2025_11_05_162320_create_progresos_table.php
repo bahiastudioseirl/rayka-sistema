@@ -13,16 +13,15 @@ return new class extends Migration
     {
         Schema::create('progresos', function (Blueprint $table) {
             $table->id('id_progreso');
+            $table->boolean('completado')->default(false);
+            $table->float('nota')->nullable();
+            $table->integer('intentos_usados')->default(0);
+            $table->dateTime('fecha_ultimo_intento')->nullable();
             $table->unsignedBigInteger('id_usuario');
             $table->unsignedBigInteger('id_curso')->nullable();
-            $table->unsignedBigInteger('id_modulo')->nullable();
-            $table->unsignedBigInteger('id_sesion')->nullable();
-            $table->boolean('completado')->default(false);
 
             $table->foreign('id_usuario')->references('id_usuario')->on('usuarios');
             $table->foreign('id_curso')->references('id_curso')->on('cursos');
-            $table->foreign('id_modulo')->references('id_modulo')->on('modulos');
-            $table->foreign('id_sesion')->references('id_sesion')->on('sesion');
 
             $table->timestamp('fecha_completado')->nullable();
         });
