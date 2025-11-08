@@ -17,6 +17,7 @@ class Capacitaciones extends Model
         'duracion_examen_min',
         'max_intentos',
         'link_login_unico',
+        'fecha_creacion',
         'estado',
         'id_solicitante'
     ];
@@ -46,7 +47,7 @@ class Capacitaciones extends Model
     }
 
     // Una capacitación puede tener muchos solicitantes (tabla pivot)
-    public function solicitantesAsociados()
+    public function solicitantes()
     {
         return $this->belongsToMany(Solicitantes::class, 'capacitacion_solicitantes', 'id_capacitacion', 'id_solicitante')
                     ->withPivot('fecha_inicio', 'fecha_fin', 'observaciones');

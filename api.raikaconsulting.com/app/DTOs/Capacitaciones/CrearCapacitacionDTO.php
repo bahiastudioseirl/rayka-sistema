@@ -11,13 +11,15 @@ class CrearCapacitacionDTO
         public readonly string $estado,
         public readonly int $id_solicitante,
         public readonly array $cursos = [], // IDs de cursos
-        public readonly array $estudiantes = [] // IDs de estudiantes
+        public readonly array $usuarios_estudiantes = [], // IDs de estudiantes
+        public readonly ?string $fecha_fin = null,
+        public readonly ?string $observaciones = null
     ) {}
     
     public static function fromRequest(array $validatedData): self
     {
         // Generar link único automáticamente
-        $linkUnico = 'capacitacion-' . uniqid() . '-' . time();
+        $linkUnico = uniqid('cap_') . '_' . time();
         
         return new self(
             duracion_examen_min: (int) $validatedData['duracion_examen_min'],
@@ -26,7 +28,9 @@ class CrearCapacitacionDTO
             estado: $validatedData['estado'] ?? 'activa',
             id_solicitante: (int) $validatedData['id_solicitante'],
             cursos: $validatedData['cursos'] ?? [],
-            estudiantes: $validatedData['estudiantes'] ?? []
+            usuarios_estudiantes: $validatedData['usuarios_estudiantes'] ?? [],
+            fecha_fin: $validatedData['fecha_fin'] ?? null,
+            observaciones: $validatedData['observaciones'] ?? null
         );
     }
 
@@ -39,7 +43,9 @@ class CrearCapacitacionDTO
             estado: $data['estado'] ?? 'activa',
             id_solicitante: (int) $data['id_solicitante'],
             cursos: $data['cursos'] ?? [],
-            estudiantes: $data['estudiantes'] ?? []
+            usuarios_estudiantes: $data['usuarios_estudiantes'] ?? [],
+            fecha_fin: $data['fecha_fin'] ?? null,
+            observaciones: $data['observaciones'] ?? null
         );
     }
 
@@ -49,6 +55,7 @@ class CrearCapacitacionDTO
             'duracion_examen_min' => $this->duracion_examen_min,
             'max_intentos' => $this->max_intentos,
             'link_login_unico' => $this->link_login_unico,
+            'fecha_creacion' => now(),
             'estado' => $this->estado,
             'id_solicitante' => $this->id_solicitante,
         ];
@@ -59,7 +66,9 @@ class CrearCapacitacionDTO
         return [
             'capacitacion' => $this->toArray(),
             'cursos' => $this->cursos,
-            'estudiantes' => $this->estudiantes,
+            'usuarios_estudiantes' => $this->usuarios_estudiantes,
+            'fecha_fin' => $this->fecha_fin,
+            'observaciones' => $this->observaciones,
         ];
     }
 }

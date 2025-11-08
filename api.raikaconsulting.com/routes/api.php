@@ -6,6 +6,7 @@ use App\Http\Controllers\CursoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\SolicitanteController;
+use App\Http\Controllers\CapacitacionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,5 +58,15 @@ Route::middleware('auth.admin')->group(function () {
     Route::get('solicitantes/{id}', [SolicitanteController::class, 'obtenerSolicitantePorId']);
     Route::get('solicitantes', [SolicitanteController::class, 'listarSolicitantes']);
     Route::get('empresas/{empresaId}/solicitantes', [SolicitanteController::class, 'listarSolicitantesPorEmpresa']);
+
+        //Capacitaciones endpoints para administradores
+    Route::post('capacitaciones', [CapacitacionController::class, 'crear']);
+    Route::get('capacitaciones', [CapacitacionController::class, 'verCapacitaciones']);
+    Route::get('capacitaciones/{id}', [CapacitacionController::class, 'verCapacitacionPorId']);
+    Route::post('capacitaciones/{id}/estudiantes/agregar', [CapacitacionController::class, 'agregarEstudiantes']);
+    Route::delete('capacitaciones/{id}/estudiantes/eliminar', [CapacitacionController::class, 'eliminarEstudiantes']);
+    Route::post('capacitaciones/{id}/cursos/agregar', [CapacitacionController::class, 'agregarCursos']);
+    Route::delete('capacitaciones/{id}/cursos/eliminar', [CapacitacionController::class, 'eliminarCursos']);
+    Route::patch('capacitaciones/{id}/cambiar-estado', [CapacitacionController::class, 'cambiarEstado']);
 
 });

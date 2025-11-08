@@ -123,4 +123,19 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Frontend URL Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Esta configuración define la URL base del frontend para generar
+    | enlaces de acceso a las capacitaciones.
+    |
+    */
+
+    'frontend' => [
+        'url' => env('FRONTEND_URL', 'https://www.rayka.com'),
+        'capacitacion_login_path' => env('CAPACITACION_LOGIN_PATH', '/login'),
+    ],
+
 ];
