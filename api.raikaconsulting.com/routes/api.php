@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\EmpresaController;
@@ -22,6 +23,12 @@ Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::middleware('jwt.auth')->post('refresh', [AuthController::class, 'refresh']);
+});
+
+// Rutas de autenticación para estudiantes
+Route::prefix('estudiantes')->group(function () {
+    Route::post('login/{link_login_unico}', [StudentAuthController::class, 'login']);
+    Route::post('logout', [StudentAuthController::class, 'logout']);
 });
 
 // Rutas para administradores autenticados
