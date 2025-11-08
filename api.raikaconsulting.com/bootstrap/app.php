@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'jwt.auth' => \App\Http\Middleware\JWTAuthMiddleware::class,
             'admin' => \App\Http\Middleware\AdminRoleMiddleware::class,
             'auth.admin' => \App\Http\Middleware\AuthAdminMiddleware::class,
+            'auth.estudiante' => \App\Http\Middleware\AuthStudentMiddleware::class,
         ]);
         
         // BLOQUEAR COMPLETAMENTE todos los middleware automáticos de JWT
