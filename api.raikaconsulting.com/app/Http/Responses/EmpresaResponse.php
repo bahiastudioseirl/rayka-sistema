@@ -10,7 +10,7 @@ class EmpresaResponse
     public static function empresaCreada(Empresas $empresa): JsonResponse
     {
         $datoEmpresa = [
-            'id' => $empresa->id_empresa,
+            'id_empresa' => $empresa->id_empresa,
             'nombre' => $empresa->nombre,
             'creado_por' => $empresa->creado_por,
             'fecha_creacion' => $empresa->fecha_creacion?->format('Y-m-d H:i:s'),
@@ -28,7 +28,7 @@ class EmpresaResponse
     public static function empresaActualizada(Empresas $empresa): JsonResponse
     {
         $datoEmpresa = [
-            'id' => $empresa->id_empresa,
+            'id_empresa' => $empresa->id_empresa,
             'nombre' => $empresa->nombre,
             'creado_por' => $empresa->creado_por,
             'fecha_creacion' => $empresa->fecha_creacion?->format('Y-m-d H:i:s'),

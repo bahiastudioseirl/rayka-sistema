@@ -55,11 +55,7 @@ class CapacitacionResponse
                         'fecha_creacion' => $capacitacion->fecha_creacion?->format('Y-m-d H:i:s'),
                         'estado' => $capacitacion->estado
                     ],
-                    'solicitante' => [
-                        'id_solicitante' => $capacitacion->solicitante->id_solicitante,
-                        'nombre' => $capacitacion->solicitante->nombre,
-                        'id_empresa' => $capacitacion->solicitante->id_empresa
-                    ]
+                    'solicitante' => self::formatSolicitante($capacitacion->solicitante)
                 ];
             })->all()
         ];

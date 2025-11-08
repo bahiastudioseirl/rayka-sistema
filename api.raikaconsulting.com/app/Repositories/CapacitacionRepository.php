@@ -22,7 +22,7 @@ class CapacitacionRepository
         return Capacitaciones::with([
             'usuarios:id_usuario,nombre,apellido,correo,num_documento,activo',
             'cursos:id_curso,titulo,contenido,tipo_contenido,activo,fecha_creacion',
-            'solicitante'
+            'solicitante:id_solicitante,nombre,apellido,cargo,correo,id_empresa'
         ])->find($id);
     }
 
@@ -31,7 +31,7 @@ class CapacitacionRepository
         return Capacitaciones::with([
             'usuarios:id_usuario,nombre,apellido,correo,num_documento',
             'cursos:id_curso,titulo,contenido,tipo_contenido,activo',
-            'solicitante'
+            'solicitante:id_solicitante,nombre,apellido,cargo,correo,id_empresa'
         ])->get();
     }
 

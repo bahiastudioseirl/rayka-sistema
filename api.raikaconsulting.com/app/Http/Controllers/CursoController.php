@@ -73,10 +73,7 @@ class CursoController extends Controller
     {
         try {
             $cursos = $this->cursoService->listarCursos();
-            return response()->json([
-                'message' => 'Cursos obtenidos exitosamente',
-                'data' => $cursos
-            ]);
+            return CursoResponse::listarCursos($cursos);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error interno del servidor',

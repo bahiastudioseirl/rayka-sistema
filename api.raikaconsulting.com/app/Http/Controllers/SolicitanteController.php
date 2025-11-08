@@ -71,10 +71,7 @@ class SolicitanteController extends Controller
         try {
             $solicitante = $this->solicitanteService->obtenerSolicitantePorId($id);
 
-            return response()->json([
-                'message' => 'Solicitante obtenido exitosamente',
-                'data' => $solicitante
-            ], 200);
+            return SolicitanteResponse::solicitanteObtenido($solicitante);
 
         } catch (ValidationException $e) {
             return response()->json([
@@ -94,10 +91,7 @@ class SolicitanteController extends Controller
         try {
             $solicitantes = $this->solicitanteService->listarTodosLosSolicitantes();
 
-            return response()->json([
-                'message' => 'Solicitantes obtenidos exitosamente',
-                'data' => $solicitantes
-            ], 200);
+            return SolicitanteResponse::listarSolicitantes($solicitantes);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -112,10 +106,7 @@ class SolicitanteController extends Controller
         try {
             $solicitantes = $this->solicitanteService->listarSolicitantesPorEmpresa($empresaId);
 
-            return response()->json([
-                'message' => 'Solicitantes obtenidos exitosamente',
-                'data' => $solicitantes
-            ], 200);
+            return SolicitanteResponse::listarSolicitantes($solicitantes);
 
         } catch (ValidationException $e) {
             return response()->json([
