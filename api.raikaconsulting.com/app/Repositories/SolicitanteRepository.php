@@ -19,17 +19,20 @@ class SolicitanteRepository
 
     public function obtenerPorId(int $id): ?Solicitantes
     {
-        return Solicitantes::find($id);
+        return Solicitantes::with('empresa:id_empresa,nombre')->find($id);
     }
 
     public function listarTodos(): Collection
     {
-        return Solicitantes::orderBy('id_solicitante', 'desc')->get();
+        return Solicitantes::with('empresa:id_empresa,nombre')
+            ->orderBy('id_solicitante', 'desc')
+            ->get();
     }
 
     public function listarPorEmpresa(int $idEmpresa): Collection
     {
-        return Solicitantes::where('id_empresa', $idEmpresa)
+        return Solicitantes::with('empresa:id_empresa,nombre')
+            ->where('id_empresa', $idEmpresa)
             ->orderBy('id_solicitante', 'desc')
             ->get();
     }

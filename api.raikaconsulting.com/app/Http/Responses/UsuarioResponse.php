@@ -15,7 +15,7 @@ class UsuarioResponse
             'message' => 'Usuario creado exitosamente',
             'data' => [
                 'usuario' => [
-                    'id' => $usuario->id_usuario,
+                    'id_usuario' => $usuario->id_usuario,
                     'nombre' => $usuario->nombre,
                     'apellido' => $usuario->apellido,
                     'num_documento' => $usuario->num_documento,
@@ -39,7 +39,7 @@ class UsuarioResponse
             'message' => 'Usuario actualizado exitosamente',
             'data' => [
                 'usuario' => [
-                    'id' => $usuario->id_usuario,
+                    'id_usuario' => $usuario->id_usuario,
                     'nombre' => $usuario->nombre,
                     'apellido' => $usuario->apellido,
                     'num_documento' => $usuario->num_documento,

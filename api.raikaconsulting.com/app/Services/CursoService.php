@@ -149,10 +149,9 @@ class CursoService
         return $this->cursoRepository->obtenerPorId($id);
     }
 
-    public function listarCursos(): array
+    public function listarCursos()
     {
-        $cursos = $this->cursoRepository->listarTodos();
-        return $cursos->toArray();
+        return $this->cursoRepository->listarTodos();
     }
 
     public function obtenerCursoPorId(int $id): ?Cursos
