@@ -41,17 +41,8 @@ export default function SolicitanteAdmin() {
         obtenerEmpresas()
       ])
       
-      // Crear un mapa de empresas para búsqueda rápida
-      const empresasMap = new Map(resEmpresas.data.map(emp => [emp.id_empresa, emp]))
-      
-      // Enriquecer solicitantes con información de empresa
-      const solicitantesConEmpresa = resSolicitantes.data.map(sol => ({
-        ...sol,
-        empresa: empresasMap.get(sol.empresa_id) || null
-      }))
-      
       // Ordenar por ID ascendente (1, 2, 3...)
-      const solicitantesOrdenados = solicitantesConEmpresa.sort((a, b) => a.id_solicitante - b.id_solicitante)
+      const solicitantesOrdenados = resSolicitantes.data.sort((a, b) => a.id_solicitante - b.id_solicitante)
       
       setSolicitantes(solicitantesOrdenados)
       setEmpresas(resEmpresas.data)

@@ -29,7 +29,7 @@ export default function ModalEditar({ open, solicitante, onClose, onSave, loadin
             setCargo(solicitante.cargo);
             setCorreo(solicitante.correo);
             setTelefono(solicitante.telefono);
-            setIdEmpresa(solicitante.empresa_id);
+            setIdEmpresa(solicitante.empresa?.id_empresa || solicitante.empresa_id);
             setError("");
             setTimeout(() => inputRef.current?.focus(), 0);
         }

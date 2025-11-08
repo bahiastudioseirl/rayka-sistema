@@ -30,6 +30,7 @@ export interface CrearSolicitanteResponse {
 }
 
 export interface ObtenerSolicitantesResponse {
+  success: true;
   message: string;
   data: Solicitante[];
 }
