@@ -18,9 +18,15 @@ class SolicitanteResponse
                     'id_solicitante' => $solicitante->id_solicitante,
                     'nombre' => $solicitante->nombre,
                     'apellido' => $solicitante->apellido,
+                    'cargo' => $solicitante->cargo,
                     'correo' => $solicitante->correo,
                     'telefono' => $solicitante->telefono,
-                    'empresa_id' => $solicitante->id_empresa
+                    'empresa' => [
+                        'id_empresa' => $solicitante->empresa->id_empresa ?? null,
+                        'nombre' => $solicitante->empresa->nombre ?? null,
+                        'creado_por' => $solicitante->empresa->creado_por ?? null,
+                        'fecha_creacion' => $solicitante->empresa->fecha_creacion ?? null
+                    ]
                 ]
             ]
         ], 201);
@@ -32,13 +38,19 @@ class SolicitanteResponse
             'success' => true,
             'message' => 'Solicitante actualizado exitosamente',
             'data' => [
-                'id_solicitante' => [
-                    'id' => $solicitante->id_solicitante,
+                'solicitante' => [
+                    'id_solicitante' => $solicitante->id_solicitante,
                     'nombre' => $solicitante->nombre,
                     'apellido' => $solicitante->apellido,
+                    'cargo' => $solicitante->cargo,
                     'correo' => $solicitante->correo,
                     'telefono' => $solicitante->telefono,
-                    'empresa_id' => $solicitante->id_empresa
+                    'empresa' => [
+                        'id_empresa' => $solicitante->empresa->id_empresa ?? null,
+                        'nombre' => $solicitante->empresa->nombre ?? null,
+                        'creado_por' => $solicitante->empresa->creado_por ?? null,
+                        'fecha_creacion' => $solicitante->empresa->fecha_creacion ?? null
+                    ]
                 ]
             ]
         ], 200);
