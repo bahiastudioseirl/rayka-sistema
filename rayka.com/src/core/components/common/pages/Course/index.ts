@@ -12,7 +12,6 @@ export const mockCoursesData: CourseData[] = [
     title: "Fundamentos de Fitness",
     description: "Aprende los conceptos básicos del entrenamiento físico, anatomía y nutrición deportiva.",
     progressPct: 75,
-    modules: 8,
     ctaText: "Continuar curso"
   },
   {
@@ -20,7 +19,6 @@ export const mockCoursesData: CourseData[] = [
     title: "Entrenamiento Funcional",
     description: "Domina los movimientos funcionales y técnicas de entrenamiento para mejorar la fuerza y movilidad.",
     progressPct: 45,
-    modules: 6,
     ctaText: "Reanudar"
   },
   {
@@ -28,7 +26,6 @@ export const mockCoursesData: CourseData[] = [
     title: "Nutrición Deportiva Avanzada",
     description: "Estrategias nutricionales para optimizar el rendimiento deportivo y la composición corporal.",
     progressPct: 20,
-    modules: 10,
     ctaText: "Empezar"
   },
   {
@@ -36,7 +33,6 @@ export const mockCoursesData: CourseData[] = [
     title: "Yoga y Flexibilidad",
     description: "Técnicas de yoga, estiramientos y movilidad para complementar tu entrenamiento físico.",
     progressPct: 90,
-    modules: 5,
     ctaText: "Finalizar"
   },
 

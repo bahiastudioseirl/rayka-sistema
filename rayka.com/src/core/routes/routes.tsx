@@ -28,6 +28,9 @@ const EmpresaAdmin = lazy(() =>
 const CapacitacionAdmin = lazy(() => 
   import('../../admin/features/capacticacionAdmin/pages/CapactitacionAdmin').then((module) => ({ default: module.default }))
 );
+const SolicitanteAdmin = lazy(() => 
+  import('../../admin/features/solicitanteAdmin/pages/SolicitanteAdmin').then((module) => ({ default: module.default }))
+);
 
 export const routes = [
   // RUTAS PÚBLICAS - PÁGINAS DE USUARIO
@@ -99,6 +102,13 @@ export const routes = [
         element: (
           <LazyWrapper>
             <CapacitacionAdmin />
+          </LazyWrapper>
+        ),
+      },{
+        path: 'solicitantes',
+        element: (
+          <LazyWrapper>
+            <SolicitanteAdmin />
           </LazyWrapper>
         ),
       },

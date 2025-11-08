@@ -5,7 +5,7 @@ export interface CourseCardProps {
   title: string
   description: string
   progressPct: number // 0 - 100
-  modules: number
+
 
   ctaText?: string
   onClick?: () => void
@@ -15,7 +15,7 @@ export const CourseCard: FC<CourseCardProps> = ({
   title,
   description,
   progressPct,
-  modules,
+
   ctaText = "Continuar",
   onClick,
 }) => {
@@ -48,14 +48,6 @@ export const CourseCard: FC<CourseCardProps> = ({
               aria-valuemax={100}
             />
           </div>
-        </div>
-
-        {/* Meta: módulos y sesiones */}
-        <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
-          <Info className="h-4 w-4" aria-hidden />
-          <span>
-            {modules} módulo{modules !== 1 ? "s" : ""} 
-          </span>
         </div>
 
         {/* CTA */}
