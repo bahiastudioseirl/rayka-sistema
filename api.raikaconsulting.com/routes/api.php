@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentAuthController;
+use App\Http\Controllers\UsuarioEstudianteController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\EmpresaController;
@@ -29,6 +30,11 @@ Route::prefix('auth')->group(function () {
 Route::prefix('estudiantes')->group(function () {
     Route::post('login/{link_login_unico}', [StudentAuthController::class, 'login']);
     Route::post('logout', [StudentAuthController::class, 'logout']);
+});
+
+// Rutas para estudiantes autenticados
+Route::middleware('auth.estudiante')->prefix('estudiantes')->group(function () {
+    Route::get('cursos', [UsuarioEstudianteController::class, 'listarMisCursos']);
 });
 
 // Rutas para administradores autenticados

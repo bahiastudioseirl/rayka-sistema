@@ -50,7 +50,14 @@ class AuthStudentMiddleware
                 ], 403);
             }
 
-            $request->merge(['authenticated_user' => $usuario]);
+            // Extraer el ID de capacitación del token
+            $idCapacitacion = $payload->get('id_capacitacion');
+            
+            // Agregar usuario y capacitación al request para uso posterior
+            $request->merge([
+                'authenticated_user' => $usuario,
+                'id_capacitacion' => $idCapacitacion
+            ]);
             
         } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
             return response()->json([

@@ -50,7 +50,9 @@ class StudentAuthController extends Controller
             ]);
         }
 
-        $token = JWTAuth::fromUser($usuario);
+        // Generar token JWT con el id de capacitación como claim personalizado
+        $customClaims = ['id_capacitacion' => $capacitacion->id_capacitacion];
+        $token = JWTAuth::claims($customClaims)->fromUser($usuario);
 
         return $this->respondWithToken($token, $usuario, $capacitacion);
     }
