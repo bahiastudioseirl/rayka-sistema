@@ -1,4 +1,4 @@
-import { Edit, Plus, Search, Trash2, Eye, AlertCircle, FileText } from "lucide-react"
+import { Edit, Plus, Search, Trash2, Eye, AlertCircle, ClipboardCheck} from "lucide-react"
 import { useState } from "react"
 
 
@@ -12,10 +12,11 @@ export default function EmpresaAdmin() {
     {
       id: 1,
       fecha: "2025-06-30",
-      titulo: "Elemento de Ejemplo",
-      categoria: "Categoria1",
-      descripcion: "Esta es una descripción de ejemplo para el elemento",
-      archivo: "/placeholder.svg"
+      duracion_examen: "2 horas",
+      max_intentos: 3,
+      id_solicitante: "Enrique Palacios",
+      usuarios_estudiantes: 3,
+      cursos: 5
     }
   ]
   const openModal = () => setIsModalOpen(true);
@@ -47,7 +48,7 @@ export default function EmpresaAdmin() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-lg bg-red-50">
-                <FileText className="w-6 h-6 text-red-600" />
+                <ClipboardCheck className="w-6 h-6 text-red-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">Gestión de Capacitaciones</h1>
@@ -92,9 +93,11 @@ export default function EmpresaAdmin() {
             <thead className="border-b bg-slate-50 border-slate-200">
               <tr>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Fecha</th>
-                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Titulo</th>
-                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Descripción</th>
-                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Archivo</th>
+                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Duración Examen</th>
+                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Máximo Intentos</th>
+                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Solicitante</th>
+                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Estudiantes</th>
+                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Cursos</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Acciones</th>
               </tr>
             </thead>
@@ -147,19 +150,28 @@ export default function EmpresaAdmin() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="max-w-xs">
-                        <p className="text-sm font-medium text-slate-900 line-clamp-2">{item.titulo}</p>
+                        <p className="text-sm font-medium text-slate-900 line-clamp-2">{item.duracion_examen}</p>
                       </div>
                     </td>
 
                     <td className="px-6 py-4">
-                      <div
-                        className="max-w-md text-sm text-slate-600 line-clamp-2"
-                        dangerouslySetInnerHTML={{ __html: item.descripcion }}
-                      />
+                      <div className="max-w-xs">
+                        <p className="text-sm font-medium text-slate-900 line-clamp-2">{item.max_intentos}</p>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="max-w-xs">
-                        <p className="text-sm font-medium text-slate-900 line-clamp-2">{item.archivo}</p>
+                        <p className="text-sm font-medium text-slate-900 line-clamp-2">{item.id_solicitante}</p>
+                      </div>
+                    </td>
+                     <td className="px-6 py-4">
+                      <div className="max-w-xs">
+                        <p className="text-sm font-medium text-slate-900 line-clamp-2">{item.usuarios_estudiantes}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="max-w-xs">
+                        <p className="text-sm font-medium text-slate-900 line-clamp-2">{item.cursos}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -193,7 +205,7 @@ export default function EmpresaAdmin() {
           </table>
         </div>
       </div>
-      
+
     </div>
 
   )

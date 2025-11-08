@@ -1,4 +1,4 @@
-import { Edit, Plus, Search, Power, Eye, FileText, Link, Video } from "lucide-react";
+import { Edit, Plus, Search, Power, Eye, FileText, Link, Video, Book } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ModalAgregar from "../components/ModalAgregar";
 import ModalEditar from "../components/ModalEditar";
@@ -161,7 +161,7 @@ export default function CursosAdmin() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-lg bg-red-50">
-                <FileText className="w-6 h-6 text-red-600" />
+                <Book className="w-6 h-6 text-red-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">Gestión de Cursos</h1>

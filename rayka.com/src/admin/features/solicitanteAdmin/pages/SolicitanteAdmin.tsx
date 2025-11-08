@@ -125,8 +125,8 @@ export default function SolicitanteAdmin() {
         <div className="p-6 border-b border-slate-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-blue-50">
-                <UserPlus className="w-6 h-6 text-blue-600" />
+              <div className="p-2 rounded-lg bg-red-50">
+                <UserPlus className="w-6 h-6 text-red-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">Gestión de Solicitantes</h1>
