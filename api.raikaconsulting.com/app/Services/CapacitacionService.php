@@ -255,7 +255,6 @@ class CapacitacionService
     public function cambiarEstado(int $idCapacitacion): array
     {
         try {
-            // Toggle automático del estado
             $capacitacionActualizada = $this->capacitacionRepository->toggleEstado($idCapacitacion);
             
             if ($capacitacionActualizada === null) {
