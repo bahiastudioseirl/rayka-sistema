@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Request\Solicitante\ActualizarSolicitanteRequest;
 use App\Http\Request\Solicitante\CrearSolicitanteRequest;
 use App\Http\Responses\SolicitanteResponse;
 use App\Services\SolicitanteService;
@@ -36,7 +37,7 @@ class SolicitanteController extends Controller
         }
     }
 
-    public function actualizarSolicitante(CrearSolicitanteRequest $request, int $id): JsonResponse
+    public function actualizarSolicitante(ActualizarSolicitanteRequest $request, int $id): JsonResponse
     {
         try {
             $actualizado = $this->solicitanteService->actualizarSolicitante(
