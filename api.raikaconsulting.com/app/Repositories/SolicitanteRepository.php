@@ -9,7 +9,8 @@ class SolicitanteRepository
 {
     public function crear(array $data): Solicitantes
     {
-        return Solicitantes::create($data);
+        $solicitante = Solicitantes::create($data);
+        return Solicitantes::with('empresa')->find($solicitante->id_solicitante);
     }
 
     public function actualizar(int $id, array $data): bool
@@ -19,7 +20,7 @@ class SolicitanteRepository
 
     public function obtenerPorId(int $id): ?Solicitantes
     {
-        return Solicitantes::with('empresa:id_empresa,nombre')->find($id);
+        return Solicitantes::with('empresa')->find($id);
     }
 
     public function listarTodos(): Collection
