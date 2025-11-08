@@ -157,4 +157,39 @@ class CapacitacionController extends Controller
         }
     }
 
+    public function cambiarEstado(int $id): JsonResponse
+    {
+        try {
+            $resultado = $this->capacitacionService->cambiarEstado($id);
+            
+            if ($resultado['success']) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $resultado['message'],
+                    'data' => $resultado['data'] ?? null
+                ], 200);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => $resultado['message'],
+                'errors' => $resultado['errors'] ?? null
+            ], 400);
+            
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación.',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

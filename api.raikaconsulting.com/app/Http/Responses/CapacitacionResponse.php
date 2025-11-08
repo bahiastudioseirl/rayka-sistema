@@ -198,4 +198,17 @@ class CapacitacionResponse
         
         return "{$frontendUrl}{$loginPath}/{$codigoUnico}";
     }
+
+
+    public static function estadoCambiado(Capacitaciones $capacitacion): array
+    {
+        return [
+            'success' => true,
+            'message' => 'Estado de la capacitación cambiado exitosamente.',
+            'data' => [
+                'capacitacion' => self::formatCapacitacion($capacitacion),
+                'estado_actual' => $capacitacion->estado
+            ]
+        ];
+    }
 }

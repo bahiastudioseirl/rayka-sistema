@@ -3,68 +3,43 @@
 namespace App\Services;
 
 use App\DTOs\Capacitaciones\CrearCapacitacionDTO;
-use App\Models\Capacitaciones;
-use App\Models\Cursos;
-use App\Models\UsuariosCapacitaciones;
-use App\Models\CapacitacionesCursos;
-use App\Models\CapacitacionSolicitantes;
+use App\Repositories\CapacitacionRepository;
 use App\Http\Responses\CapacitacionResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Auth;
 use Exception;
 
 class CapacitacionService
 {
+    public function __construct(
+        private readonly CapacitacionRepository $capacitacionRepository
+    ) {}
+
     public function crearCapacitacion(CrearCapacitacionDTO $capacitacionDTO): array
     {
         try {
-            return DB::transaction(function () use ($capacitacionDTO) {
-                $capacitacion = Capacitaciones::create($capacitacionDTO->toArray());
-                
+            return $this->capacitacionRepository->ejecutarTransaccion(function () use ($capacitacionDTO) {
+                $capacitacion = $this->capacitacionRepository->crear($capacitacionDTO->toArray());
                 $idCapacitacion = $capacitacion->id_capacitacion;
                 
-                $usuariosCapacitaciones = [];
-                foreach ($capacitacionDTO->usuarios_estudiantes as $idUsuario) {
-                    $usuariosCapacitaciones[] = [
-                        'id_capacitacion' => $idCapacitacion,
-                        'id_usuario' => $idUsuario
-                    ];
+                if (!empty($capacitacionDTO->usuarios_estudiantes)) {
+                    $this->capacitacionRepository->asignarUsuarios($idCapacitacion, $capacitacionDTO->usuarios_estudiantes);
                 }
                 
-                if (!empty($usuariosCapacitaciones)) {
-                    UsuariosCapacitaciones::insert($usuariosCapacitaciones);
+                if (!empty($capacitacionDTO->cursos)) {
+                    $this->capacitacionRepository->asignarCursos($idCapacitacion, $capacitacionDTO->cursos);
                 }
                 
-                $capacitacionesCursos = [];
-                foreach ($capacitacionDTO->cursos as $idCurso) {
-                    $capacitacionesCursos[] = [
-                        'id_capacitacion' => $idCapacitacion,
-                        'id_curso' => $idCurso
-                    ];
-                }
-                
-                if (!empty($capacitacionesCursos)) {
-                    CapacitacionesCursos::insert($capacitacionesCursos);
-                }
-                
-                // 4. Crear registro en capacitacion_solicitantes (historial/seguimiento) - solo si se proporciona fecha_fin
                 if ($capacitacionDTO->fecha_fin) {
-                    CapacitacionSolicitantes::create([
-                        'id_capacitacion' => $idCapacitacion,
-                        'id_solicitante' => $capacitacionDTO->id_solicitante,
-                        'fecha_inicio' => now(),
-                        'fecha_fin' => $capacitacionDTO->fecha_fin,
-                        'observaciones' => $capacitacionDTO->observaciones
-                    ]);
+                    $this->capacitacionRepository->crearSeguimiento(
+                        $idCapacitacion,
+                        $capacitacionDTO->id_solicitante,
+                        $capacitacionDTO->fecha_fin,
+                        $capacitacionDTO->observaciones
+                    );
                 }
                 
-                // 5. Cargar la capacitación con todas sus relaciones para retornar
-                $capacitacionCompleta = Capacitaciones::with([
-                    'usuarios:id_usuario,nombre,apellido,correo,num_documento,activo',
-                    'cursos:id_curso,titulo,contenido,tipo_contenido,activo,fecha_creacion',
-                    'solicitante'
-                ])->find($idCapacitacion);
+                // 5. Obtener capacitación completa para respuesta
+                $capacitacionCompleta = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
                 return CapacitacionResponse::created($capacitacionCompleta);
             });
@@ -88,12 +63,7 @@ class CapacitacionService
     public function obtenerCapacitaciones(): array
     {
         try {
-            $capacitaciones = Capacitaciones::with([
-                'usuarios:id_usuario,nombre,apellido,correo,num_documento',
-                'cursos:id_curso,titulo,contenido,tipo_contenido,activo',
-                'solicitante'
-            ])->get();
-            
+            $capacitaciones = $this->capacitacionRepository->listarTodos();
             return CapacitacionResponse::index($capacitaciones);
             
         } catch (Exception $e) {
@@ -104,11 +74,7 @@ class CapacitacionService
     public function obtenerCapacitacion(int $idCapacitacion): array
     {
         try {
-            $capacitacion = Capacitaciones::with([
-                'usuarios:id_usuario,nombre,apellido,correo,num_documento,activo',
-                'cursos:id_curso,titulo,contenido,tipo_contenido,activo,fecha_creacion',
-                'solicitante'
-            ])->find($idCapacitacion);
+            $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
             
             if (!$capacitacion) {
                 return CapacitacionResponse::error('Capacitación no encontrada.');
@@ -117,53 +83,37 @@ class CapacitacionService
             return CapacitacionResponse::show($capacitacion);
             
         } catch (Exception $e) {
-            return CapacitacionResponse::error('Error al eliminar la capacitación.', [$e->getMessage()]);
+            return CapacitacionResponse::error('Error al obtener la capacitación.', [$e->getMessage()]);
         }
     }
-    
 
     public function agregarEstudiantes(int $idCapacitacion, array $nuevosEstudiantes): array
     {
         try {
-            return DB::transaction(function () use ($idCapacitacion, $nuevosEstudiantes) {
-                $capacitacion = Capacitaciones::find($idCapacitacion);
+            return $this->capacitacionRepository->ejecutarTransaccion(function () use ($idCapacitacion, $nuevosEstudiantes) {
+                $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
                 if (!$capacitacion) {
                     return CapacitacionResponse::error('Capacitación no encontrada.');
                 }
                 
-                $estudiantesExistentes = UsuariosCapacitaciones::where('id_capacitacion', $idCapacitacion)
-                    ->whereIn('id_usuario', $nuevosEstudiantes)
-                    ->pluck('id_usuario')
-                    ->toArray();
-                
+                $estudiantesExistentes = $this->capacitacionRepository->obtenerUsuariosAsignados($idCapacitacion);
+                $duplicados = array_intersect($nuevosEstudiantes, $estudiantesExistentes);
                 $estudiantesAgregar = array_diff($nuevosEstudiantes, $estudiantesExistentes);
                 
                 if (empty($estudiantesAgregar)) {
                     return [
                         'success' => false,
                         'message' => 'Todos los estudiantes ya están asignados a esta capacitación.',
-                        'estudiantes_duplicados' => $estudiantesExistentes
+                        'estudiantes_duplicados' => $duplicados
                     ];
                 }
                 
-                $usuariosCapacitaciones = [];
-                foreach ($estudiantesAgregar as $idUsuario) {
-                    $usuariosCapacitaciones[] = [
-                        'id_capacitacion' => $idCapacitacion,
-                        'id_usuario' => $idUsuario
-                    ];
-                }
+                $this->capacitacionRepository->agregarUsuarios($idCapacitacion, $estudiantesAgregar);
                 
-                UsuariosCapacitaciones::insert($usuariosCapacitaciones);
+                $capacitacionCompleta = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
-                $capacitacionCompleta = Capacitaciones::with([
-                    'usuarios:id_usuario,nombre,apellido,correo,num_documento,activo',
-                    'cursos:id_curso,titulo,contenido,tipo_contenido,activo,fecha_creacion',
-                    'solicitante'
-                ])->find($idCapacitacion);
-                
-                return CapacitacionResponse::estudiantesAgregados($capacitacionCompleta, count($estudiantesAgregar), $estudiantesExistentes);
+                return CapacitacionResponse::estudiantesAgregados($capacitacionCompleta, count($estudiantesAgregar), $duplicados);
             });
             
         } catch (Exception $e) {
@@ -174,67 +124,57 @@ class CapacitacionService
     public function eliminarEstudiantes(int $idCapacitacion, array $estudiantesEliminar): array
     {
         try {
-            return DB::transaction(function () use ($idCapacitacion, $estudiantesEliminar) {
-                $capacitacion = Capacitaciones::find($idCapacitacion);
+            return $this->capacitacionRepository->ejecutarTransaccion(function () use ($idCapacitacion, $estudiantesEliminar) {
+                $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
                 if (!$capacitacion) {
                     return CapacitacionResponse::error('Capacitación no encontrada.');
                 }
                 
-                $estudiantesExistentes = UsuariosCapacitaciones::where('id_capacitacion', $idCapacitacion)
-                    ->whereIn('id_usuario', $estudiantesEliminar)
-                    ->pluck('id_usuario')
-                    ->toArray();
+                $estudiantesAsignados = $this->capacitacionRepository->obtenerUsuariosAsignados($idCapacitacion);
+                $estudiantesAEliminar = array_intersect($estudiantesEliminar, $estudiantesAsignados);
+                $estudiantesNoEncontrados = array_diff($estudiantesEliminar, $estudiantesAsignados);
                 
-                if (empty($estudiantesExistentes)) {
+                if (empty($estudiantesAEliminar)) {
                     return [
                         'success' => false,
                         'message' => 'Ninguno de los estudiantes especificados está asignado a esta capacitación.',
-                        'estudiantes_no_encontrados' => $estudiantesEliminar
+                        'estudiantes_no_encontrados' => $estudiantesNoEncontrados
                     ];
                 }
                 
-                $totalEstudiantesActuales = UsuariosCapacitaciones::where('id_capacitacion', $idCapacitacion)->count();
+                $totalEstudiantesActuales = $this->capacitacionRepository->contarUsuarios($idCapacitacion);
                 
-                if ($totalEstudiantesActuales <= count($estudiantesExistentes)) {
+                if ($totalEstudiantesActuales <= count($estudiantesAEliminar)) {
                     return [
                         'success' => false,
                         'message' => 'No se pueden eliminar todos los estudiantes. La capacitación debe tener al menos un estudiante.'
                     ];
                 }
                 
-                $eliminados = UsuariosCapacitaciones::where('id_capacitacion', $idCapacitacion)
-                    ->whereIn('id_usuario', $estudiantesEliminar)
-                    ->delete();
+                $eliminados = $this->capacitacionRepository->eliminarUsuarios($idCapacitacion, $estudiantesAEliminar);
                 
-                $capacitacionCompleta = Capacitaciones::with([
-                    'usuarios:id_usuario,nombre,apellido,correo,num_documento,activo',
-                    'cursos:id_curso,titulo,contenido,tipo_contenido,activo,fecha_creacion',
-                    'solicitante'
-                ])->find($idCapacitacion);
+                $capacitacionCompleta = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
-                return CapacitacionResponse::estudiantesEliminados($capacitacionCompleta, $eliminados, array_diff($estudiantesEliminar, $estudiantesExistentes));
+                return CapacitacionResponse::estudiantesEliminados($capacitacionCompleta, $eliminados, $estudiantesNoEncontrados);
             });
             
         } catch (Exception $e) {
             return CapacitacionResponse::error('Error al eliminar estudiantes.', [$e->getMessage()]);
         }
     }
+
     public function agregarCursos(int $idCapacitacion, array $cursosAgregar): array
     {
         try {
-            return DB::transaction(function () use ($idCapacitacion, $cursosAgregar) {
-                $capacitacion = Capacitaciones::find($idCapacitacion);
+            return $this->capacitacionRepository->ejecutarTransaccion(function () use ($idCapacitacion, $cursosAgregar) {
+                $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
                 if (!$capacitacion) {
                     return CapacitacionResponse::error('La capacitación especificada no existe.', ['id_capacitacion' => 'No encontrada']);
                 }
                 
-                $cursosValidos = Cursos::whereIn('id_curso', $cursosAgregar)
-                    ->where('activo', true)
-                    ->pluck('id_curso')
-                    ->toArray();
-                
+                $cursosValidos = $this->capacitacionRepository->obtenerCursosActivos($cursosAgregar);
                 $cursosInvalidos = array_diff($cursosAgregar, $cursosValidos);
                 
                 if (!empty($cursosInvalidos)) {
@@ -244,10 +184,7 @@ class CapacitacionService
                     );
                 }
                 
-                $cursosExistentes = CapacitacionesCursos::where('id_capacitacion', $idCapacitacion)
-                    ->pluck('id_curso')
-                    ->toArray();
-                
+                $cursosExistentes = $this->capacitacionRepository->obtenerCursosAsignados($idCapacitacion);
                 $duplicados = array_intersect($cursosAgregar, $cursosExistentes);
                 $cursosNuevos = array_diff($cursosAgregar, $cursosExistentes);
                 
@@ -255,20 +192,9 @@ class CapacitacionService
                     return CapacitacionResponse::error('Todos los cursos ya están asignados a esta capacitación.', ['duplicados' => $duplicados]);
                 }
                 
-                $cursosData = array_map(function ($idCurso) use ($idCapacitacion) {
-                    return [
-                        'id_capacitacion' => $idCapacitacion,
-                        'id_curso' => $idCurso
-                    ];
-                }, $cursosNuevos);
+                $this->capacitacionRepository->agregarCursos($idCapacitacion, $cursosNuevos);
                 
-                CapacitacionesCursos::insert($cursosData);
-                
-                $capacitacionCompleta = Capacitaciones::with([
-                    'usuarios:id_usuario,nombre,apellido,correo,num_documento,activo',
-                    'cursos:id_curso,titulo,contenido,tipo_contenido,activo,fecha_creacion',
-                    'solicitante'
-                ])->find($idCapacitacion);
+                $capacitacionCompleta = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
                 return CapacitacionResponse::cursosAgregados($capacitacionCompleta, count($cursosNuevos), $duplicados);
             });
@@ -277,20 +203,18 @@ class CapacitacionService
             return CapacitacionResponse::error('Error al agregar cursos.', [$e->getMessage()]);
         }
     }
+
     public function eliminarCursos(int $idCapacitacion, array $cursosEliminar): array
     {
         try {
-            return DB::transaction(function () use ($idCapacitacion, $cursosEliminar) {
-                $capacitacion = Capacitaciones::find($idCapacitacion);
+            return $this->capacitacionRepository->ejecutarTransaccion(function () use ($idCapacitacion, $cursosEliminar) {
+                $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
                 if (!$capacitacion) {
                     return CapacitacionResponse::error('La capacitación especificada no existe.', ['id_capacitacion' => 'No encontrada']);
                 }
                 
-                $cursosExistentesEnBD = Cursos::whereIn('id_curso', $cursosEliminar)
-                    ->pluck('id_curso')
-                    ->toArray();
-                
+                $cursosExistentesEnBD = $this->capacitacionRepository->verificarCursosExisten($cursosEliminar);
                 $cursosInexistentes = array_diff($cursosEliminar, $cursosExistentesEnBD);
                 
                 if (!empty($cursosInexistentes)) {
@@ -300,34 +224,25 @@ class CapacitacionService
                     );
                 }
                 
-                $cursosAsignados = CapacitacionesCursos::where('id_capacitacion', $idCapacitacion)
-                    ->whereIn('id_curso', $cursosEliminar)
-                    ->pluck('id_curso')
-                    ->toArray();
-                
+                $cursosAsignados = $this->capacitacionRepository->obtenerCursosAsignados($idCapacitacion);
+                $cursosAEliminar = array_intersect($cursosEliminar, $cursosAsignados);
                 $cursosNoAsignados = array_diff($cursosEliminar, $cursosAsignados);
                 
-                if (empty($cursosAsignados)) {
+                if (empty($cursosAEliminar)) {
                     return CapacitacionResponse::error('Ninguno de los cursos especificados está asignado a esta capacitación.', ['cursos_no_asignados' => $cursosNoAsignados]);
                 }
                 
-                $totalCursosActuales = CapacitacionesCursos::where('id_capacitacion', $idCapacitacion)->count();
-                if (count($cursosAsignados) >= $totalCursosActuales) {
+                $totalCursosActuales = $this->capacitacionRepository->contarCursos($idCapacitacion);
+                if (count($cursosAEliminar) >= $totalCursosActuales) {
                     return [
                         'success' => false,
                         'message' => 'No se pueden eliminar todos los cursos. La capacitación debe tener al menos un curso.'
                     ];
                 }
                 
-                $eliminados = CapacitacionesCursos::where('id_capacitacion', $idCapacitacion)
-                    ->whereIn('id_curso', $cursosAsignados)
-                    ->delete();
+                $eliminados = $this->capacitacionRepository->eliminarCursos($idCapacitacion, $cursosAEliminar);
                 
-                $capacitacionCompleta = Capacitaciones::with([
-                    'usuarios:id_usuario,nombre,apellido,correo,num_documento,activo',
-                    'cursos:id_curso,titulo,contenido,tipo_contenido,activo,fecha_creacion',
-                    'solicitante'
-                ])->find($idCapacitacion);
+                $capacitacionCompleta = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
                 return CapacitacionResponse::cursosEliminados($capacitacionCompleta, $eliminados, $cursosNoAsignados);
             });
@@ -336,7 +251,24 @@ class CapacitacionService
             return CapacitacionResponse::error('Error al eliminar cursos.', [$e->getMessage()]);
         }
     }
-    
 
-    
+    public function cambiarEstado(int $idCapacitacion): array
+    {
+        try {
+            // Toggle automático del estado
+            $capacitacionActualizada = $this->capacitacionRepository->toggleEstado($idCapacitacion);
+            
+            if ($capacitacionActualizada === null) {
+                return CapacitacionResponse::error('La capacitación especificada no existe.', ['id_capacitacion' => 'No encontrada']);
+            }
+            
+            return CapacitacionResponse::estadoCambiado($capacitacionActualizada);
+            
+        } catch (Exception $e) {
+            return CapacitacionResponse::error('Error al cambiar el estado de la capacitación.', [$e->getMessage()]);
+        }
+    }
+
+
+
 }
