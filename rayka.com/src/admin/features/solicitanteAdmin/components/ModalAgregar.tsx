@@ -84,7 +84,7 @@ export default function ModalAgregar({ open, onClose, onSave, loading, empresas 
       cargo: cargoValue,
       correo: correoValue,
       telefono: telefonoValue,
-      empresa_id: idEmpresa as number,
+      id_empresa: idEmpresa as number,
     });
   };
 

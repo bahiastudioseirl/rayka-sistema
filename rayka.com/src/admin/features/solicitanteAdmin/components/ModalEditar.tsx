@@ -1,13 +1,13 @@
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { Solicitante, CrearSolicitanteRequest } from "../schemas/SolicitanteSchema";
+import type { Solicitante, ActualizarSolicitanteRequest } from "../schemas/SolicitanteSchema";
 import type { Empresa } from "../../empresaAdmin/schemas/EmpresaSchema";
 
 type Props = {
     open: boolean;
     solicitante: Solicitante | null;
     onClose: () => void;
-    onSave: (id: number, data: CrearSolicitanteRequest) => Promise<void>;
+    onSave: (id: number, data: ActualizarSolicitanteRequest) => Promise<void>;
     loading?: boolean;
     empresas: Empresa[];
 };
@@ -80,14 +80,24 @@ export default function ModalEditar({ open, solicitante, onClose, onSave, loadin
         }
         if (!solicitante) return;
 
-        await onSave(solicitante.id_solicitante, {
-            nombre: nombreValue,
-            apellido: apellidoValue,
-            cargo: cargoValue,
-            correo: correoValue,
-            telefono: telefonoValue,
-            empresa_id: idEmpresa as number,
-        });
+        const cambios: ActualizarSolicitanteRequest = {};
+        
+        if (nombreValue !== solicitante.nombre) cambios.nombre = nombreValue;
+        if (apellidoValue !== solicitante.apellido) cambios.apellido = apellidoValue;
+        if (cargoValue !== solicitante.cargo) cambios.cargo = cargoValue;
+        if (correoValue !== solicitante.correo) cambios.correo = correoValue;
+        if (telefonoValue !== solicitante.telefono) cambios.telefono = telefonoValue;
+        if (idEmpresa !== (solicitante.empresa?.id_empresa || solicitante.empresa_id)) {
+            cambios.id_empresa = idEmpresa as number;
+        }
+
+        // Si no hay cambios, cerrar modal
+        if (Object.keys(cambios).length === 0) {
+            setError("No se detectaron cambios.");
+            return;
+        }
+
+        await onSave(solicitante.id_solicitante, cambios as any);
     };
 
     if (!open || !solicitante) return null;

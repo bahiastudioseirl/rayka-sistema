@@ -1,6 +1,6 @@
 import { Edit, Plus, Search, AlertCircle, UserPlus } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
-import type { Solicitante, CrearSolicitanteRequest } from "../schemas/SolicitanteSchema"
+import type { Solicitante, CrearSolicitanteRequest, ActualizarSolicitanteRequest } from "../schemas/SolicitanteSchema"
 import type { Empresa } from "../../empresaAdmin/schemas/EmpresaSchema"
 import ModalAgregar from "../components/ModalAgregar"
 import ModalEditar from "../components/ModalEditar"
@@ -75,25 +75,34 @@ export default function SolicitanteAdmin() {
     setLoadingSave(true)
     try {
       const response = await crearSolicitante(data)
-      setSolicitantes((prev) => [...prev, response.data.solicitante])
+      console.log("📥 Respuesta completa al crear:", response)
+      console.log("📥 Solicitante recibido:", response.data.solicitante)
+      
+      // Agregar y mantener orden ascendente
+      setSolicitantes((prev) => {
+        const nuevosSolicitantes = [...prev, response.data.solicitante]
+        return nuevosSolicitantes.sort((a, b) => a.id_solicitante - b.id_solicitante)
+      })
+      
       setIsModalAgregarOpen(false)
     } catch (err) {
+      console.error("❌ Error al crear:", err)
       alert(err instanceof Error ? err.message : "Error al crear solicitante")
     } finally {
       setLoadingSave(false)
     }
   }
 
-  const handleSaveEditar = async (id: number, data: CrearSolicitanteRequest) => {
+  const handleSaveEditar = async (id: number, data: ActualizarSolicitanteRequest) => {
     setLoadingSave(true)
     try {
       const response = await actualizarSolicitante(id, data)
-      setSolicitantes((prev) => {
-        const nuevosSelicitantes = prev.map((sol) =>
+      
+      setSolicitantes((prev) =>
+        prev.map((sol) =>
           sol.id_solicitante === id ? response.data.solicitante : sol
         )
-        return nuevosSelicitantes
-      })
+      )
       
       setIsModalEditarOpen(false)
       setSolicitanteSeleccionado(null)

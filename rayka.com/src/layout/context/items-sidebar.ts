@@ -6,13 +6,14 @@ import {
     Building,
     ClipboardCheck,
     Hand,
+    Users,
     type LucideIcon
 } from 'lucide-react';
 
 export interface MenuItem {
     titulo: string;
     icon: LucideIcon;
-    link?: string; 
+    link?: string;
     subMenu?: SubMenuItem[];
 }
 
@@ -26,22 +27,39 @@ export const menuItems: MenuItem[] = [
     {
         titulo: 'Cursos',
         icon: Book,
-        link: '/administrator/cursos' 
+        link: '/administrator/cursos'
     },
     {
         titulo: 'Empresa',
         icon: Building,
-        link: '/administrator/empresa'  
+        link: '/administrator/empresa'
     },
     {
         titulo: 'Capacitación',
-        icon:   ClipboardCheck,
-        link: '/administrator/capacitacion'  
+        icon: ClipboardCheck,
+        link: '/administrator/capacitacion'
     },
     {
         titulo: 'Solicitantes',
-        icon:   Hand,
-        link: '/administrator/solicitantes'  
+        icon: Hand,
+        link: '/administrator/solicitantes'
     },
-    
+
+    {
+        titulo: 'Usuario',
+        icon: UserCheck,
+        subMenu: [
+            {
+                titulo: 'Administrador',
+                link: '/administrator/usuarios/administrador',
+                icon: Settings,
+            },
+            {
+                titulo: 'Usuarios',
+                link: '/administrator/usuarios/listado',
+                icon: UserCheck,
+            },
+        ],
+    },
+
 ];

@@ -18,7 +18,16 @@ export interface CrearSolicitanteRequest {
   cargo: string;
   correo: string;
   telefono: string;
-  empresa_id: number;
+  id_empresa: number;
+}
+
+export interface ActualizarSolicitanteRequest {
+  nombre?: string;
+  apellido?: string;
+  cargo?: string;
+  correo?: string;
+  telefono?: string;
+  id_empresa?: number;
 }
 
 export interface CrearSolicitanteResponse {
