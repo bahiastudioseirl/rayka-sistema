@@ -1,2 +1,5 @@
 export { CourseCompletionModal } from './CourseCompletionModal'
 export { ExamReadyPanel } from './ExamReadyPanel'
+export { ExamQuiz } from './ExamQuiz'
+export { ExamResults } from './ExamResults'
+export { ExamHistory } from './ExamHistory'

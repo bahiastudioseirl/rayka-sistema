@@ -1,4 +1,4 @@
-import { Edit, Plus, Search, Trash2, Eye, AlertCircle, ClipboardCheck } from "lucide-react";
+import { Edit, Plus, Search, Trash2, Eye, AlertCircle, ClipboardCheck, FileSpreadsheet } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import type { CapacitacionConDetalles, Usuario, Curso, CrearCapacitacionRequest, CrearCapacitacionResponse } from "../schemas/CapacitacionSchema";
 import type { Solicitante } from "../../solicitanteAdmin/schemas/SolicitanteSchema";
@@ -8,6 +8,7 @@ import { obtenerCursos } from "../services/obtenerCursos";
 import { crearCapacitacion } from "../services/crearCapacitacion";
 import { obtenerSolicitantes } from "../../solicitanteAdmin/services/obtenerSolicitantes";
 import ModalAgregar from "../components/ModalAgregar";
+import ModalEditar from "../components/ModalEditar";
 
 export default function CapacitacionAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,6 +16,10 @@ export default function CapacitacionAdmin() {
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [savingModal, setSavingModal] = useState(false);
+  
+  // Modal de edición
+  const [editOpen, setEditOpen] = useState(false);
+  const [capacitacionSel, setCapacitacionSel] = useState<CapacitacionConDetalles | null>(null);
 
   // Data states
   const [capacitaciones, setCapacitaciones] = useState<CapacitacionConDetalles[]>([]);
@@ -81,15 +86,43 @@ export default function CapacitacionAdmin() {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  // Funciones para modal de edición
+  const openEdit = (capacitacion: CapacitacionConDetalles) => {
+    setCapacitacionSel(capacitacion);
+    setEditOpen(true);
+  };
+  
+  const closeEdit = () => {
+    setEditOpen(false);
+    setCapacitacionSel(null);
+  };
+  
+  const onSaveEdit = async (data: any) => {
+    setSavingModal(true);
+    try {
+      console.log("Guardando edición:", data);
+      // TODO: Implementar servicio de actualización
+      
+      // Recargar datos después de editar
+      await cargarDatos();
+      closeEdit();
+    } catch (err) {
+      console.error("Error editando capacitación:", err);
+      alert("Error al editar la capacitación");
+    } finally {
+      setSavingModal(false);
+    }
+  };
+
   const handleSaveNuevo = async (data: CrearCapacitacionRequest) => {
     setSavingModal(true);
     try {
       const response: CrearCapacitacionResponse = await crearCapacitacion(data);
       console.log("Capacitación creada:", response);
-      
+
       // Reload data after creating
       await cargarDatos();
-      
+
       closeModal();
     } catch (err) {
       console.error("Error creando capacitación:", err);
@@ -100,8 +133,10 @@ export default function CapacitacionAdmin() {
   };
 
   const handleEdit = (id: number) => {
-    console.log("Editar capacitación:", id);
-    // TODO: Implement edit modal
+    const capacitacion = capacitaciones.find(cap => cap.capacitacion.id_capacitacion === id);
+    if (capacitacion) {
+      openEdit(capacitacion);
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -127,13 +162,16 @@ export default function CapacitacionAdmin() {
                 <p className="mt-1 text-slate-600">Administra las capacitaciones del sistema Rayka Academia</p>
               </div>
             </div>
-            <button
-              className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
-              onClick={openModal}
-            >
-              <Plus className="w-4 h-4" />
-              <span>Nueva Capacitación</span>
-            </button>
+            <div className="flex items-center gap-3">
+
+              <button
+                className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
+                onClick={openModal}
+              >
+                <Plus className="w-4 h-4" />
+                <span>Nueva Capacitación</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -171,13 +209,14 @@ export default function CapacitacionAdmin() {
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Estudiantes</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Cursos</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Estado</th>
+                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Link</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {loading && (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center">
+                  <td colSpan={9} className="py-16 text-center">
                     <div className="flex flex-col items-center space-y-3">
                       <div className="w-8 h-8 border-2 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
                       <p className="text-slate-600">Cargando capacitaciones...</p>
@@ -187,7 +226,7 @@ export default function CapacitacionAdmin() {
               )}
               {error && (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center">
+                  <td colSpan={9} className="py-16 text-center">
                     <div className="flex flex-col items-center space-y-3">
                       <div className="p-3 rounded-full bg-red-50">
                         <AlertCircle className="w-6 h-6 text-red-600" />
@@ -202,7 +241,7 @@ export default function CapacitacionAdmin() {
               )}
               {!loading && !error && paginatedData.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center">
+                  <td colSpan={9} className="py-16 text-center">
                     <div className="flex flex-col items-center space-y-3">
                       <div className="p-3 rounded-full bg-slate-100">
                         <Search className="w-6 h-6 text-slate-400" />
@@ -219,7 +258,7 @@ export default function CapacitacionAdmin() {
                 paginatedData.map((item) => {
                   const numEstudiantes = item.resumen.total_estudiantes;
                   const numCursos = item.resumen.total_cursos;
-                  
+
                   return (
                     <tr key={item.capacitacion.id_capacitacion} className="transition-colors hover:bg-slate-50">
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -249,21 +288,38 @@ export default function CapacitacionAdmin() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                          item.capacitacion.estado === 'activa' 
-                            ? 'bg-green-100 text-green-800' 
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${item.capacitacion.estado === 'activa'
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                        }`}>
+                          }`}>
                           {item.capacitacion.estado}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-sm">
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-800 break-all">
+                              http://localhost:5173/login/{item.resumen.codigo_unico}
+                            </code>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(`http://localhost:5173/login/${item.resumen.codigo_unico}`)}
+                              className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                              title="Copiar link"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-1">
                           <button
-                            className="p-2 transition-colors rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50"
-                            title="Ver detalles"
+                            className="p-2 transition-colors rounded-lg text-slate-400 hover:text-green-600 hover:bg-blue-50"
+                            title="Exportar detalle"
                           >
-                            <Eye className="w-4 h-4" />
+                            <FileSpreadsheet className="w-4 h-4" />
                           </button>
                           <button
                             className="p-2 transition-colors rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
@@ -317,11 +373,24 @@ export default function CapacitacionAdmin() {
         )}
       </div>
 
+
       {/* Modal */}
       <ModalAgregar
         open={isModalOpen}
         onClose={closeModal}
         onSave={handleSaveNuevo}
+        loading={savingModal}
+        solicitantes={solicitantes}
+        usuarios={usuarios}
+        cursos={cursos}
+      />
+
+      {/* Modal Editar */}
+      <ModalEditar
+        open={editOpen}
+        capacitacion={capacitacionSel}
+        onClose={closeEdit}
+        onSave={onSaveEdit}
         loading={savingModal}
         solicitantes={solicitantes}
         usuarios={usuarios}

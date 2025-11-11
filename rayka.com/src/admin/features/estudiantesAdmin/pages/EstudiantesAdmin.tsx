@@ -1,4 +1,4 @@
-import { Edit, Plus, Search, Trash2, Eye, AlertCircle, FileText } from "lucide-react";
+import { Edit, Plus, Search, Power, Eye, AlertCircle, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ModalAgregar from "../components/ModalAgregar"; // crear estudiante (nombre, apellido, doc)
 import ModalEditarEstudiante from "../components/ModalEditar"; // editar estudiante
@@ -6,6 +6,7 @@ import { crearEstudiante } from "../services/crearEstudiantes";       // POST /u
 import { obtenerEstudiantes } from "../services/obtenerEstudiantes"; // GET  /usuarios/ver-estudiantes
 import { actualizarEstudiante } from "../services/actualizarEstudiantes"; // PATCH /usuarios/:id
 import type { ActualizarEstudianteRequest, Estudiante } from "../schemas/EstudianteSchemas";
+import { cambiarEstadoEstudiante } from "../services/estadoEstudiante";
 
 type SavePayload = { nombre: string; apellido: string; num_documento: string };
 
@@ -90,12 +91,26 @@ export default function EstudiantesAdmin() {
     }
   };
 
-  const handleDelete = (item: Estudiante) => {
-    if (window.confirm(`¿Eliminar a ${item.nombre} ${item.apellido}?`)) {
-      // TODO: DELETE y refrescar
-      // await eliminarEstudiante(item.id_usuario)
-      // setEstudiantes(prev => prev.filter(e => e.id_usuario !== item.id_usuario))
-      console.log("Eliminar:", item.id_usuario);
+  const handleToggleEstado = async (id: number) => {
+    try {
+      const response = await cambiarEstadoEstudiante(id);
+      setEstudiantes((prev) => {
+        const nuevaLista = prev.map((c) => {
+          if (c.id_usuario === id) {
+            return response.data;
+          }
+          return c;
+        });
+        return nuevaLista;
+      });
+    } catch (err: any) {
+      console.error("❌ Error al cambiar estado:", err);
+      console.error("❌ Error response:", err?.response);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "No se pudo cambiar el estado.";
+      setError(msg);
     }
   };
 
@@ -155,6 +170,7 @@ export default function EstudiantesAdmin() {
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Nombre</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Apellido</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Documento</th>
+                <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Estado</th>
                 <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Acciones</th>
               </tr>
             </thead>
@@ -219,6 +235,14 @@ export default function EstudiantesAdmin() {
                     <p className="text-sm font-medium text-slate-900">{s.num_documento}</p>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${s.activo
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                      }`}>
+                      {s.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-1">
                       <button className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50" title="Ver">
                         <Eye className="w-4 h-4" />
@@ -231,11 +255,14 @@ export default function EstudiantesAdmin() {
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50"
-                        onClick={() => handleDelete(s)}
-                        title="Eliminar"
+                        className={`p-2 transition-colors rounded-lg ${s.activo
+                          ? 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'
+                          : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                          }`}
+                        title={s.activo ? "Desactivar estudiante" : "Activar estudiante"}
+                        onClick={() => handleToggleEstado(s.id_usuario)}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Power className="w-4 h-4" />
                       </button>
                     </div>
                   </td>

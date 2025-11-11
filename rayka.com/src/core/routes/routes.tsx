@@ -4,10 +4,15 @@ import { LazyWrapper } from './components/LazyWrapper';
 import { ProtectedRoute } from './guard/ProtectedRoute';
 import { AdminLayout } from '../../layout/components/AdminLayout';
 
-// LOGIN FORM
+// LOGIN FORMS
 const LoginForm = lazy(() => 
   import('../components/auth/LoginForm').then((module) => ({ default: module.LoginForm }))
 );
+
+const UserLoginForm = lazy(() => 
+  import('../components/auth/UserLoginForm').then((module) => ({ default: module.UserLoginForm }))
+);
+
 
 // PAGINAS USUARIO
 const Cursos = lazy(() => 
@@ -34,6 +39,9 @@ const SolicitanteAdmin = lazy(() =>
 const EstudiantesAdmin = lazy(() => 
   import('../../admin/features/estudiantesAdmin/pages/EstudiantesAdmin').then((module) => ({ default: module.default }))
 );
+const AdministradorAdmin = lazy(() => 
+  import('../../admin/features/administradorAdmin/pages/AdministradorAdmin').then((module) => ({ default: module.default }))
+);
 
 export const routes = [
   // RUTAS PÚBLICAS - PÁGINAS DE USUARIO
@@ -41,6 +49,36 @@ export const routes = [
   // Ruta principal - Página de cursos (pantalla principal)
   {
     path: '/',
+    element: (
+      <LazyWrapper>
+        <UserLoginForm/>
+      </LazyWrapper>
+    ),
+  },
+
+  // Login para usuarios/estudiantes - Acceso con DNI
+  {
+    path: '/login',
+    element: (
+      <LazyWrapper>
+        <UserLoginForm />
+      </LazyWrapper>
+    ),
+  },
+
+  // Login específico para capacitación con código único
+  {
+    path: '/login/:codigo',
+    element: (
+      <LazyWrapper>
+        <UserLoginForm />
+      </LazyWrapper>
+    ),
+  },
+
+  // Vista de cursos para capacitación específica (requiere autenticación)
+  {
+    path: '/capacitacion/:codigo/cursos',
     element: (
       <LazyWrapper>
         <Cursos />
@@ -121,7 +159,14 @@ export const routes = [
             <EstudiantesAdmin />
           </LazyWrapper>
         ),
-      },
+      },{
+        path:'usuarios/administrador',
+        element: (
+          <LazyWrapper>
+            <AdministradorAdmin />
+          </LazyWrapper>
+        ),
+      }
     ],
   },
 

@@ -1,8 +1,8 @@
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { CrearEstudianteRequest } from "../schemas/EstudianteSchemas";
+import type { CrearAdministradorRequest } from "../schemas/AdministradorSchema";
 
-type SavePayload = Pick<CrearEstudianteRequest, "nombre" | "apellido" | "num_documento">;
+type SavePayload = Pick<CrearAdministradorRequest, "nombre" | "apellido" | "num_documento" | "correo" | "contrasenia">;
 
 type Props = {
   open: boolean;
@@ -11,10 +11,12 @@ type Props = {
   loading?: boolean;
 };
 
-export default function ModalAgregarEstudiante({ open, onClose, onSave, loading }: Props) {
+export default function ModalAgregarAdministrador({ open, onClose, onSave, loading }: Props) {
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [numDocumento, setNumDocumento] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [contrasenia, setContrasenia] = useState("");
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -23,6 +25,8 @@ export default function ModalAgregarEstudiante({ open, onClose, onSave, loading 
       setNombre("");
       setApellido("");
       setNumDocumento("");
+      setCorreo("");
+      setContrasenia("");
       setError("");
       setTimeout(() => inputRef.current?.focus(), 0);
     }
@@ -38,9 +42,11 @@ export default function ModalAgregarEstudiante({ open, onClose, onSave, loading 
     const n = nombre.trim();
     const a = apellido.trim();
     const d = numDocumento.trim();
+    const c = correo.trim();
+    const con = contrasenia.trim();
 
-    if (!n || !a || !d) {
-      setError("Completa nombre, apellido y documento.");
+    if (!n || !a || !d || !c || !con) {
+      setError("Completa nombre, apellido, documento, correo y contraseña.");
       return;
     }
 
@@ -50,7 +56,7 @@ export default function ModalAgregarEstudiante({ open, onClose, onSave, loading 
       return;
     }
 
-    await onSave({ nombre: n, apellido: a, num_documento: d });
+    await onSave({ nombre: n, apellido: a, num_documento: d, correo: c, contrasenia: con });
   };
 
   if (!open) return null;
@@ -117,6 +123,34 @@ export default function ModalAgregarEstudiante({ open, onClose, onSave, loading 
                 setError("");
               }}
               placeholder="Ej. 12345678"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          {/* Correo */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Correo</label>
+            <input
+              type="email"
+              value={correo}
+              onChange={(e) => {
+                setCorreo(e.target.value);
+                setError("");
+              }}
+              placeholder="ejemplo@gmail.com"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          {/* Contraseña */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
+            <input
+              type="password"
+              value={contrasenia}
+              onChange={(e) => {
+                setContrasenia(e.target.value);
+                setError("");
+              }}
+              placeholder="********"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Play, CheckCircle2, ChevronRight, Lock } from "lucide-react";
+import { ArrowLeft, Play, CheckCircle2, ChevronRight, Lock, History } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { CourseCompletionModal, ExamReadyPanel } from "./components";
+import { CourseCompletionModal, ExamReadyPanel, ExamQuiz, ExamHistory } from "./components";
 
 type Module = {
   id: string | number;
@@ -18,14 +18,26 @@ type CourseDetail = {
   modules: Module[]; // ahora solo 1 módulo
 };
 
+interface ExamAttempt {
+  id: number;
+  score: number;
+  totalQuestions: number;
+  percentage: number;
+  passed: boolean;
+  date: Date;
+  answers: number[];
+}
+
 type ActiveView =
   | { kind: "module"; id: string | number }
-  | { kind: "exam" };
+  | { kind: "exam" }
+  | { kind: "exam-quiz" }
+  | { kind: "exam-history" };
 
 const COURSE: CourseDetail = {
-  id: "fundamentos-js",
-  title: "Fundamentos de JavaScript",
-  description: "Aprende los conceptos básicos de JavaScript desde cero",
+  id: "seguridad-y-salud-ocupacional",
+  title: "Seguridad y Salud Ocupacional",
+  description: "Aprende los conceptos básicos de seguridad y salud en el trabajo.",
   modules: [
     {
       id: 1,
@@ -47,9 +59,13 @@ export default function CursoSeccion() {
   // Vista activa: por defecto el módulo
   const [active, setActive] = useState<ActiveView>({ kind: "module", id: COURSE.modules[0].id });
 
-  // Modal de “curso completo”
+  // Modal de "curso completo"
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [hasShownModal, setHasShownModal] = useState(false);
+
+  // Estado de exámenes
+  const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
+  const MAX_EXAM_ATTEMPTS = 3;
 
   const progressPct = moduleCompleted ? 100 : 0;
 
@@ -73,9 +89,15 @@ export default function CursoSeccion() {
 
   const handleTakeExam = () => {
     setShowCompletionModal(false);
-    // navega a tu ruta real de examen
-    // navigate(`/examen/${cursoId}`);
-    console.log("Ir al examen del curso:", COURSE.id);
+    setActive({ kind: "exam-quiz" });
+  };
+
+  const handleExamComplete = (attempt: ExamAttempt) => {
+    setExamAttempts(prev => [...prev, attempt]);
+  };
+
+  const handleBackToCourse = () => {
+    setActive({ kind: "module", id: COURSE.modules[0].id });
   };
 
   const module = COURSE.modules[0];
@@ -184,6 +206,33 @@ export default function CursoSeccion() {
                       </div>
                     </button>
                   </li>
+
+                  {/* Historial de exámenes */}
+                  {moduleCompleted && examAttempts.length > 0 && (
+                    <li>
+                      <button
+                        onClick={() => setActive({ kind: "exam-history" })}
+                        className={`w-full flex items-start gap-3 rounded-xl p-3 text-left transition-all
+                          ${active.kind === "exam-history"
+                            ? "bg-[#224666]/10 border border-[#224666]/50 shadow-sm"
+                            : "bg-slate-50 border border-slate-200/50 hover:bg-slate-100 hover:border-slate-300/50"
+                          }`}
+                      >
+                        <div className="shrink-0 mt-0.5">
+                          <History className="h-5 w-5 text-[#224666]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-medium text-slate-500">Historial</span>
+                          <h4 className={`font-medium mt-0.5 ${active.kind === "exam-history" ? "text-[#132436]" : "text-[#374151]"}`}>
+                            Mis intentos
+                          </h4>
+                          <p className="text-xs text-slate-600 mt-1">
+                            {examAttempts.length} intento{examAttempts.length !== 1 ? 's' : ''} realizado{examAttempts.length !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                  )}
                 </ul>
               </div>
             </aside>
@@ -196,6 +245,20 @@ export default function CursoSeccion() {
                   onTakeExam={handleTakeExam}
                   completedModules={moduleCompleted ? 1 : 0}
                   totalModules={1}
+                />
+              ) : active.kind === "exam-quiz" ? (
+                <ExamQuiz
+                  courseTitle={COURSE.title}
+                  onExamComplete={handleExamComplete}
+                  onBackToCourse={handleBackToCourse}
+                  attempts={examAttempts}
+                  maxAttempts={MAX_EXAM_ATTEMPTS}
+                />
+              ) : active.kind === "exam-history" ? (
+                <ExamHistory
+                  attempts={examAttempts}
+                  maxAttempts={MAX_EXAM_ATTEMPTS}
+                  onTakeExam={() => setActive({ kind: "exam-quiz" })}
                 />
               ) : (
                 <div className="rounded-2xl border border-slate-200/60 bg-white shadow-sm overflow-hidden">

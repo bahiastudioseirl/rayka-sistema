@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { CrearSolicitanteRequest } from "../schemas/SolicitanteSchema";
+import type { CrearSolicitanteRequest,  } from "../schemas/SolicitanteSchema";
 import type { Empresa } from "../../empresaAdmin/schemas/EmpresaSchema";
 
 type Props = {
@@ -20,6 +20,8 @@ export default function ModalAgregar({ open, onClose, onSave, loading, empresas 
   const [idEmpresa, setIdEmpresa] = useState<number | "">("");
   const [error, setError] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  
 
   useEffect(() => {
     if (open) {
@@ -188,6 +190,7 @@ export default function ModalAgregar({ open, onClose, onSave, loading, empresas 
             <input
               type="tel"
               value={telefono}
+              maxLength={9}
               onChange={(e) => {
                 setTelefono(e.target.value);
                 setError("");

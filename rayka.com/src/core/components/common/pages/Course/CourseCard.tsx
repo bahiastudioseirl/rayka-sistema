@@ -2,20 +2,18 @@ import type { FC } from "react"
 import { Info } from "lucide-react"
 
 export interface CourseCardProps {
-  title: string
-  description: string
-  progressPct: number // 0 - 100
-
-
-  ctaText?: string
-  onClick?: () => void
+  title: string;
+  description: string;
+  progressPct: number;
+  ctaText?: string;
+  onClick?: () => void;
+  imageUrl?: string;
 }
-
 export const CourseCard: FC<CourseCardProps> = ({
   title,
   description,
   progressPct,
-
+  imageUrl,
   ctaText = "Continuar",
   onClick,
 }) => {
@@ -24,7 +22,17 @@ export const CourseCard: FC<CourseCardProps> = ({
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden w-full max-w-md">
       {/* Banda superior tipo cover */}
-      <div className="h-20 bg-linear-to-r  bg-[#224666]" />
+      <div className="h-28 w-full relative bg-[#224666]">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[#224666]" />
+        )}
+      </div>
 
       {/* Contenido */}
       <div className="p-5">

@@ -75,7 +75,15 @@ export interface CapacitacionConDetalles {
     fecha_creacion: string;
     estado: string;
   };
-  solicitante: Solicitante;
+  solicitante: {
+    id_solicitante: number,
+    nombre: string,
+    apellido: string,
+    correo: string,
+    telefono: string,
+    cargo: string,
+    id_empresa: number
+  }
 }
 
 export interface ObtenerCapacitacionesResponse {
