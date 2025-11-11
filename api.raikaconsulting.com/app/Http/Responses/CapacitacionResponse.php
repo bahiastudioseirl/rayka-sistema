@@ -41,6 +41,40 @@ class CapacitacionResponse
         ];
     }
 
+    public static function showWithEmpresa(Capacitaciones $capacitacion): array
+    {
+        $solicitanteData = [];
+        
+        if ($capacitacion->solicitante) {
+            $solicitanteData = [
+                'id_solicitante' => $capacitacion->solicitante->id_solicitante,
+                'nombre' => $capacitacion->solicitante->nombre,
+                'apellido' => $capacitacion->solicitante->apellido ?? '',
+                'correo' => $capacitacion->solicitante->correo ?? '',
+                'telefono' => $capacitacion->solicitante->telefono ?? '',
+                'cargo' => $capacitacion->solicitante->cargo ?? '',
+                'id_empresa' => $capacitacion->solicitante->id_empresa
+            ];
+
+            if ($capacitacion->solicitante->empresa) {
+                $solicitanteData['empresa'] = [
+                    'id_empresa' => $capacitacion->solicitante->empresa->id_empresa,
+                    'nombre' => $capacitacion->solicitante->empresa->nombre
+                ];
+            }
+        }
+
+        return [
+            'success' => true,
+            'data' => [
+                'capacitacion' => self::formatCapacitacion($capacitacion),
+                'usuarios_asignados' => self::formatUsuarios($capacitacion->usuarios),
+                'cursos_asignados' => self::formatCursos($capacitacion->cursos),
+                'solicitante' => $solicitanteData
+            ]
+        ];
+    }
+
     public static function index($capacitaciones): array
     {
         return [

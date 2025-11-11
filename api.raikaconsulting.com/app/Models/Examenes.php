@@ -13,8 +13,7 @@ class Examenes extends Model
     protected $primaryKey = 'id_examen';
     
     protected $fillable = [
-        'nombre',
-        'puntaje_total',
+        'titulo',
         'id_curso'
     ];
 
@@ -30,9 +29,5 @@ class Examenes extends Model
         return $this->hasMany(Preguntas::class, 'id_examen', 'id_examen');
     }
 
-    // Un examen tiene muchos resultados
-    public function resultados()
-    {
-        return $this->hasMany(ResultadosExamenes::class, 'id_examen', 'id_examen');
-    }
+
 }
