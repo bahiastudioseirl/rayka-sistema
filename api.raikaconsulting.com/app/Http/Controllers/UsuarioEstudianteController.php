@@ -135,10 +135,23 @@ class UsuarioEstudianteController extends Controller
             );
 
             if (isset($data['success']) && $data['success'] === false) {
+                // Manejo específico de errores con códigos HTTP apropiados
                 if ($data['message'] === 'No tienes acceso a este curso') {
                     return UsuarioEstudianteResponse::accesoNoAutorizadoCurso();
                 }
-                return UsuarioEstudianteResponse::error($data['message']);
+                
+                if ($data['message'] === 'Debes finalizar el video del curso antes de rendir el examen') {
+                    return UsuarioEstudianteResponse::videoNoFinalizado();
+                }
+                
+                if (str_contains($data['message'], 'Has alcanzado el máximo de intentos')) {
+                    preg_match('/\((\d+)\)/', $data['message'], $matches);
+                    $maxIntentos = isset($matches[1]) ? (int)$matches[1] : 0;
+                    return UsuarioEstudianteResponse::intentosAgotados($maxIntentos);
+                }
+                
+                // Otros errores relacionados con el examen (400 Bad Request)
+                return UsuarioEstudianteResponse::examenNoDisponible($data['message']);
             }
 
             return UsuarioEstudianteResponse::resultadoExamen($data);

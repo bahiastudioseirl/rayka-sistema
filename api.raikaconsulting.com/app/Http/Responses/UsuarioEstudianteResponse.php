@@ -85,6 +85,30 @@ class UsuarioEstudianteResponse
         ], $statusCode);
     }
 
+    public static function videoNoFinalizado(): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Debes finalizar el video del curso antes de rendir el examen'
+        ], 403);
+    }
+
+    public static function intentosAgotados(int $maxIntentos): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => "Has alcanzado el máximo de intentos permitidos ({$maxIntentos})"
+        ], 403);
+    }
+
+    public static function examenNoDisponible(string $message): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message
+        ], 400);
+    }
+
     public static function error(string $message = 'Error al procesar la solicitud'): JsonResponse
     {
         return response()->json([
