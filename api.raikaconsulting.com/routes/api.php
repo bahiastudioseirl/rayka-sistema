@@ -9,6 +9,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\SolicitanteController;
 use App\Http\Controllers\CapacitacionController;
+use App\Http\Controllers\ExamenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +56,7 @@ Route::middleware('auth.admin')->group(function () {
     Route::get('cursos', [CursoController::class, 'listarCursos']);
     Route::get('cursos/{id}', [CursoController::class, 'obtenerCursoPorId']);
     Route::patch('cursos/{id}/cambiar-estado', [CursoController::class, 'cambiarEstadoCurso']);
+    Route::get('cursos/{id}/examenes', [ExamenController::class, 'listarPorCurso']);
     
     // Ruta para servir archivos de cursos (privados pero autenticados)
     Route::get('cursos/archivos/{filename}', [CursoController::class, 'servirArchivoCurso'])->where('filename', '.*');
@@ -81,5 +83,12 @@ Route::middleware('auth.admin')->group(function () {
     Route::post('capacitaciones/{id}/cursos/agregar', [CapacitacionController::class, 'agregarCursos']);
     Route::delete('capacitaciones/{id}/cursos/eliminar', [CapacitacionController::class, 'eliminarCursos']);
     Route::patch('capacitaciones/{id}/cambiar-estado', [CapacitacionController::class, 'cambiarEstado']);
+
+    //Examenes endpoints para administradores
+    Route::post('examenes', [ExamenController::class, 'crear']);
+    Route::get('examenes/{id}', [ExamenController::class, 'obtenerPorId']);
+    Route::patch('examenes/{id}', [ExamenController::class, 'actualizar']);
+    Route::post('examenes/{id}/preguntas', [ExamenController::class, 'agregarPreguntas']);
+    Route::delete('examenes/{idExamen}/preguntas/{idPregunta}', [ExamenController::class, 'eliminarPregunta']);
 
 });
