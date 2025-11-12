@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('progresos', function (Blueprint $table) {
             $table->id('id_progreso');
             $table->boolean('completado')->default(false);
+            $table->boolean('video_finalizado')->default(false);
             $table->float('nota')->nullable();
             $table->integer('intentos_usados')->default(0);
             $table->dateTime('fecha_ultimo_intento')->nullable();

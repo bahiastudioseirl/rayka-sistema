@@ -118,4 +118,101 @@ class UsuarioEstudianteService
     {
         return $this->usuarioEstudianteRepository->tieneAccesoAlCurso($idUsuario, $idCurso);
     }
+
+    public function obtenerCursoPorId(int $idUsuario, int $idCurso): array
+    {
+        // Verificar que el estudiante tenga acceso al curso
+        $tieneAcceso = $this->usuarioEstudianteRepository->tieneAccesoAlCurso($idUsuario, $idCurso);
+        
+        if (!$tieneAcceso) {
+            return [
+                'success' => false,
+                'message' => 'No tienes acceso a este curso'
+            ];
+        }
+
+        // Obtener la información completa del curso
+        $curso = $this->usuarioEstudianteRepository->obtenerCursoPorId($idCurso);
+
+        if (!$curso) {
+            return [
+                'success' => false,
+                'message' => 'Curso no encontrado'
+            ];
+        }
+
+        // Obtener el examen del curso
+        $examen = $this->usuarioEstudianteRepository->obtenerExamenDelCurso($idCurso);
+
+        $examenData = null;
+        if ($examen) {
+            // Obtener las preguntas con sus respuestas (sin mostrar cuál es correcta)
+            $preguntas = $this->usuarioEstudianteRepository->obtenerPreguntasDelExamen($examen->id_examen);
+            
+            $examenData = [
+                'id_examen' => $examen->id_examen,
+                'titulo' => $examen->titulo,
+                'total_preguntas' => count($preguntas),
+                'preguntas' => $preguntas
+            ];
+        }
+
+        return [
+            'success' => true,
+            'curso' => [
+                'id_curso' => $curso->id_curso,
+                'titulo' => $curso->titulo,
+                'descripcion' => $curso->descripcion,
+                'url_imagen' => $curso->url_imagen,
+                'contenido' => $curso->contenido,
+                'tipo_contenido' => $curso->tipo_contenido,
+                'activo' => $curso->activo,
+                'fecha_creacion' => $curso->fecha_creacion,
+                'creado_por' => [
+                    'id_usuario' => $curso->creado_por,
+                    'nombre' => $curso->creador_nombre,
+                    'apellido' => $curso->creador_apellido,
+                ],
+                'examen' => $examenData
+            ]
+        ];
+    }
+
+    public function marcarVideoFinalizado(int $idUsuario, int $idCurso): array
+    {
+        // Verificar que el estudiante tenga acceso al curso
+        $tieneAcceso = $this->usuarioEstudianteRepository->tieneAccesoAlCurso($idUsuario, $idCurso);
+        
+        if (!$tieneAcceso) {
+            return [
+                'success' => false,
+                'message' => 'No tienes acceso a este curso'
+            ];
+        }
+
+        // Marcar el video como finalizado
+        $actualizado = $this->usuarioEstudianteRepository->marcarVideoFinalizado($idUsuario, $idCurso);
+
+        if (!$actualizado) {
+            return [
+                'success' => false,
+                'message' => 'No se pudo actualizar el progreso'
+            ];
+        }
+
+        // Obtener el progreso actualizado
+        $progreso = $this->usuarioEstudianteRepository->obtenerProgresoCurso($idUsuario, $idCurso);
+
+        return [
+            'success' => true,
+            'message' => 'Video marcado como finalizado',
+            'progreso' => [
+                'id_progreso' => $progreso->id_progreso,
+                'video_finalizado' => $progreso->video_finalizado,
+                'completado' => $progreso->completado,
+                'nota' => $progreso->nota,
+                'intentos_usados' => $progreso->intentos_usados
+            ]
+        ];
+    }
 }

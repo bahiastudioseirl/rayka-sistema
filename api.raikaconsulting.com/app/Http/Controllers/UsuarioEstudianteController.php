@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\UsuarioEstudianteService;
 use App\Http\Responses\UsuarioEstudianteResponse;
+use App\Http\Request\Progresos\ActualizarProgresoVideoRequest;
 use Illuminate\Http\JsonResponse;
 
 class UsuarioEstudianteController extends Controller
@@ -49,6 +50,68 @@ class UsuarioEstudianteController extends Controller
 
         } catch (\Exception $e) {
             return UsuarioEstudianteResponse::error('Error al obtener los cursos: ' . $e->getMessage());
+        }
+    }
+
+    public function mostrarCursoPorId(int $id, Request $request): JsonResponse
+    {
+        try {
+            $usuario = $request->get('authenticated_user');
+
+            if (!$usuario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no autenticado'
+                ], 401);
+            }
+
+            $data = $this->usuarioEstudianteService->obtenerCursoPorId(
+                $usuario->id_usuario,
+                $id
+            );
+
+            if (isset($data['success']) && $data['success'] === false) {
+                if ($data['message'] === 'No tienes acceso a este curso') {
+                    return UsuarioEstudianteResponse::accesoNoAutorizadoCurso();
+                }
+                return UsuarioEstudianteResponse::cursoNoEncontrado();
+            }
+
+            return UsuarioEstudianteResponse::cursoDetalle($data);
+
+        } catch (\Exception $e) {
+            return UsuarioEstudianteResponse::error('Error al obtener el curso: ' . $e->getMessage());
+        }
+    }
+
+    public function marcarVideoFinalizado(int $id, ActualizarProgresoVideoRequest $request): JsonResponse
+    {
+        try {
+            $usuario = $request->get('authenticated_user');
+
+            if (!$usuario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no autenticado'
+                ], 401);
+            }
+
+            $data = $this->usuarioEstudianteService->marcarVideoFinalizado(
+                $usuario->id_usuario,
+                $id
+            );
+
+            if (isset($data['success']) && $data['success'] === false) {
+                if ($data['message'] === 'No tienes acceso a este curso') {
+                    return UsuarioEstudianteResponse::accesoNoAutorizadoCurso();
+                }
+                return UsuarioEstudianteResponse::error($data['message']);
+            }
+
+            return UsuarioEstudianteResponse::videoFinalizado($data);
+
+        } catch (\Exception $e) {
+            return UsuarioEstudianteResponse::error('Error al marcar el video como finalizado: ' . $e->getMessage());
         }
     }
 }

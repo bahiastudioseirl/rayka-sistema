@@ -39,6 +39,8 @@ Route::get('cursos/imagenes/{filename}', [CursoController::class, 'servirImagenC
 // Rutas para estudiantes autenticados
 Route::middleware('auth.estudiante')->prefix('estudiantes')->group(function () {
     Route::get('cursos', [UsuarioEstudianteController::class, 'listarMisCursos']);
+    Route::get('cursos/{id}', [UsuarioEstudianteController::class, 'mostrarCursoPorId']);
+    Route::patch('cursos/{id}/marcar-video-finalizado', [UsuarioEstudianteController::class, 'marcarVideoFinalizado']);
 });
 
 // Rutas para administradores autenticados

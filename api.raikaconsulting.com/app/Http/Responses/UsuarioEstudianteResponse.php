@@ -48,6 +48,32 @@ class UsuarioEstudianteResponse
         ], 403);
     }
 
+    public static function cursoDetalle(array $data): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Curso obtenido exitosamente',
+            'data' => $data['curso']
+        ], 200);
+    }
+
+    public static function cursoNoEncontrado(): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Curso no encontrado'
+        ], 404);
+    }
+
+    public static function videoFinalizado(array $data): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => $data['message'],
+            'data' => $data['progreso']
+        ], 200);
+    }
+
     public static function error(string $message = 'Error al procesar la solicitud'): JsonResponse
     {
         return response()->json([

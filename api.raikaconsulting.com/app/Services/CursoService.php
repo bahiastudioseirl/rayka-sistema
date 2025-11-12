@@ -38,7 +38,7 @@ class CursoService
             $imagen = $datosValidados['imagen'];
             $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
             $rutaImagen = $imagen->storeAs('cursos/imagenes', $nombreImagen, 'public');
-            $urlImagen = url('storage/' . $rutaImagen);
+            $urlImagen = '/storage/' . $rutaImagen;
         }
 
         $contenido = '';
@@ -104,9 +104,7 @@ class CursoService
 
         if (isset($datosValidados['imagen']) && $datosValidados['imagen']) {
             if ($curso->url_imagen) {
-                $rutaAntigua = str_replace(url(''), '', $curso->url_imagen);
-                $rutaAntigua = ltrim($rutaAntigua, '/');
-                $rutaAntigua = str_replace('storage/', '', $rutaAntigua);
+                $rutaAntigua = str_replace('/storage/', '', $curso->url_imagen);
                 if (Storage::disk('public')->exists($rutaAntigua)) {
                     Storage::disk('public')->delete($rutaAntigua);
                 }
@@ -115,7 +113,7 @@ class CursoService
             $imagen = $datosValidados['imagen'];
             $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
             $rutaImagen = $imagen->storeAs('cursos/imagenes', $nombreImagen, 'public');
-            $datosActualizacion['url_imagen'] = url('storage/' . $rutaImagen);
+            $datosActualizacion['url_imagen'] = '/storage/' . $rutaImagen;
         }
 
         if (isset($datosValidados['archivo']) && $datosValidados['archivo']) {
