@@ -11,6 +11,7 @@ use App\Utils\RolesEnum;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UsuarioService
 {
@@ -126,14 +127,18 @@ class UsuarioService
         return $this->usuarioRepository->obtenerPorId($id);
     }
 
-    public function actualizarContrasenia(int $id, string $nuevaContrasenia): Usuarios
+    public function actualizarContrasenia(int $id, string $contraseniaActual, string $contraseniaNueva): Usuarios
     {
         $usuario = $this->usuarioRepository->obtenerPorId($id);
         if (!$usuario) {
             throw new ModelNotFoundException('Usuario no encontrado');
         }
 
-        $contraseniaHasheada = bcrypt($nuevaContrasenia);
+        if (!Hash::check($contraseniaActual, $usuario->contrasenia)) {
+            throw new \Exception('La contraseña actual es incorrecta');
+        }
+
+        $contraseniaHasheada = bcrypt($contraseniaNueva);
         
         $actualizado = $this->usuarioRepository->actualizar($id, ['contrasenia' => $contraseniaHasheada]);
         

@@ -2,11 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StudentAuthController;
+use App\Http\Controllers\UsuarioEstudianteController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\SolicitanteController;
 use App\Http\Controllers\CapacitacionController;
+use App\Http\Controllers\ExamenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +25,20 @@ Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::middleware('jwt.auth')->post('refresh', [AuthController::class, 'refresh']);
+});
+
+// Rutas de autenticación para estudiantes
+Route::prefix('estudiantes')->group(function () {
+    Route::post('login/{link_login_unico}', [StudentAuthController::class, 'login']);
+    Route::post('logout', [StudentAuthController::class, 'logout']);
+});
+
+// Rutas públicas para acceder a archivos de cursos
+Route::get('cursos/imagenes/{filename}', [CursoController::class, 'servirImagenCurso'])->where('filename', '.*');
+
+// Rutas para estudiantes autenticados
+Route::middleware('auth.estudiante')->prefix('estudiantes')->group(function () {
+    Route::get('cursos', [UsuarioEstudianteController::class, 'listarMisCursos']);
 });
 
 // Rutas para administradores autenticados
@@ -42,8 +59,8 @@ Route::middleware('auth.admin')->group(function () {
     Route::get('cursos', [CursoController::class, 'listarCursos']);
     Route::get('cursos/{id}', [CursoController::class, 'obtenerCursoPorId']);
     Route::patch('cursos/{id}/cambiar-estado', [CursoController::class, 'cambiarEstadoCurso']);
+    Route::get('cursos/{id}/examenes', [ExamenController::class, 'listarPorCurso']);
     
-    // Ruta para servir archivos de cursos (privados pero autenticados)
     Route::get('cursos/archivos/{filename}', [CursoController::class, 'servirArchivoCurso'])->where('filename', '.*');
 
     //Empresas endpoints para administradores
@@ -68,5 +85,12 @@ Route::middleware('auth.admin')->group(function () {
     Route::post('capacitaciones/{id}/cursos/agregar', [CapacitacionController::class, 'agregarCursos']);
     Route::delete('capacitaciones/{id}/cursos/eliminar', [CapacitacionController::class, 'eliminarCursos']);
     Route::patch('capacitaciones/{id}/cambiar-estado', [CapacitacionController::class, 'cambiarEstado']);
+
+    //Examenes endpoints para administradores
+    Route::post('examenes', [ExamenController::class, 'crear']);
+    Route::get('examenes/{id}', [ExamenController::class, 'obtenerPorId']);
+    Route::patch('examenes/{id}', [ExamenController::class, 'actualizar']);
+    Route::post('examenes/{id}/preguntas', [ExamenController::class, 'agregarPreguntas']);
+    Route::delete('examenes/{idExamen}/preguntas/{idPregunta}', [ExamenController::class, 'eliminarPregunta']);
 
 });

@@ -33,14 +33,14 @@ class ActualizarUsuarioRequest extends FormRequest
                 'string',
                 'max:50',
                 'min:5',
-                'unique:usuarios,num_documento,' . $this->route('id')
+                'unique:usuarios,num_documento,' . $this->route('id') . ',id_usuario'
             ],
             'correo' => [
                 'sometimes',
                 'string',
                 'email:rfc,dns',
                 'max:255',
-                'unique:usuarios,correo,' . $this->route('id')
+                'unique:usuarios,correo,' . $this->route('id') . ',id_usuario'
             ]
         ];
     }

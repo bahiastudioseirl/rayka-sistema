@@ -11,28 +11,22 @@ class Examenes extends Model
 
     protected $table = 'examenes';
     protected $primaryKey = 'id_examen';
+    public $timestamps = false;
     
     protected $fillable = [
-        'nombre',
-        'puntaje_total',
+        'titulo',
         'id_curso'
     ];
 
-    // Un examen pertenece a un curso
     public function curso()
     {
         return $this->belongsTo(Cursos::class, 'id_curso', 'id_curso');
     }
 
-    // Un examen tiene muchas preguntas
     public function preguntas()
     {
         return $this->hasMany(Preguntas::class, 'id_examen', 'id_examen');
     }
 
-    // Un examen tiene muchos resultados
-    public function resultados()
-    {
-        return $this->hasMany(ResultadosExamenes::class, 'id_examen', 'id_examen');
-    }
+
 }

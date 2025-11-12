@@ -14,6 +14,8 @@ class CursoResponse
         $datoCurso = [
             'id_curso' => $curso->id_curso,
             'titulo' => $curso->titulo,
+            'descripcion' => $curso->descripcion,
+            'url_imagen' => $curso->url_imagen,
             'tipo_contenido' => $curso->tipo_contenido,
             'contenido' => $curso->contenido,
             'activo' => $curso->activo,
@@ -39,6 +41,8 @@ class CursoResponse
         $datoCurso = [
             'id_curso' => $curso->id_curso,
             'titulo' => $curso->titulo,
+            'descripcion' => $curso->descripcion,
+            'url_imagen' => $curso->url_imagen,
             'tipo_contenido' => $curso->tipo_contenido,
             'contenido' => $curso->contenido,
             'activo' => $curso->activo,
@@ -65,6 +69,8 @@ class CursoResponse
             return [
                 'id_curso' => $curso->id_curso,
                 'titulo' => $curso->titulo,
+                'descripcion' => $curso->descripcion,
+                'url_imagen' => $curso->url_imagen,
                 'tipo_contenido' => $curso->tipo_contenido,
                 'contenido' => $curso->contenido,
                 'activo' => $curso->activo,

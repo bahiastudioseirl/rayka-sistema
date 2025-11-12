@@ -178,8 +178,10 @@ class UsuarioController extends Controller
     public function actualizarContrasenia(int $id, ActualizarContraseniaRequest $request): JsonResponse
     {
         try {
-            $nuevaContrasenia = $request->input('contrasenia');
-            $usuario = $this->usuarioService->actualizarContrasenia($id, $nuevaContrasenia);
+            $contraseniaActual = $request->input('contrasenia_actual');
+            $contraseniaNueva = $request->input('contrasenia_nueva');
+            
+            $usuario = $this->usuarioService->actualizarContrasenia($id, $contraseniaActual, $contraseniaNueva);
             
             return response()->json([
                 'message' => 'Contraseña actualizada exitosamente',

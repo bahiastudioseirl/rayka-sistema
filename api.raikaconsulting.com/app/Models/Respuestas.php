@@ -11,10 +11,7 @@ class Respuestas extends Model
 
     protected $table = 'respuestas';
     protected $primaryKey = 'id_respuesta';
-    
-    // Definir nombre de columna de timestamp personalizada
-    const CREATED_AT = 'fecha_creacion';
-    const UPDATED_AT = null; // No hay columna updated_at en esta tabla
+    public $timestamps = false;
     
     protected $fillable = [
         'texto',

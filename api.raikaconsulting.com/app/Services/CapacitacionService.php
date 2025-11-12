@@ -29,6 +29,11 @@ class CapacitacionService
                     $this->capacitacionRepository->asignarCursos($idCapacitacion, $capacitacionDTO->cursos);
                 }
                 
+                // Crear progresos automáticamente para cada estudiante y cada curso
+                if (!empty($capacitacionDTO->usuarios_estudiantes) && !empty($capacitacionDTO->cursos)) {
+                    $this->capacitacionRepository->crearProgresosEstudiantesCursos($idCapacitacion);
+                }
+                
                 if ($capacitacionDTO->fecha_fin) {
                     $this->capacitacionRepository->crearSeguimiento(
                         $idCapacitacion,
@@ -110,6 +115,9 @@ class CapacitacionService
                 }
                 
                 $this->capacitacionRepository->agregarUsuarios($idCapacitacion, $estudiantesAgregar);
+                
+                // Crear progresos automáticamente para los nuevos estudiantes con todos los cursos
+                $this->capacitacionRepository->crearProgresosParaNuevosEstudiantes($idCapacitacion, $estudiantesAgregar);
                 
                 $capacitacionCompleta = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 
@@ -193,6 +201,9 @@ class CapacitacionService
                 }
                 
                 $this->capacitacionRepository->agregarCursos($idCapacitacion, $cursosNuevos);
+                
+                // Crear progresos automáticamente para todos los estudiantes con los nuevos cursos
+                $this->capacitacionRepository->crearProgresosParaNuevosCursos($idCapacitacion, $cursosNuevos);
                 
                 $capacitacionCompleta = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
                 

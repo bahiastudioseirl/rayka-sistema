@@ -163,4 +163,39 @@ class CursoController extends Controller
         }
     }
 
+    public function servirImagenCurso(string $filename)
+    {
+        try {
+            $rutaImagen = 'cursos/imagenes/' . $filename;
+            
+            if (!Storage::disk('public')->exists($rutaImagen)) {
+                return response()->json([
+                    'message' => 'Imagen no encontrada'
+                ], 404);
+            }
+
+            $imagen = Storage::disk('public')->get($rutaImagen);
+            $extension = pathinfo($filename, PATHINFO_EXTENSION);
+            
+            $tiposMime = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp'
+            ];
+            
+            $tipoMime = $tiposMime[strtolower($extension)] ?? 'image/jpeg';
+            
+            return response($imagen, 200)
+                ->header('Content-Type', $tipoMime)
+                ->header('Cache-Control', 'public, max-age=31536000');
+                
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al acceder a la imagen',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

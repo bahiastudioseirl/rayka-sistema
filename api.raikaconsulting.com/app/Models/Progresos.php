@@ -11,21 +11,24 @@ class Progresos extends Model
 
     protected $table = 'progresos';
     protected $primaryKey = 'id_progreso';
-    
-    // Definir nombre de columna de timestamp personalizada
-    const CREATED_AT = 'fecha_completado';
-    const UPDATED_AT = null; // No hay columna updated_at en esta tabla
+    public $timestamps = false;
     
     protected $fillable = [
+        'completado',
+        'nota',
+        'intentos_usados',
+        'fecha_ultimo_intento',
         'id_usuario',
         'id_curso',
-        'id_modulo',
-        'id_sesion',
-        'completado'
+        'fecha_completado'
     ];
 
     protected $casts = [
-        'completado' => 'boolean'
+        'completado' => 'boolean',
+        'nota' => 'float',
+        'intentos_usados' => 'integer',
+        'fecha_ultimo_intento' => 'datetime',
+        'fecha_completado' => 'datetime',
     ];
 
     // Un progreso pertenece a un usuario
@@ -34,21 +37,9 @@ class Progresos extends Model
         return $this->belongsTo(Usuarios::class, 'id_usuario', 'id_usuario');
     }
 
-    // Un progreso puede pertenecer a un curso
+    // Un progreso pertenece a un curso
     public function curso()
     {
         return $this->belongsTo(Cursos::class, 'id_curso', 'id_curso');
-    }
-
-    // Un progreso puede pertenecer a un módulo
-    public function modulo()
-    {
-        return $this->belongsTo(Modulos::class, 'id_modulo', 'id_modulo');
-    }
-
-    // Un progreso puede pertenecer a una sesión
-    public function sesion()
-    {
-        return $this->belongsTo(Sesion::class, 'id_sesion', 'id_sesion');
     }
 }

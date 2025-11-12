@@ -22,7 +22,8 @@ class CapacitacionRepository
         return Capacitaciones::with([
             'usuarios:id_usuario,nombre,apellido,correo,num_documento,activo',
             'cursos:id_curso,titulo,contenido,tipo_contenido,activo,fecha_creacion',
-            'solicitante:id_solicitante,nombre,apellido,cargo,correo,id_empresa'
+            'solicitante:id_solicitante,nombre,apellido,cargo,correo,telefono,id_empresa',
+            'solicitante.empresa:id_empresa,nombre'
         ])->find($id);
     }
 
@@ -140,6 +141,103 @@ class CapacitacionRepository
         return DB::transaction($callback);
     }
 
+    public function crearProgresosEstudiantesCursos(int $idCapacitacion): int
+    {
+        // Obtener todos los estudiantes de la capacitación
+        $usuarios = DB::table('usuarios_capacitaciones')
+            ->where('id_capacitacion', $idCapacitacion)
+            ->pluck('id_usuario');
+
+        // Obtener todos los cursos de la capacitación
+        $cursos = DB::table('capacitaciones_cursos')
+            ->where('id_capacitacion', $idCapacitacion)
+            ->pluck('id_curso');
+
+        // Crear progresos para cada combinación estudiante-curso
+        $progresos = [];
+        foreach ($usuarios as $idUsuario) {
+            foreach ($cursos as $idCurso) {
+                $progresos[] = [
+                    'completado' => false,
+                    'nota' => null,
+                    'intentos_usados' => 0,
+                    'fecha_ultimo_intento' => null,
+                    'id_usuario' => $idUsuario,
+                    'id_curso' => $idCurso,
+                    'fecha_completado' => null
+                ];
+            }
+        }
+
+        // Insertar todos los progresos
+        if (!empty($progresos)) {
+            DB::table('progresos')->insert($progresos);
+        }
+
+        return count($progresos);
+    }
+
+    public function crearProgresosParaNuevosEstudiantes(int $idCapacitacion, array $nuevosEstudiantes): int
+    {
+        // Obtener todos los cursos de la capacitación
+        $cursos = DB::table('capacitaciones_cursos')
+            ->where('id_capacitacion', $idCapacitacion)
+            ->pluck('id_curso');
+
+        // Crear progresos para cada nuevo estudiante y cada curso
+        $progresos = [];
+        foreach ($nuevosEstudiantes as $idUsuario) {
+            foreach ($cursos as $idCurso) {
+                $progresos[] = [
+                    'completado' => false,
+                    'nota' => null,
+                    'intentos_usados' => 0,
+                    'fecha_ultimo_intento' => null,
+                    'id_usuario' => $idUsuario,
+                    'id_curso' => $idCurso,
+                    'fecha_completado' => null
+                ];
+            }
+        }
+
+        // Insertar todos los progresos
+        if (!empty($progresos)) {
+            DB::table('progresos')->insert($progresos);
+        }
+
+        return count($progresos);
+    }
+
+    public function crearProgresosParaNuevosCursos(int $idCapacitacion, array $nuevosCursos): int
+    {
+        // Obtener todos los estudiantes de la capacitación
+        $usuarios = DB::table('usuarios_capacitaciones')
+            ->where('id_capacitacion', $idCapacitacion)
+            ->pluck('id_usuario');
+
+        // Crear progresos para cada estudiante y cada nuevo curso
+        $progresos = [];
+        foreach ($usuarios as $idUsuario) {
+            foreach ($nuevosCursos as $idCurso) {
+                $progresos[] = [
+                    'completado' => false,
+                    'nota' => null,
+                    'intentos_usados' => 0,
+                    'fecha_ultimo_intento' => null,
+                    'id_usuario' => $idUsuario,
+                    'id_curso' => $idCurso,
+                    'fecha_completado' => null
+                ];
+            }
+        }
+
+        // Insertar todos los progresos
+        if (!empty($progresos)) {
+            DB::table('progresos')->insert($progresos);
+        }
+
+        return count($progresos);
+    }
 
     public function cambiarEstadoCapacitacion(int $idCapacitacion, bool $nuevoEstado): bool
     {

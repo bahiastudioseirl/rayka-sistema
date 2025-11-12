@@ -21,6 +21,17 @@ class CrearCursoRequest extends FormRequest
                 'max:255',
                 'min:2'
             ],
+            'descripcion' => [
+                'nullable',
+                'string',
+                'max:1000'
+            ],
+            'imagen' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,jpg,png,webp',
+                'max:5120' // 5MB máximo
+            ],
             'contenido' => [
                 'nullable',
                 'string',
@@ -45,6 +56,12 @@ class CrearCursoRequest extends FormRequest
             'titulo.required' => 'El título del curso es obligatorio.',
             'titulo.min' => 'El título del curso debe tener al menos 2 caracteres.',
             'titulo.max' => 'El título del curso no puede exceder 255 caracteres.',
+            
+            'descripcion.max' => 'La descripción no puede exceder 1000 caracteres.',
+            
+            'imagen.image' => 'El archivo debe ser una imagen.',
+            'imagen.mimes' => 'La imagen debe ser de tipo: jpeg, jpg, png o webp.',
+            'imagen.max' => 'La imagen no puede exceder 5MB.',
             
             'contenido.string' => 'El contenido del curso debe ser un texto.',
             'contenido.min' => 'El contenido del curso debe tener al menos 10 caracteres.',
