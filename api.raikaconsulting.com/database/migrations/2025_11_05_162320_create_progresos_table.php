@@ -16,6 +16,7 @@ return new class extends Migration
             $table->boolean('completado')->default(false);
             $table->boolean('video_finalizado')->default(false);
             $table->float('nota')->nullable();
+            $table->enum('resultado_examen', ['aprobado', 'desaprobado'])->nullable();
             $table->integer('intentos_usados')->default(0);
             $table->dateTime('fecha_ultimo_intento')->nullable();
             $table->unsignedBigInteger('id_usuario');

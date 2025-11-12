@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\UsuarioEstudianteService;
 use App\Http\Responses\UsuarioEstudianteResponse;
 use App\Http\Request\Progresos\ActualizarProgresoVideoRequest;
+use App\Http\Request\Progresos\RendirExamenRequest;
 use Illuminate\Http\JsonResponse;
 
 class UsuarioEstudianteController extends Controller
@@ -112,6 +113,38 @@ class UsuarioEstudianteController extends Controller
 
         } catch (\Exception $e) {
             return UsuarioEstudianteResponse::error('Error al marcar el video como finalizado: ' . $e->getMessage());
+        }
+    }
+
+    public function rendirExamen(int $id, RendirExamenRequest $request): JsonResponse
+    {
+        try {
+            $usuario = $request->get('authenticated_user');
+
+            if (!$usuario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no autenticado'
+                ], 401);
+            }
+
+            $data = $this->usuarioEstudianteService->rendirExamen(
+                $usuario->id_usuario,
+                $id,
+                $request->input('respuestas')
+            );
+
+            if (isset($data['success']) && $data['success'] === false) {
+                if ($data['message'] === 'No tienes acceso a este curso') {
+                    return UsuarioEstudianteResponse::accesoNoAutorizadoCurso();
+                }
+                return UsuarioEstudianteResponse::error($data['message']);
+            }
+
+            return UsuarioEstudianteResponse::resultadoExamen($data);
+
+        } catch (\Exception $e) {
+            return UsuarioEstudianteResponse::error('Error al procesar el examen: ' . $e->getMessage());
         }
     }
 }

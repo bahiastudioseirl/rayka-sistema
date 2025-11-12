@@ -228,4 +228,50 @@ class UsuarioEstudianteRepository
             ->where('id_curso', $idCurso)
             ->first();
     }
+
+    public function verificarRespuesta(int $idRespuesta): bool
+    {
+        $respuesta = DB::table('respuestas')
+            ->where('id_respuesta', $idRespuesta)
+            ->first();
+        
+        return $respuesta ? $respuesta->es_correcta : false;
+    }
+
+    public function obtenerMaxIntentosCapacitacion(int $idUsuario, int $idCurso): ?int
+    {
+        return DB::table('usuarios_capacitaciones')
+            ->join('capacitaciones_cursos', 'usuarios_capacitaciones.id_capacitacion', '=', 'capacitaciones_cursos.id_capacitacion')
+            ->join('capacitaciones', 'usuarios_capacitaciones.id_capacitacion', '=', 'capacitaciones.id_capacitacion')
+            ->where('usuarios_capacitaciones.id_usuario', $idUsuario)
+            ->where('capacitaciones_cursos.id_curso', $idCurso)
+            ->value('capacitaciones.max_intentos');
+    }
+
+    public function actualizarProgresoExamen(int $idUsuario, int $idCurso, float $nota, string $resultado, int $intentosUsados): bool
+    {
+        $progreso = $this->obtenerProgresoCurso($idUsuario, $idCurso);
+
+        $datosActualizacion = [
+            'nota' => $nota,
+            'resultado_examen' => $resultado,
+            'intentos_usados' => $intentosUsados,
+            'fecha_ultimo_intento' => now(),
+            'completado' => ($resultado === 'aprobado'),
+            'fecha_completado' => ($resultado === 'aprobado') ? now() : null
+        ];
+
+        if ($progreso) {
+            return DB::table('progresos')
+                ->where('id_usuario', $idUsuario)
+                ->where('id_curso', $idCurso)
+                ->update($datosActualizacion);
+        } else {
+            $datosActualizacion['id_usuario'] = $idUsuario;
+            $datosActualizacion['id_curso'] = $idCurso;
+            $datosActualizacion['video_finalizado'] = false;
+            
+            return DB::table('progresos')->insert($datosActualizacion);
+        }
+    }
 }
