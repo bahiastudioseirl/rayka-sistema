@@ -1,46 +1,63 @@
-import { Link, Upload, X } from "lucide-react";
+import { Link, Upload, X, Image } from "lucide-react"; // Queda igual
 import { useEffect, useRef, useState } from "react";
 import type { TipoContenido } from "../schemas/CursoSchema";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSave: (data: { titulo: string; tipo_contenido: TipoContenido; contenido?: string; archivo?: File }) => Promise<void> | void;
+  onSave: (data: {
+    titulo: string;
+    tipo_contenido: TipoContenido;
+    contenido?: string;
+    archivo?: File;
+    descripcion: string; // Ya no es opcional
+    url_imagen?: File;
+  }) => Promise<void> | void;
   loading?: boolean;
 };
 
 export default function ModalAgregar({ open, onClose, onSave, loading }: Props) {
+  // Todos los estados quedan igual
   const [titulo, setTitulo] = useState("");
+  const [descripcion, setDescripcion] = useState("");
   const [tipoContenido, setTipoContenido] = useState<TipoContenido>("link");
   const [contenidoLink, setContenidoLink] = useState("");
   const [archivo, setArchivo] = useState<File | null>(null);
+  const [imagenArchivo, setImagenArchivo] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
+
+  // Todos los refs quedan igual
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imagenInputRef = useRef<HTMLInputElement>(null);
 
+  // El useEffect de 'open' queda igual
   useEffect(() => {
     if (open) {
       setTitulo("");
+      setDescripcion("");
       setTipoContenido("link");
       setContenidoLink("");
       setArchivo(null);
+      setImagenArchivo(null);
       setError("");
       setTimeout(() => inputRef.current?.focus(), 0);
     }
   }, [open]);
 
+  // El useEffect de 'onEsc' queda igual
   useEffect(() => {
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && open && onClose();
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
   }, [open, onClose]);
 
+  // handleFileChange (video) queda igual
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validar que sea un video
-      if (!file.type.startsWith('video/')) {
-        setError('Por favor selecciona un archivo de video válido');
+      if (!file.type.startsWith("video/")) {
+        setError("Por favor selecciona un archivo de video válido");
         return;
       }
       setArchivo(file);
@@ -48,6 +65,22 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
     }
   };
 
+  // handleImagenChange (imagen) queda igual
+  const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError(
+          "Por favor selecciona un archivo de imagen válido (JPG, PNG, WebP)"
+        );
+        return;
+      }
+      setImagenArchivo(file);
+      setError("");
+    }
+  };
+
+  // handleSave se MODIFICA
   const handleSave = async () => {
     const tituloValue = titulo.trim();
     if (!tituloValue) {
@@ -55,32 +88,50 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
       return;
     }
 
+    const descripcionValue = descripcion.trim();
+    // 'imagenArchivo' es el estado interno que contiene el File
+
     if (tipoContenido === "link") {
       const linkValue = contenidoLink.trim();
       if (!linkValue) {
         setError("Ingresa el link del video.");
         return;
       }
-      // Validación básica de URL
       try {
         new URL(linkValue);
       } catch {
         setError("Ingresa una URL válida.");
         return;
       }
-      await onSave({ titulo: tituloValue, tipo_contenido: "link", contenido: linkValue });
+      
+      await onSave({
+        titulo: tituloValue,
+        tipo_contenido: "link",
+        contenido: linkValue,
+        descripcion: descripcionValue,
+        url_imagen: imagenArchivo || undefined, // MODIFICADO: Enviamos el File bajo la key 'url_imagen'
+      });
     } else {
       if (!archivo) {
         setError("Selecciona un archivo de video.");
         return;
       }
-      await onSave({ titulo: tituloValue, tipo_contenido: "carga_archivo", archivo });
+      
+      await onSave({
+        titulo: tituloValue,
+        tipo_contenido: "carga_archivo",
+        archivo,
+        descripcion: descripcionValue,
+        url_imagen: imagenArchivo || undefined, // MODIFICADO: Enviamos el File bajo la key 'url_imagen'
+      });
     }
   };
 
   if (!open) return null;
 
   return (
+    // Todo el JSX (HTML) es exactamente el mismo que en la respuesta anterior
+    // Incluyendo el scroll, el límite de caracteres y el botón de subir imagen.
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       {/* Overlay */}
       <div
@@ -100,7 +151,8 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-4">
+        {/* Contenedor del contenido con scroll */}
+        <div className="px-5 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Título */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -117,6 +169,27 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
               placeholder="Ej. Introducción a React"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+          </div>
+
+          {/* Descripción (con límite y sin resize) */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Descripción
+            </label>
+            <textarea
+              value={descripcion}
+              onChange={(e) => {
+                setDescripcion(e.target.value);
+                setError("");
+              }}
+              rows={3}
+              maxLength={200}
+              placeholder="Describe brevemente el contenido del curso..."
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            />
+            <p className="text-xs text-slate-500 text-right mt-1">
+              {descripcion.length} / 200
+            </p>
           </div>
 
           {/* Tipo de contenido */}
@@ -226,8 +299,59 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
             </div>
           )}
 
+          {/* Subida de Imagen (Thumbnail) */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Imagen del curso (Thumbnail)
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                ref={imagenInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImagenChange}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => imagenInputRef.current?.click()}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50 transition-all text-slate-600 hover:text-blue-700"
+              >
+                <Image className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {imagenArchivo ? "Cambiar imagen" : "Seleccionar imagen"}
+                </span>
+              </button>
+            </div>
+            {/* Display para el archivo de imagen seleccionado */}
+            {imagenArchivo && (
+              <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-blue-900 truncate">
+                    {imagenArchivo.name}
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    {(imagenArchivo.size / 1024).toFixed(2)} KB
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImagenArchivo(null);
+                    if (imagenInputRef.current)
+                      imagenInputRef.current.value = "";
+                  }}
+                  className="p-1 rounded hover:bg-blue-100 text-blue-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
+        {/* FIN del div con scroll */}
 
         <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-200">
           <button

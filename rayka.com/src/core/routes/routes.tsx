@@ -42,7 +42,7 @@ const AdministradorAdmin = lazy(() =>
   import('../../admin/features/administradorAdmin/pages/AdministradorAdmin').then((module) => ({ default: module.default }))
 );
 const ExamenAdmin = lazy(() => 
-  import('../../admin/features/examenAdmin/pages/examenAdmin').then((module) => ({ default: module.default }))
+  import('../../admin/features/examenAdmin/pages/ExamenAdmin').then((module) => ({ default: module.default }))
 );
 
 export const routes = [

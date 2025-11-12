@@ -15,6 +15,8 @@ export interface Creador {
 export interface Curso {
   id_curso: number;
   titulo: string;
+  descripcion: string;
+  url_imagen: string;
   tipo_contenido: TipoContenido;
   contenido: string;
   activo: boolean;
@@ -25,9 +27,20 @@ export interface Curso {
 
 export interface CrearCursoRequest {
   titulo: string;
+  descripcion: string;
+  url_imagen?: File; // Al crear, enviamos un File
   tipo_contenido: TipoContenido;
-  contenido?: string; // Para link
-  archivo?: File; // Para carga_archivo
+  contenido?: string; 
+  archivo?: File; 
+}
+
+export interface ActualizarCursoRequest {
+  titulo: string;
+  tipo_contenido: TipoContenido;
+  contenido?: string; 
+  archivo?: File; 
+  url_imagen?: File;
+  descripcion?: string;
 }
 
 export interface CrearCursoResponse {

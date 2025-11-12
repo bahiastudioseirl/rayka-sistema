@@ -6,27 +6,36 @@ type Props = {
   open: boolean;
   curso: Curso | null;
   onClose: () => void;
-  onSave: (id: number, data: { titulo: string; tipo_contenido: TipoContenido; contenido?: string; archivo?: File }) => Promise<void>;
+  onSave: (data: {
+    titulo: string;
+    tipo_contenido: TipoContenido;
+    contenido?: string;
+    archivo?: File;
+    descripcion: string; // Ya no es opcional
+    url_imagen?: File;
+  }) => Promise<void>;
   loading?: boolean;
 };
 
 export default function ModalEditar({ open, curso, onClose, onSave, loading }: Props) {
   const [titulo, setTitulo] = useState("");
+  const [descripcion, setDescripcion] = useState("");
   const [tipoContenido, setTipoContenido] = useState<TipoContenido>("link");
   const [contenidoLink, setContenidoLink] = useState("");
   const [archivo, setArchivo] = useState<File | null>(null);
+  const [imagenArchivo, setImagenArchivo] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open && curso) {
-      setTitulo(curso.titulo);
-      setTipoContenido(curso.tipo_contenido);
-      if (curso.tipo_contenido === 'link') {
-        setContenidoLink(curso.contenido);
-      }
+    if (open) {
+      setTitulo("");
+      setDescripcion("");
+      setTipoContenido("link");
+      setContenidoLink("");
       setArchivo(null);
+      setImagenArchivo(null);
       setError("");
       setTimeout(() => inputRef.current?.focus(), 0);
     }
@@ -58,7 +67,7 @@ export default function ModalEditar({ open, curso, onClose, onSave, loading }: P
     }
 
     if (!curso) return;
-
+const descripcionValue = descripcion.trim();
     if (tipoContenido === "link") {
       const linkValue = contenidoLink.trim();
       if (!linkValue) {
@@ -71,13 +80,25 @@ export default function ModalEditar({ open, curso, onClose, onSave, loading }: P
         setError("Ingresa una URL válida.");
         return;
       }
-      await onSave(curso.id_curso, { titulo: tituloValue, tipo_contenido: "link", contenido: linkValue });
+        await onSave({
+        titulo: tituloValue,
+        tipo_contenido: "link",
+        contenido: linkValue,
+        descripcion: descripcionValue,
+        url_imagen: imagenArchivo || undefined, // MODIFICADO: Enviamos el File bajo la key 'url_imagen'
+      });
     } else {
       if (!archivo) {
         setError("Selecciona un archivo de video.");
         return;
       }
-      await onSave(curso.id_curso, { titulo: tituloValue, tipo_contenido: "carga_archivo", archivo });
+      await onSave({
+        titulo: tituloValue,
+        tipo_contenido: "carga_archivo",
+        archivo,
+        descripcion: descripcionValue,
+        url_imagen: imagenArchivo || undefined, // MODIFICADO: Enviamos el File bajo la key 'url_imagen'
+      });
     }
   };
 

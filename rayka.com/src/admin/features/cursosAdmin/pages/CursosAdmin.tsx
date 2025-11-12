@@ -6,7 +6,7 @@ import { crearCurso } from "../services/crearCurso";
 import { obtenerCursos } from "../services/obtenerCursos";
 import { actualizarCurso } from "../services/actualizarCurso";
 import { cambiarEstadoCurso } from "../services/estadoCurso";
-import type { CrearCursoRequest, Curso } from "../schemas/CursoSchema";
+import type { CrearCursoRequest, Curso, ActualizarCursoRequest } from "../schemas/CursoSchema";
 
 export default function CursosAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -97,7 +97,10 @@ export default function CursosAdmin() {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateCurso = async (id: number, data: { titulo: string; tipo_contenido: "link" | "carga_archivo"; contenido?: string; archivo?: File }) => {
+  const handleUpdateCurso = async (
+    id: number,
+    data: ActualizarCursoRequest
+  ) => {
     setSaving(true);
     setError("");
     try {
@@ -134,7 +137,7 @@ export default function CursosAdmin() {
       setCursos((prev) => {
         const nuevaLista = prev.map((c) => {
           if (c.id_curso === id) {
-            return response.data; 
+            return response.data;
           }
           return c;
         });
@@ -168,7 +171,7 @@ export default function CursosAdmin() {
                 <p className="mt-1 text-slate-600">Administra los elementos del sistema Rayka Academia</p>
               </div>
             </div>
-           <button
+            <button
               className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
               onClick={openModal}
             >
@@ -223,6 +226,8 @@ export default function CursosAdmin() {
                   <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">ID</th>
                   <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Fecha</th>
                   <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Título</th>
+                  <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Descripción</th>
+                  <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Imagen</th>
                   <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Video</th>
                   <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Estado</th>
                   <th className="px-6 py-4 text-xs font-semibold tracking-wider text-left uppercase text-slate-600">Acciones</th>
@@ -262,15 +267,34 @@ export default function CursosAdmin() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
+                        <div className="max-w-xs">
+                          <p className="text-sm font-medium text-slate-900 line-clamp-2">{curso.descripcion}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs">
+                          {curso.url_imagen ? (
+                            <img
+                              src={curso.url_imagen}
+                              alt={ "Imagen del curso"}
+                              className="h-16 w-16 object-cover rounded-md shadow-sm border border-slate-200"
+                            />
+                          ) : (
+                            <p className="text-sm text-slate-400 italic">Sin imagen</p>
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           {curso.tipo_contenido === 'link' ? (
                             <>
                               <div className="p-1.5 rounded bg-blue-50">
                                 <Link className="w-4 h-4 text-blue-600" />
                               </div>
-                              <a 
-                                href={curso.contenido} 
-                                target="_blank" 
+                              <a
+                                href={curso.contenido}
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-sm text-blue-600 hover:underline max-w-xs truncate"
                               >
@@ -314,11 +338,10 @@ export default function CursosAdmin() {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            className={`p-2 transition-colors rounded-lg ${
-                              curso.activo 
-                                ? 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50' 
+                            className={`p-2 transition-colors rounded-lg ${curso.activo
+                                ? 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'
                                 : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
-                            }`}
+                              }`}
                             title={curso.activo ? "Desactivar curso" : "Activar curso"}
                             onClick={() => handleToggleEstado(curso.id_curso)}
                           >
@@ -332,7 +355,7 @@ export default function CursosAdmin() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Paginación */}
           {filteredData.length > 0 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
@@ -354,11 +377,10 @@ export default function CursosAdmin() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1.5 text-sm font-medium rounded-lg ${
-                        currentPage === page
+                      className={`px-3 py-1.5 text-sm font-medium rounded-lg ${currentPage === page
                           ? "bg-[#132436] text-white"
                           : "border border-slate-300 text-slate-700 hover:bg-slate-50"
-                      }`}
+                        }`}
                     >
                       {page}
                     </button>

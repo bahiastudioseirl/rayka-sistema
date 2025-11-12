@@ -5,6 +5,12 @@ export const crearCurso = async (data: CrearCursoRequest): Promise<CrearCursoRes
   const formData = new FormData();
   formData.append('titulo', data.titulo);
   formData.append('tipo_contenido', data.tipo_contenido);
+  formData.append('descripcion', data.descripcion);
+  
+  if (data.url_imagen) {
+    formData.append('imagen', data.url_imagen); // Backend espera 'imagen', no 'url_imagen'
+  }
+  
   if (data.tipo_contenido === 'link' && data.contenido) {
     formData.append('contenido', data.contenido);
   } else if (data.tipo_contenido === 'carga_archivo' && data.archivo) {
