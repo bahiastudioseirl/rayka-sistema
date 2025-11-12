@@ -28,6 +28,8 @@ class UsuarioEstudianteRepository
             ->select(
                 'cursos.id_curso',
                 'cursos.titulo',
+                'cursos.descripcion',
+                'cursos.url_imagen',
                 'cursos.contenido',
                 'cursos.tipo_contenido',
                 'cursos.fecha_creacion',
@@ -86,6 +88,8 @@ class UsuarioEstudianteRepository
             ->select(
                 'cursos.id_curso',
                 'cursos.titulo',
+                'cursos.descripcion',
+                'cursos.url_imagen',
                 'cursos.contenido',
                 'cursos.tipo_contenido',
                 'cursos.fecha_creacion',

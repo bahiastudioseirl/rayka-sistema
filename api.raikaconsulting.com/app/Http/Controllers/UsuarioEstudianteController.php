@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\UsuarioEstudianteService;
+use App\Http\Responses\UsuarioEstudianteResponse;
 use Illuminate\Http\JsonResponse;
 
 class UsuarioEstudianteController extends Controller
@@ -41,24 +42,13 @@ class UsuarioEstudianteController extends Controller
             );
 
             if (isset($data['success']) && $data['success'] === false) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $data['message']
-                ], 403);
+                return UsuarioEstudianteResponse::accesoNoAutorizado();
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Cursos obtenidos exitosamente',
-                'data' => $data
-            ], 200);
+            return UsuarioEstudianteResponse::cursosDeCapacitacion($data);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al obtener los cursos',
-                'error' => $e->getMessage()
-            ], 500);
+            return UsuarioEstudianteResponse::error('Error al obtener los cursos: ' . $e->getMessage());
         }
     }
 }

@@ -47,6 +47,8 @@ class UsuarioEstudianteService
                 return [
                     'id_curso' => $curso->id_curso,
                     'titulo' => $curso->titulo,
+                    'descripcion' => $curso->descripcion,
+                    'url_imagen' => $curso->url_imagen,
                     'contenido' => $curso->contenido,
                     'tipo_contenido' => $curso->tipo_contenido,
                     'fecha_creacion' => $curso->fecha_creacion,
@@ -95,6 +97,8 @@ class UsuarioEstudianteService
                     return [
                         'id_curso' => $curso->id_curso,
                         'titulo' => $curso->titulo,
+                        'descripcion' => $curso->descripcion,
+                        'url_imagen' => $curso->url_imagen,
                         'contenido' => $curso->contenido,
                         'tipo_contenido' => $curso->tipo_contenido,
                         'fecha_creacion' => $curso->fecha_creacion,
