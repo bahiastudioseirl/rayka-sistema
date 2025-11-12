@@ -15,6 +15,7 @@ class Progresos extends Model
     
     protected $fillable = [
         'completado',
+        'video_finalizado',
         'nota',
         'intentos_usados',
         'fecha_ultimo_intento',
@@ -25,6 +26,7 @@ class Progresos extends Model
 
     protected $casts = [
         'completado' => 'boolean',
+        'video_finalizado' => 'boolean',
         'nota' => 'float',
         'intentos_usados' => 'integer',
         'fecha_ultimo_intento' => 'datetime',

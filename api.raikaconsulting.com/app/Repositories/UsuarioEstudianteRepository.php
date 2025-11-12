@@ -28,6 +28,8 @@ class UsuarioEstudianteRepository
             ->select(
                 'cursos.id_curso',
                 'cursos.titulo',
+                'cursos.descripcion',
+                'cursos.url_imagen',
                 'cursos.contenido',
                 'cursos.tipo_contenido',
                 'cursos.fecha_creacion',
@@ -86,6 +88,8 @@ class UsuarioEstudianteRepository
             ->select(
                 'cursos.id_curso',
                 'cursos.titulo',
+                'cursos.descripcion',
+                'cursos.url_imagen',
                 'cursos.contenido',
                 'cursos.tipo_contenido',
                 'cursos.fecha_creacion',
@@ -129,5 +133,99 @@ class UsuarioEstudianteRepository
             ->where('capacitaciones_cursos.id_curso', $idCurso)
             ->where('capacitaciones.estado', 'activa')
             ->exists();
+    }
+
+    public function obtenerCursoPorId(int $idCurso)
+    {
+        return DB::table('cursos')
+            ->leftJoin('usuarios', 'cursos.creado_por', '=', 'usuarios.id_usuario')
+            ->where('cursos.id_curso', $idCurso)
+            ->where('cursos.activo', true)
+            ->select(
+                'cursos.id_curso',
+                'cursos.titulo',
+                'cursos.descripcion',
+                'cursos.url_imagen',
+                'cursos.contenido',
+                'cursos.tipo_contenido',
+                'cursos.activo',
+                'cursos.fecha_creacion',
+                'cursos.creado_por',
+                'usuarios.nombre as creador_nombre',
+                'usuarios.apellido as creador_apellido'
+            )
+            ->first();
+    }
+
+    public function obtenerExamenDelCurso(int $idCurso)
+    {
+        return DB::table('examenes')
+            ->where('id_curso', $idCurso)
+            ->select('id_examen', 'titulo', 'id_curso')
+            ->first();
+    }
+
+    public function obtenerPreguntasDelExamen(int $idExamen)
+    {
+        $preguntas = DB::table('preguntas')
+            ->where('id_examen', $idExamen)
+            ->select('id_pregunta', 'texto', 'id_examen')
+            ->get();
+
+        $preguntasConRespuestas = [];
+
+        foreach ($preguntas as $pregunta) {
+            $respuestas = DB::table('respuestas')
+                ->where('id_pregunta', $pregunta->id_pregunta)
+                ->select('id_respuesta', 'texto', 'id_pregunta')
+                ->get();
+
+            $preguntasConRespuestas[] = [
+                'id_pregunta' => $pregunta->id_pregunta,
+                'texto' => $pregunta->texto,
+                'respuestas' => $respuestas->map(function($respuesta) {
+                    return [
+                        'id_respuesta' => $respuesta->id_respuesta,
+                        'texto' => $respuesta->texto
+                    ];
+                })->toArray()
+            ];
+        }
+
+        return $preguntasConRespuestas;
+    }
+
+    public function marcarVideoFinalizado(int $idUsuario, int $idCurso): bool
+    {
+        // Verificar si ya existe un registro de progreso
+        $progreso = DB::table('progresos')
+            ->where('id_usuario', $idUsuario)
+            ->where('id_curso', $idCurso)
+            ->first();
+
+        if ($progreso) {
+            // Actualizar el registro existente
+            return DB::table('progresos')
+                ->where('id_usuario', $idUsuario)
+                ->where('id_curso', $idCurso)
+                ->update(['video_finalizado' => true]);
+        } else {
+            // Crear un nuevo registro de progreso
+            return DB::table('progresos')->insert([
+                'id_usuario' => $idUsuario,
+                'id_curso' => $idCurso,
+                'video_finalizado' => true,
+                'completado' => false,
+                'intentos_usados' => 0
+            ]);
+        }
+    }
+
+    public function obtenerProgresoCurso(int $idUsuario, int $idCurso)
+    {
+        return DB::table('progresos')
+            ->where('id_usuario', $idUsuario)
+            ->where('id_curso', $idCurso)
+            ->first();
     }
 }
