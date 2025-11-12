@@ -1,5 +1,5 @@
-import { Link, Upload, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Link, Upload, X, Image as ImageIcon } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Curso, TipoContenido } from "../schemas/CursoSchema";
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
     tipo_contenido: TipoContenido;
     contenido?: string;
     archivo?: File;
-    descripcion: string; // Ya no es opcional
+    descripcion: string;
     url_imagen?: File;
   }) => Promise<void>;
   loading?: boolean;
@@ -25,17 +25,37 @@ export default function ModalEditar({ open, curso, onClose, onSave, loading }: P
   const [archivo, setArchivo] = useState<File | null>(null);
   const [imagenArchivo, setImagenArchivo] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
+
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imagenInputRef = useRef<HTMLInputElement>(null);
+
+  // URL de preview para la imagen seleccionada
+  const imagenPreview = useMemo(() => {
+    if (imagenArchivo) return URL.createObjectURL(imagenArchivo);
+    // Si no hay nuevo archivo, usa la imagen actual del curso (si existe)
+    return curso?.url_imagen ?? "";
+  }, [imagenArchivo, curso?.url_imagen]);
+
+  // Limpieza de object URL
+  useEffect(() => {
+    return () => {
+      if (imagenPreview?.startsWith("blob:")) URL.revokeObjectURL(imagenPreview);
+    };
+  }, [imagenPreview]);
 
   useEffect(() => {
-    if (open) {
-      setTitulo("");
-      setDescripcion("");
-      setTipoContenido("link");
-      setContenidoLink("");
+    if (open && curso) {
+      setTitulo(curso.titulo);
+      setDescripcion(curso.descripcion ?? "");
+      setTipoContenido(curso.tipo_contenido);
+      if (curso.tipo_contenido === "link") {
+        setContenidoLink(curso.contenido ?? "");
+      } else {
+        setContenidoLink("");
+      }
       setArchivo(null);
-      setImagenArchivo(null);
+      setImagenArchivo(null); // no pre-cargamos File, solo mostramos preview de url_imagen
       setError("");
       setTimeout(() => inputRef.current?.focus(), 0);
     }
@@ -47,11 +67,12 @@ export default function ModalEditar({ open, curso, onClose, onSave, loading }: P
     return () => window.removeEventListener("keydown", onEsc);
   }, [open, onClose]);
 
+  // Video
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('video/')) {
-        setError('Por favor selecciona un archivo de video válido');
+      if (!file.type.startsWith("video/")) {
+        setError("Por favor selecciona un archivo de video válido");
         return;
       }
       setArchivo(file);
@@ -59,15 +80,35 @@ export default function ModalEditar({ open, curso, onClose, onSave, loading }: P
     }
   };
 
+  // Imagen
+  const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Por favor selecciona un archivo de imagen válido (JPG, PNG, WebP)");
+        return;
+      }
+      setImagenArchivo(file);
+      setError("");
+    }
+  };
+
   const handleSave = async () => {
     const tituloValue = titulo.trim();
+    const descripcionValue = descripcion.trim();
+
     if (!tituloValue) {
       setError("Ingresa el título del curso.");
       return;
     }
 
+    if (!descripcionValue) {
+      setError("Ingresa la descripción del curso.");
+      return;
+    }
+
     if (!curso) return;
-const descripcionValue = descripcion.trim();
+
     if (tipoContenido === "link") {
       const linkValue = contenidoLink.trim();
       if (!linkValue) {
@@ -80,14 +121,15 @@ const descripcionValue = descripcion.trim();
         setError("Ingresa una URL válida.");
         return;
       }
-        await onSave({
+      await onSave({
         titulo: tituloValue,
         tipo_contenido: "link",
         contenido: linkValue,
         descripcion: descripcionValue,
-        url_imagen: imagenArchivo || undefined, // MODIFICADO: Enviamos el File bajo la key 'url_imagen'
+        url_imagen: imagenArchivo || undefined, // solo enviamos si el usuario reemplazó
       });
     } else {
+      // carga_archivo
       if (!archivo) {
         setError("Selecciona un archivo de video.");
         return;
@@ -97,7 +139,7 @@ const descripcionValue = descripcion.trim();
         tipo_contenido: "carga_archivo",
         archivo,
         descripcion: descripcionValue,
-        url_imagen: imagenArchivo || undefined, // MODIFICADO: Enviamos el File bajo la key 'url_imagen'
+        url_imagen: imagenArchivo || undefined,
       });
     }
   };
@@ -124,7 +166,8 @@ const descripcionValue = descripcion.trim();
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-4">
+        {/* Contenido con scroll por si se alarga */}
+        <div className="px-5 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Título */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -141,6 +184,27 @@ const descripcionValue = descripcion.trim();
               placeholder="Ej. Introducción a React"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Descripción
+            </label>
+            <textarea
+              value={descripcion}
+              onChange={(e) => {
+                setDescripcion(e.target.value);
+                setError("");
+              }}
+              rows={3}
+              maxLength={200}
+              placeholder="Describe brevemente el contenido del curso..."
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            />
+            <p className="text-xs text-slate-500 text-right mt-1">
+              {descripcion.length} / 200
+            </p>
           </div>
 
           {/* Tipo de contenido */}
@@ -249,6 +313,101 @@ const descripcionValue = descripcion.trim();
               )}
             </div>
           )}
+
+          {/* Imagen (thumbnail) */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Imagen del curso (Thumbnail)
+            </label>
+
+            {/* Preview */}
+            {(imagenPreview || imagenArchivo) && (
+              <div className="flex items-center gap-3">
+                {imagenPreview ? (
+                  <img
+                    src={imagenPreview}
+                    alt="Thumbnail del curso"
+                    className="h-20 w-20 rounded-md object-cover border border-slate-200"
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => imagenInputRef.current?.click()}
+                  className="px-3 py-2 rounded-md border text-sm border-slate-300 hover:bg-blue-50 hover:border-blue-400"
+                >
+                  Reemplazar imagen
+                </button>
+                {imagenArchivo && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImagenArchivo(null);
+                      if (imagenInputRef.current) imagenInputRef.current.value = "";
+                    }}
+                    className="px-3 py-2 rounded-md border text-sm border-slate-300 hover:bg-slate-50"
+                  >
+                    Quitar cambio
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Botón para seleccionar si no hay preview aún */}
+            {!imagenPreview && (
+              <div className="flex items-center gap-3 mt-2">
+                <input
+                  ref={imagenInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImagenChange}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => imagenInputRef.current?.click()}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50 transition-all text-slate-600 hover:text-blue-700"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    Seleccionar imagen
+                  </span>
+                </button>
+              </div>
+            )}
+
+            {/* Si seleccionaste una nueva imagen, muestra info */}
+            {imagenArchivo && (
+              <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-blue-900 truncate">
+                    {imagenArchivo.name}
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    {(imagenArchivo.size / 1024).toFixed(2)} KB
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImagenArchivo(null);
+                    if (imagenInputRef.current) imagenInputRef.current.value = "";
+                  }}
+                  className="p-1 rounded hover:bg-blue-100 text-blue-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Input real (oculto) */}
+            <input
+              ref={imagenInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImagenChange}
+              className="hidden"
+            />
+          </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>

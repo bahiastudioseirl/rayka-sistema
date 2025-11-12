@@ -415,7 +415,7 @@ export default function CursosAdmin() {
           setIsEditModalOpen(false);
           setCursoEditar(null);
         }}
-        onSave={handleUpdateCurso}
+        onSave={(data) => cursoEditar ? handleUpdateCurso(cursoEditar.id_curso, data) : Promise.resolve()}
         loading={saving}
       />
     </div>
