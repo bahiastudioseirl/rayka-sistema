@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // 👈 añade useNavigate
 import { LogOut } from "lucide-react";
-import LogoRayka from "../../assets/LogoRayka.png";
+import LOGORAYKA from "../../assets/LOGO_RAYKA2.png";
 
 export interface NavbarProps {
   appName: string;
@@ -44,36 +44,36 @@ export const Navbar: FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <Link to="/" className="shrink-0">
-            <img src={LogoRayka} alt="logo" className="h-10 w-25" />
+            <img
+              src={LOGORAYKA}
+              alt="logo"
+              className="h-10 w-auto object-contain"
+            />
           </Link>
-          <div className="truncate">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-900">{appName}</span>
-            </div>
-          </div>
+          <div className="truncate"></div>
         </div>
 
-        <div className="flex items-center gap-3">
+
+        <div className="flex items-center gap-4">
           {userName && (
             <div className="hidden sm:flex flex-col text-right leading-tight">
               <span className="text-xs text-slate-500">Bienvenido, Hola</span>
               <span className="text-sm font-medium text-slate-900">{userName}</span>
             </div>
           )}
-
+          {/* Línea divisoria */}
+          <div className="h-6 w-px bg-slate-300"></div>
           <button
             type="button"
-            onClick={handleLogout}             
-            className="bg-[#CD321A] inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium text-white hover:bg-[#CD321A]/80"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Salir</span>
+            onClick={handleLogout}
+            className="inline-flex items-center gap-2 rounded-lg text-sm font-medium bg-white hover:bg-slate-50 transition">
+            <LogOut className="h-4 w-4 text-[#CD321A]" />
+            <span className="text-[#CD321A]">Salir</span>
           </button>
         </div>
       </div>
 
       {tabs?.length > 0 && <div className="w-full h-px bg-slate-200"></div>}
-
       {tabs?.length > 0 && (
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ul className="flex items-center gap-6 text-sm">

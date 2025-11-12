@@ -56,11 +56,11 @@ export default function ModalAgregarEstudiante({ open, onClose, onSave, loading 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
+    <div className="fixed inset-0 z-70 flex items-center justify-center">
       {/* Overlay */}
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[1px]" onClick={onClose} />
       {/* Modal */}
-      <div className="relative z-[61] w-full max-w-lg mx-4 rounded-xl bg-white shadow-xl border border-slate-200">
+      <div className="relative z-71 w-full max-w-lg mx-4 rounded-xl bg-white shadow-xl border border-slate-200">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
           <h3 className="text-base font-semibold text-slate-900">Nuevo Estudiante</h3>
           <button

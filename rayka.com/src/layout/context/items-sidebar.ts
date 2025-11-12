@@ -7,6 +7,7 @@ import {
     ClipboardCheck,
     Hand,
     Users,
+    BookOpen,
     type LucideIcon
 } from 'lucide-react';
 
@@ -43,6 +44,11 @@ export const menuItems: MenuItem[] = [
         titulo: 'Solicitantes',
         icon: Hand,
         link: '/administrator/solicitantes'
+    },
+     {
+        titulo: 'Exámenes',
+        icon: BookOpen,
+        link: '/administrator/examenes'
     },
 
     {

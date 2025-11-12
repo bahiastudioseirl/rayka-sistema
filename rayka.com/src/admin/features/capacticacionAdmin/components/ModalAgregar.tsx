@@ -1,7 +1,9 @@
-import { X } from "lucide-react";
+import { X, UserPlus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { CrearCapacitacionRequest, Usuario, Curso } from "../schemas/CapacitacionSchema";
 import type { Solicitante } from "../../solicitanteAdmin/schemas/SolicitanteSchema";
+import ModalAgregarEstudiante from "../../estudiantesAdmin/components/ModalAgregar";
+import { crearEstudiante } from "../../estudiantesAdmin/services/crearEstudiantes";
 
 type Props = {
   open: boolean;
@@ -11,9 +13,10 @@ type Props = {
   solicitantes: Solicitante[];
   usuarios: Usuario[];
   cursos: Curso[];
+  onUsuarioCreado?: () => Promise<void>; 
 };
 
-export default function ModalAgregar({ open, onClose, onSave, loading, solicitantes, usuarios, cursos }: Props) {
+export default function ModalAgregar({ open, onClose, onSave, loading, solicitantes, usuarios, cursos, onUsuarioCreado }: Props) {
   const [duracionExamen, setDuracionExamen] = useState("");
   const [maxIntentos, setMaxIntentos] = useState("");
   const [idSolicitante, setIdSolicitante] = useState("");
@@ -21,6 +24,10 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
   const [cursosSeleccionados, setCursosSeleccionados] = useState<number[]>([]);
   const [error, setError] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Estado para modal de agregar estudiante
+  const [isModalEstudianteOpen, setIsModalEstudianteOpen] = useState(false);
+  const [savingEstudiante, setSavingEstudiante] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -50,6 +57,39 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
     setCursosSeleccionados(prev =>
       prev.includes(id) ? prev.filter(cid => cid !== id) : [...prev, id]
     );
+  };
+
+  const handleSaveEstudiante = async (data: { nombre: string; apellido: string; num_documento: string }) => {
+    setSavingEstudiante(true);
+    try {
+   
+      const response = await crearEstudiante({
+        nombre: data.nombre,
+        apellido: data.apellido,
+        num_documento: data.num_documento,
+        id_rol: 2, 
+        activo: true
+      });
+
+      console.log("Estudiante creado:", response.data);
+      
+      // Cerrar el modal de estudiante
+      setIsModalEstudianteOpen(false);
+      
+      // Recargar la lista de usuarios
+      if (onUsuarioCreado) {
+        await onUsuarioCreado();
+      }
+      
+      // Auto-seleccionar el nuevo estudiante
+      setUsuariosSeleccionados(prev => [...prev, response.data.id_usuario]);
+      
+    } catch (error) {
+      console.error("Error al crear estudiante:", error);
+      alert("Error al crear el estudiante. Intenta nuevamente.");
+    } finally {
+      setSavingEstudiante(false);
+    }
   };
 
   const handleSave = async () => {
@@ -94,14 +134,14 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
+    <div className="fixed inset-0 z-60 flex items-center justify-center">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-[1px]"
         onClick={onClose}
       />
       {/* Modal */}
-      <div className="relative z-[61] w-full max-w-2xl mx-4 rounded-xl bg-white shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div className="relative z-61 w-full max-w-2xl mx-4 rounded-xl bg-white shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 sticky top-0 bg-white z-10">
           <h3 className="text-base font-semibold text-slate-900">Nueva Capacitación</h3>
           <button
@@ -179,9 +219,19 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
 
           {/* Estudiantes */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Estudiantes ({usuariosSeleccionados.length} seleccionados)
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-slate-700">
+                Estudiantes ({usuariosSeleccionados.length} seleccionados)
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsModalEstudianteOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                Agregar estudiante
+              </button>
+            </div>
             <div className="border border-slate-300 rounded-lg max-h-48 overflow-y-auto">
               {usuarios.length === 0 ? (
                 <div className="px-3 py-4 text-sm text-slate-500 text-center">
@@ -262,6 +312,14 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
           </button>
         </div>
       </div>
+      
+      {/* Modal para agregar estudiante */}
+      <ModalAgregarEstudiante
+        open={isModalEstudianteOpen}
+        onClose={() => setIsModalEstudianteOpen(false)}
+        onSave={handleSaveEstudiante}
+        loading={savingEstudiante}
+      />
     </div>
   );
 }

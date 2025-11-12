@@ -43,7 +43,7 @@ export const CourseCard: FC<CourseCardProps> = ({
         <div className="mt-5">
           <div className="flex items-center justify-between text-sm">
             <span className="text-slate-700">Progreso</span>
-            <span className="font-semibold text-slate-900">{pct}%</span>
+            <span className="font-semibold text--900">{pct}%</span>
           </div>
           <div className="mt-2 h-2.5 w-full rounded-full bg-blue-100">
             <div

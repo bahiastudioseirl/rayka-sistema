@@ -67,17 +67,14 @@ export const UserLoginForm = () => {
     if (isCapacitacionLogin && capacitacionInfo) {
       if (credentials.num_documento.length === 8) {
         // Verificar si el usuario está registrado en esta capacitación
-        if (capacitacionInfo.estudiantes_registrados.includes(credentials.num_documento)) {
+        const usuarioEnCapacitacion = capacitacionInfo.usuarios_asignados.find(
+          (usuario) => usuario.num_documento === credentials.num_documento
+        );
+        
+        if (usuarioEnCapacitacion) {
           // Guardar datos del usuario con contexto de capacitación
           UserStore.clearAll();
-          UserStore.setUser({
-            id_usuario: 1,
-            nombre: 'Estudiante',
-            apellido: 'Registrado',
-            correo: 'estudiante@demo.com',
-            num_documento: credentials.num_documento,
-            estado: 'activo'
-          });
+          UserStore.setUser(usuarioEnCapacitacion);
           UserStore.setToken('capacitacion-token-' + Date.now());
           
           // Redirigir a los cursos de la capacitación específica
@@ -157,7 +154,7 @@ export const UserLoginForm = () => {
                   </h2>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-[#132436] mb-1">{capacitacionInfo.empresa.nombre}</p>
+                  <p className="text-lg font-bold text-[#132436] mb-1">{capacitacionInfo.empresaInfo?.nombre}</p>
                   <p className="text-sm text-gray-600 mb-1">
                     Solicitado por: {capacitacionInfo.solicitante.nombre} {capacitacionInfo.solicitante.apellido}
                   </p>

@@ -8,7 +8,6 @@ import { AdminLayout } from '../../layout/components/AdminLayout';
 const LoginForm = lazy(() => 
   import('../components/auth/LoginForm').then((module) => ({ default: module.LoginForm }))
 );
-
 const UserLoginForm = lazy(() => 
   import('../components/auth/UserLoginForm').then((module) => ({ default: module.UserLoginForm }))
 );
@@ -18,10 +17,10 @@ const UserLoginForm = lazy(() =>
 const Cursos = lazy(() => 
   import('../../pages/cursos/CursosPage').then((module) => ({ default: module.default }))
 );
-
 const CursoContenido = lazy(() => 
   import('../../pages/cursos/CursoContenido').then((module) => ({ default: module.default }))
 );
+
 
 // ADMINISTRATIVO
 const CursosAdmin = lazy(() => 
@@ -41,6 +40,9 @@ const EstudiantesAdmin = lazy(() =>
 );
 const AdministradorAdmin = lazy(() => 
   import('../../admin/features/administradorAdmin/pages/AdministradorAdmin').then((module) => ({ default: module.default }))
+);
+const ExamenAdmin = lazy(() => 
+  import('../../admin/features/examenAdmin/pages/examenAdmin').then((module) => ({ default: module.default }))
 );
 
 export const routes = [
@@ -166,7 +168,15 @@ export const routes = [
             <AdministradorAdmin />
           </LazyWrapper>
         ),
+      },{
+        path:'examenes',
+        element: (
+          <LazyWrapper>
+            <ExamenAdmin />
+          </LazyWrapper>
+        ),
       }
+      
     ],
   },
 

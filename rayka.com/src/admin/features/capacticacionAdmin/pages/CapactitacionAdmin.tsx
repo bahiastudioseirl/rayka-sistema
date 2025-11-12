@@ -1,4 +1,4 @@
-import { Edit, Plus, Search, Trash2, Eye, AlertCircle, ClipboardCheck, FileSpreadsheet } from "lucide-react";
+import { Edit, Plus, Search, Trash2, AlertCircle, ClipboardCheck, FileSpreadsheet } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import type { CapacitacionConDetalles, Usuario, Curso, CrearCapacitacionRequest, CrearCapacitacionResponse } from "../schemas/CapacitacionSchema";
 import type { Solicitante } from "../../solicitanteAdmin/schemas/SolicitanteSchema";
@@ -56,6 +56,16 @@ export default function CapacitacionAdmin() {
       setError("No se pudieron cargar los datos. Intenta nuevamente.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para recargar solo los usuarios (usada cuando se crea un estudiante)
+  const recargarUsuarios = async () => {
+    try {
+      const respUsuarios = await obtenerUsuarios();
+      setUsuarios(respUsuarios.data || []);
+    } catch (err) {
+      console.error("Error recargando usuarios:", err);
     }
   };
 
@@ -383,6 +393,7 @@ export default function CapacitacionAdmin() {
         solicitantes={solicitantes}
         usuarios={usuarios}
         cursos={cursos}
+        onUsuarioCreado={recargarUsuarios}
       />
 
       {/* Modal Editar */}
