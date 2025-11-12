@@ -58,8 +58,8 @@ Route::middleware('auth.admin')->group(function () {
     Route::patch('cursos/{id}/cambiar-estado', [CursoController::class, 'cambiarEstadoCurso']);
     Route::get('cursos/{id}/examenes', [ExamenController::class, 'listarPorCurso']);
     
-    // Ruta para servir archivos de cursos (privados pero autenticados)
     Route::get('cursos/archivos/{filename}', [CursoController::class, 'servirArchivoCurso'])->where('filename', '.*');
+    Route::get('cursos/imagenes/{filename}', [CursoController::class, 'servirImagenCurso'])->where('filename', '.*');
 
     //Empresas endpoints para administradores
     Route::post('empresas', [EmpresaController::class, 'crearEmpresa']);

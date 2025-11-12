@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('cursos', function (Blueprint $table) {
             $table->id('id_curso');
             $table->string('titulo');
+            $table->text('descripcion')->nullable();
+            $table->string('url_imagen')->nullable();
             $table->text('contenido'); 
             $table->enum('tipo_contenido', ['link', 'carga_archivo']);
             $table->boolean('activo')->default(true);

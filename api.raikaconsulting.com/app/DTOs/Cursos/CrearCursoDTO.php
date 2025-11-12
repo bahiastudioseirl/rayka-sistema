@@ -6,16 +6,20 @@ class CrearCursoDTO
 {
     public function __construct(
         public readonly string $titulo,
+        public readonly ?string $descripcion,
+        public readonly ?string $url_imagen,
         public readonly string $contenido,
         public readonly string $tipo_contenido,
         public readonly bool $activo = true,
         public readonly int $creado_por
     ) {}
     
-    public static function fromRequest(array $validatedData, int $creado_por): self
+    public static function fromRequest(array $validatedData, int $creado_por, ?string $url_imagen = null): self
     {
         return new self(
             titulo: trim($validatedData['titulo']),
+            descripcion: isset($validatedData['descripcion']) ? trim($validatedData['descripcion']) : null,
+            url_imagen: $url_imagen,
             contenido: trim($validatedData['contenido']),
             tipo_contenido: $validatedData['tipo_contenido'],
             activo: $validatedData['activo'] ?? true,
@@ -23,10 +27,12 @@ class CrearCursoDTO
         );
     }
 
-    public static function fromArray(array $data, int $creado_por): self
+    public static function fromArray(array $data, int $creado_por, ?string $url_imagen = null): self
     {
         return new self(
             titulo: trim($data['titulo']),
+            descripcion: isset($data['descripcion']) ? trim($data['descripcion']) : null,
+            url_imagen: $url_imagen,
             contenido: trim($data['contenido']),
             tipo_contenido: $data['tipo_contenido'],
             activo: $data['activo'] ?? true,
@@ -38,6 +44,8 @@ class CrearCursoDTO
     {
         return [
             'titulo' => $this->titulo,
+            'descripcion' => $this->descripcion,
+            'url_imagen' => $this->url_imagen,
             'contenido' => $this->contenido,
             'tipo_contenido' => $this->tipo_contenido,
             'activo' => $this->activo,

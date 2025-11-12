@@ -33,27 +33,31 @@ class CursoService
             ]);
         }
 
+        $urlImagen = null;
+        if (isset($datosValidados['imagen']) && $datosValidados['imagen']) {
+            $imagen = $datosValidados['imagen'];
+            $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
+            $rutaImagen = $imagen->storeAs('cursos/imagenes', $nombreImagen, 'public');
+            $urlImagen = url('storage/' . $rutaImagen);
+        }
+
         $contenido = '';
         $tipoContenido = '';
 
-        // PRIORIDAD 1: Si viene contenido (link) y no está vacío, usarlo directamente
         if (isset($datosValidados['contenido']) && !empty(trim($datosValidados['contenido']))) {
             $contenido = trim($datosValidados['contenido']);
             $tipoContenido = 'link';
             $this->validarUrlVideo($contenido);
         }
-        // PRIORIDAD 2: Si no hay contenido, verificar archivo
         else if (isset($datosValidados['archivo']) && $datosValidados['archivo']) {
             $archivo = $datosValidados['archivo'];
             $this->validarArchivoVideo($archivo);
             $rutaArchivo = $archivo->store('cursos/videos', 'private');
             
-            // Generar URL completa para acceder al archivo
             $nombreArchivo = basename($rutaArchivo);
             $contenido = url("api/cursos/archivos/{$nombreArchivo}");
             $tipoContenido = 'carga_archivo';
         }
-        // ERROR: No hay ninguno de los dos
         else {
             throw ValidationException::withMessages([
                 'contenido' => ['Debe proporcionar un link de video o subir un archivo.']
@@ -62,6 +66,8 @@ class CursoService
 
         $dto = new CrearCursoDTO(
             titulo: trim($datosValidados['titulo']),
+            descripcion: isset($datosValidados['descripcion']) ? trim($datosValidados['descripcion']) : null,
+            url_imagen: $urlImagen,
             contenido: $contenido,
             tipo_contenido: $tipoContenido,
             activo: $datosValidados['activo'] ?? true,
@@ -92,6 +98,26 @@ class CursoService
             $datosActualizacion['titulo'] = trim($datosValidados['titulo']);
         }
 
+        if (isset($datosValidados['descripcion'])) {
+            $datosActualizacion['descripcion'] = trim($datosValidados['descripcion']);
+        }
+
+        if (isset($datosValidados['imagen']) && $datosValidados['imagen']) {
+            if ($curso->url_imagen) {
+                $rutaAntigua = str_replace(url(''), '', $curso->url_imagen);
+                $rutaAntigua = ltrim($rutaAntigua, '/');
+                $rutaAntigua = str_replace('storage/', '', $rutaAntigua);
+                if (Storage::disk('public')->exists($rutaAntigua)) {
+                    Storage::disk('public')->delete($rutaAntigua);
+                }
+            }
+
+            $imagen = $datosValidados['imagen'];
+            $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
+            $rutaImagen = $imagen->storeAs('cursos/imagenes', $nombreImagen, 'public');
+            $datosActualizacion['url_imagen'] = url('storage/' . $rutaImagen);
+        }
+
         if (isset($datosValidados['archivo']) && $datosValidados['archivo']) {
             $archivo = $datosValidados['archivo'];
             $this->validarArchivoVideo($archivo);
@@ -102,7 +128,6 @@ class CursoService
 
             $rutaArchivo = $archivo->store('cursos/videos', 'private');
             
-            // Generar URL completa para acceder al archivo
             $nombreArchivo = basename($rutaArchivo);
             $datosActualizacion['contenido'] = url("api/cursos/archivos/{$nombreArchivo}");
             $datosActualizacion['tipo_contenido'] = 'carga_archivo';
