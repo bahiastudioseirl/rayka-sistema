@@ -33,6 +33,9 @@ Route::prefix('estudiantes')->group(function () {
     Route::post('logout', [StudentAuthController::class, 'logout']);
 });
 
+// Rutas públicas para acceder a archivos de cursos
+Route::get('cursos/imagenes/{filename}', [CursoController::class, 'servirImagenCurso'])->where('filename', '.*');
+
 // Rutas para estudiantes autenticados
 Route::middleware('auth.estudiante')->prefix('estudiantes')->group(function () {
     Route::get('cursos', [UsuarioEstudianteController::class, 'listarMisCursos']);
@@ -59,7 +62,6 @@ Route::middleware('auth.admin')->group(function () {
     Route::get('cursos/{id}/examenes', [ExamenController::class, 'listarPorCurso']);
     
     Route::get('cursos/archivos/{filename}', [CursoController::class, 'servirArchivoCurso'])->where('filename', '.*');
-    Route::get('cursos/imagenes/{filename}', [CursoController::class, 'servirImagenCurso'])->where('filename', '.*');
 
     //Empresas endpoints para administradores
     Route::post('empresas', [EmpresaController::class, 'crearEmpresa']);
