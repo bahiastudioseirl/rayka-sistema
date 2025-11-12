@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Examenes\ActualizarExamenDTO;
+use App\DTOs\Examenes\AgregarPreguntasDTO;
+use App\DTOs\Examenes\CrearExamenDTO;
 use App\Http\Request\Examen\AgregarPreguntasRequest;
 use App\Http\Request\Examen\ActualizarExamenRequest;
 use App\Http\Request\Examen\CrearExamenRequest;
@@ -21,7 +24,8 @@ class ExamenController extends Controller
     public function crear(CrearExamenRequest $request): JsonResponse
     {
         try {
-            $resultado = $this->examenService->crearExamen($request->all());
+            $dto = CrearExamenDTO::fromRequest($request->validated());
+            $resultado = $this->examenService->crearExamen($dto);
 
             if ($resultado['success']) {
                 return response()->json($resultado, 201);
@@ -65,10 +69,11 @@ class ExamenController extends Controller
     public function agregarPreguntas(AgregarPreguntasRequest $request, int $id): JsonResponse
     {
         try {
-            $resultado = $this->examenService->agregarPreguntas($id, $request->all());
+            $dto = AgregarPreguntasDTO::fromRequest($request->validated());
+            $resultado = $this->examenService->agregarPreguntas($id, $dto);
 
             if ($resultado['success']) {
-                $cantidadAgregadas = count($request->input('preguntas', []));
+                $cantidadAgregadas = count($dto->preguntas);
                 return response()->json([
                     'success' => true,
                     'message' => "Se agregaron {$cantidadAgregadas} pregunta(s) exitosamente.",
@@ -92,7 +97,8 @@ class ExamenController extends Controller
     public function actualizar(ActualizarExamenRequest $request, int $id): JsonResponse
     {
         try {
-            $resultado = $this->examenService->actualizarExamen($id, $request->all());
+            $dto = ActualizarExamenDTO::fromRequest($request->validated());
+            $resultado = $this->examenService->actualizarExamen($id, $dto);
 
             if ($resultado['success']) {
                 return response()->json($resultado, 200);

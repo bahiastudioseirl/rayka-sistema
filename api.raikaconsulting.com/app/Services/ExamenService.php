@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\DTOs\Examenes\ActualizarExamenDTO;
+use App\DTOs\Examenes\AgregarPreguntasDTO;
+use App\DTOs\Examenes\CrearExamenDTO;
 use App\Repositories\ExamenRepository;
 use Exception;
 
@@ -14,17 +17,17 @@ class ExamenService
         $this->examenRepository = $examenRepository;
     }
 
-    public function crearExamen(array $datos): array
+    public function crearExamen(CrearExamenDTO $dto): array
     {
         try {
-            if (!$this->examenRepository->cursoExiste($datos['id_curso'])) {
+            if (!$this->examenRepository->cursoExiste($dto->id_curso)) {
                 return [
                     'success' => false,
                     'message' => 'El curso especificado no existe.'
                 ];
             }
 
-            $validacion = $this->validarDatosExamen($datos);
+            $validacion = $this->validarDatosExamen($dto->toArray());
             if (!$validacion['valido']) {
                 return [
                     'success' => false,
@@ -33,7 +36,7 @@ class ExamenService
                 ];
             }
 
-            $examen = $this->examenRepository->crearExamenCompleto($datos);
+            $examen = $this->examenRepository->crearExamenCompleto($dto->toArray());
 
             return [
                 'success' => true,
@@ -158,7 +161,7 @@ class ExamenService
             })
         ];
     }
-    public function agregarPreguntas(int $idExamen, array $datos): array
+    public function agregarPreguntas(int $idExamen, AgregarPreguntasDTO $dto): array
     {
         try {
             $examen = $this->examenRepository->obtenerPorId($idExamen);
@@ -171,8 +174,8 @@ class ExamenService
             }
 
             $validacion = $this->validarDatosExamen([
-                'titulo' => $examen->titulo, 
-                'preguntas' => $datos['preguntas']
+                'titulo' => $examen->titulo,
+                'preguntas' => $dto->preguntas
             ]);
 
             if (!$validacion['valido']) {
@@ -183,7 +186,7 @@ class ExamenService
                 ];
             }
 
-            $examenActualizado = $this->examenRepository->agregarPreguntas($idExamen, $datos['preguntas']);
+            $examenActualizado = $this->examenRepository->agregarPreguntas($idExamen, $dto->preguntas);
 
             return [
                 'success' => true,
@@ -200,7 +203,7 @@ class ExamenService
         }
     }
 
-    public function actualizarExamen(int $idExamen, array $datos): array
+    public function actualizarExamen(int $idExamen, ActualizarExamenDTO $dto): array
     {
         try {
             $examen = $this->examenRepository->obtenerPorId($idExamen);
@@ -212,7 +215,7 @@ class ExamenService
                 ];
             }
 
-            $examenActualizado = $this->examenRepository->actualizarExamen($idExamen, $datos);
+            $examenActualizado = $this->examenRepository->actualizarExamen($idExamen, $dto->toArray());
 
             return [
                 'success' => true,
@@ -227,9 +230,7 @@ class ExamenService
                 'error' => $e->getMessage()
             ];
         }
-    }
-
-    public function eliminarPregunta(int $idExamen, int $idPregunta): array
+    }    public function eliminarPregunta(int $idExamen, int $idPregunta): array
     {
         try {
             $examen = $this->examenRepository->obtenerPorId($idExamen);
