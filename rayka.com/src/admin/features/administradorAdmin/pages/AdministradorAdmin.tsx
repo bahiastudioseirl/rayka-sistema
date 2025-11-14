@@ -1,12 +1,14 @@
-import { Edit, Plus, Search, Power, Eye, AlertCircle, FileText } from "lucide-react";
+import { Edit, Plus, Search, Power, KeySquare, AlertCircle, FileText } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import ModalAgregar from "../components/ModalAgregar"; // crear estudiante (nombre, apellido, doc)
-import ModalEditarAdministrador from "../components/ModalEditar"; // editar estudiante
-import { crearAdministrador } from "../services/crearAdministrador";       // POST /usuarios/estudiante
-import { obtenerAdministradores } from "../services/obtenerAdministrador"; // GET  /usuarios/ver-estudiantes
-import { actualizarAdministrador } from "../services/actualizarAdministrador"; // PATCH /usuarios/:id
-import type { ActualizarAdministradorRequest, Administrador } from "../schemas/AdministradorSchema";
+import ModalAgregar from "../components/ModalAgregar";
+import ModalEditarAdministrador from "../components/ModalEditar";
+import { crearAdministrador } from "../services/crearAdministrador";
+import { obtenerAdministradores } from "../services/obtenerAdministrador";
+import { actualizarAdministrador } from "../services/actualizarAdministrador";
+import { cambiarContrasenia } from "../services/cambiarContrasenia";
+import type { CambiarContraseniaRequest, ActualizarAdministradorRequest, Administrador } from "../schemas/AdministradorSchema";
 import { cambiarEstadoAdministrador } from "../services/estadoEstudiante";
+import ModalCambiarContrasenia from "../components/ModalCambiarContrasenia";
 
 type SavePayload = { nombre: string; apellido: string; num_documento: string; correo: string; contrasenia: string };
 
@@ -16,6 +18,11 @@ export default function AdministradorAdmin() {
     const [loadingCreate, setLoadingCreate] = useState(false);
     const [error, setError] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Modal Cambiar Contraseña
+    const [pwdOpen, setPwdOpen] = useState(false);
+    const [pwdSaving, setPwdSaving] = useState(false);
+    const [pwdUserId, setPwdUserId] = useState<number | null>(null);
 
     const [administradores, setAdministradores] = useState<Administrador[]>([]);
 
@@ -92,28 +99,58 @@ export default function AdministradorAdmin() {
         }
     };
 
-      const handleToggleEstado = async (id: number) => {
-         try {
-           const response = await cambiarEstadoAdministrador(id);
-           setAdministradores((prev) => {
-             const nuevaLista = prev.map((c) => {
-               if (c.id_usuario === id) {
-                 return response.data;
-               }
-               return c;
-             });
-             return nuevaLista;
-           });
-         } catch (err: any) {
-           console.error("❌ Error al cambiar estado:", err);
-           console.error("❌ Error response:", err?.response);
-           const msg =
-             err?.response?.data?.message ||
-             err?.message ||
-             "No se pudo cambiar el estado.";
-           setError(msg);
-         }
-       };
+    const handleToggleEstado = async (id: number) => {
+        try {
+            const response = await cambiarEstadoAdministrador(id);
+            setAdministradores((prev) => {
+                const nuevaLista = prev.map((c) => {
+                    if (c.id_usuario === id) {
+                        return response.data;
+                    }
+                    return c;
+                });
+                return nuevaLista;
+            });
+        } catch (err: any) {
+            console.error("❌ Error al cambiar estado:", err);
+            console.error("❌ Error response:", err?.response);
+            const msg =
+                err?.response?.data?.message ||
+                err?.message ||
+                "No se pudo cambiar el estado.";
+            setError(msg);
+        }
+    };
+    const openPwd = (s: Administrador) => {
+        setPwdUserId(s.id_usuario);
+        setPwdOpen(true);
+    };
+
+    const closePwd = () => {
+        setPwdOpen(false);
+        setPwdUserId(null);
+    };
+
+    const onSavePwd = async (payload: CambiarContraseniaRequest) => {
+        if (!pwdUserId) return;
+        setPwdSaving(true);
+        setError("");
+        try {
+            // Llama a tu service Axios
+            await cambiarContrasenia(pwdUserId, payload);
+            // (Opcional) podrías refrescar la fila si lo deseas; el endpoint ya devuelve el usuario.
+            // const res = await cambiarContrasenia(pwdUserId, payload);
+            // setEstudiantes(prev => prev.map(e => e.id_usuario === pwdUserId ? res.data : e));
+
+            closePwd();
+            // aquí dispara tu toast de éxito si tienes uno
+        } catch (e: any) {
+            setError(e?.response?.data?.message ?? "No se pudo cambiar la contraseña.");
+        } finally {
+            setPwdSaving(false);
+        }
+    };
+
 
     return (
         <div className="space-y-6">
@@ -249,8 +286,12 @@ export default function AdministradorAdmin() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center space-x-1">
-                                            <button className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50" title="Ver">
-                                                <Eye className="w-4 h-4" />
+                                            <button
+                                                className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+                                                title="Cambiar contraseña"
+                                                onClick={() => openPwd(s)} // ⬅️ abre modal
+                                            >
+                                                <KeySquare className="w-4 h-4" />
                                             </button>
                                             <button
                                                 className="p-2 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
@@ -289,6 +330,13 @@ export default function AdministradorAdmin() {
                 onSave={onSaveEdit}
                 loading={loading}
             />
+             {/* Modal Cambiar Contraseña */}
+                  <ModalCambiarContrasenia
+                    open={pwdOpen}
+                    onClose={closePwd}
+                    onSave={onSavePwd}
+                    loading={pwdSaving}
+                  />
         </div>
     );
 }

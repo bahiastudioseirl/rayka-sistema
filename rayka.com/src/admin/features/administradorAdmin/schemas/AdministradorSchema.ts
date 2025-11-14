@@ -51,3 +51,13 @@ export interface ActualizarAdministradorResponse {
   message: string;
   data: Administrador;
 }
+
+export interface CambiarContraseniaRequest {
+  contrasenia_actual: string;
+  contrasenia_nueva: string;
+}
+
+export interface CambiarContraseniaResponse {
+  message: string;
+  data: Administrador;
+}

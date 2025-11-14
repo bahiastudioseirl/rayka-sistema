@@ -7,6 +7,7 @@ import { obtenerCursos } from "../services/obtenerCursos";
 import { actualizarCurso } from "../services/actualizarCurso";
 import { cambiarEstadoCurso } from "../services/estadoCurso";
 import type { CrearCursoRequest, Curso, ActualizarCursoRequest } from "../schemas/CursoSchema";
+import { API_CONFIG } from "../../../../config/api.config";
 
 export default function CursosAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -275,8 +276,8 @@ export default function CursosAdmin() {
                         <div className="max-w-xs">
                           {curso.url_imagen ? (
                             <img
-                              src={curso.url_imagen}
-                              alt={ "Imagen del curso"}
+                              src={API_CONFIG.getFullUrl(curso.url_imagen)}
+                              alt={"Imagen del curso"}
                               className="h-16 w-16 object-cover rounded-md shadow-sm border border-slate-200"
                             />
                           ) : (

@@ -1,6 +1,7 @@
 import { Link, Upload, X, Image as ImageIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Curso, TipoContenido } from "../schemas/CursoSchema";
+import { API_CONFIG } from "../../../../config/api.config";
 
 type Props = {
   open: boolean;
@@ -34,7 +35,7 @@ export default function ModalEditar({ open, curso, onClose, onSave, loading }: P
   const imagenPreview = useMemo(() => {
     if (imagenArchivo) return URL.createObjectURL(imagenArchivo);
     // Si no hay nuevo archivo, usa la imagen actual del curso (si existe)
-    return curso?.url_imagen ?? "";
+    return curso?.url_imagen ? API_CONFIG.getFullUrl(curso.url_imagen) : "";
   }, [imagenArchivo, curso?.url_imagen]);
 
   // Limpieza de object URL

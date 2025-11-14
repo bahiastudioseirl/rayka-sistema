@@ -1,5 +1,6 @@
 import { axiosInstance } from '../../../../api/axiosInstance';
 import type { CrearCursoRequest, CrearCursoResponse } from '../schemas/CursoSchema';
+const url_data = "http://localhost:8000/";
 
 export const crearCurso = async (data: CrearCursoRequest): Promise<CrearCursoResponse> => {
   const formData = new FormData();
@@ -7,8 +8,8 @@ export const crearCurso = async (data: CrearCursoRequest): Promise<CrearCursoRes
   formData.append('tipo_contenido', data.tipo_contenido);
   formData.append('descripcion', data.descripcion);
   
-  if (data.url_imagen) {
-    formData.append('imagen', data.url_imagen); // Backend espera 'imagen', no 'url_imagen'
+  if (data.url_imagen) { 
+    formData.append('imagen', data.url_imagen);
   }
   
   if (data.tipo_contenido === 'link' && data.contenido) {

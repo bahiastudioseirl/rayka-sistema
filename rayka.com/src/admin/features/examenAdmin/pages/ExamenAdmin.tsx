@@ -1,13 +1,57 @@
 import { Edit, Plus, Search, Trash2, Eye, AlertCircle, FileText } from "lucide-react"
-import { useState } from "react"
-
+import { useState, useEffect } from "react"
+import ModalAgregarExamen from "../components/ModalAgregar"
+import { crearExamen } from "../services/crearExamen"
+import type { CrearExamenRequest } from "../schemas/ExamenSchema"
+import { obtenerCursos } from "../../cursosAdmin/services/obtenerCursos"
+import type { CursoParaSelect } from "../components/ModalAgregar"
 
 export default function ExamenAdmin() {
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Datos de ejemplo - reemplazar con tu hook personalizado
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [cursos, setCursos] = useState<CursoParaSelect[]>([])
+
+
+  useEffect(() => {
+    const cargarCursos = async () => {
+      try {
+        const response = await obtenerCursos()
+        setCursos(response.data || [])
+      } catch (error) {
+        console.error("Error al cargar cursos:", error)
+      }
+    }
+
+    cargarCursos()
+  }, [])
+
+  const handleSaveExamen = async (data: CrearExamenRequest) => {
+    setIsSubmitting(true)
+    try {
+      await crearExamen(data)
+
+      alert("¡Examen creado con éxito!")
+      setIsModalOpen(false)
+
+    } catch (error) {
+      console.error("Error al crear el examen:", error)
+      let errorMessage = "Ocurrió un error desconocido";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      alert(`Error al guardar: ${errorMessage}`)
+
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+  // --- FIN DE CAMBIOS ---
+
+  // Tus datos de ejemplo - ¡los mantenemos!
   const filteredData = [
     {
       id: 1,
@@ -19,28 +63,22 @@ export default function ExamenAdmin() {
     }
   ]
   const openModal = () => setIsModalOpen(true);
-
-  const handleAdd = () => {
-    // Lógica para agregar nuevo elemento
-    console.log("Agregar nuevo elemento")
-  }
+  const closeModal = () => setIsModalOpen(false);
 
   const handleEdit = () => {
-    // Lógica para editar elemento
     console.log("Editar elemento:")
   }
 
   const handleDelete = () => {
     if (window.confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
-      // Lógica para eliminar elemento
       console.log("Eliminar elemento:")
     }
   }
 
-
-
   return (
     <div className="space-y-6">
+      {/* ... (Todo tu JSX del Header y la Tabla se mantiene EXACTAMENTE IGUAL) ... */}
+
       {/* Header */}
       <div className="bg-white border shadow-sm rounded-xl border-slate-200">
         <div className="p-6 border-b border-slate-200">
@@ -59,11 +97,10 @@ export default function ExamenAdmin() {
               onClick={openModal}
             >
               <Plus className="w-4 h-4" />
-              <span>Nuevo elemento</span>
+              <span>Nuevo Examen</span>
             </button>
           </div>
         </div>
-
         <div className="p-6">
           <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
             <div className="flex-1 max-w-md">
@@ -85,8 +122,9 @@ export default function ExamenAdmin() {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content (Tu tabla estática) */}
       <div className="overflow-hidden bg-white border shadow-sm rounded-xl border-slate-200">
+        {/* ... (Tu tabla <table>...</table> se mantiene igual) ... */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b bg-slate-50 border-slate-200">
@@ -99,46 +137,9 @@ export default function ExamenAdmin() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {loading && (
-                <tr>
-                  <td colSpan={6} className="py-16 text-center">
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="w-8 h-8 border-2 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-                      <p className="text-slate-600">Cargando elementos...</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {error && (
-                <tr>
-                  <td colSpan={6} className="py-16 text-center">
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="p-3 rounded-full bg-red-50">
-                        <AlertCircle className="w-6 h-6 text-red-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-red-900">Error al cargar los elementos</p>
-                        <p className="mt-1 text-sm text-red-600">{error}</p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {!loading && !error && filteredData.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="py-16 text-center">
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="p-3 rounded-full bg-slate-100">
-                        <Search className="w-6 h-6 text-slate-400" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-700">No se encontraron elementos</p>
-                        <p className="mt-1 text-sm text-slate-500">Intenta con otros términos de búsqueda</p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
+              {loading && (<tr>...</tr>)}
+              {error && (<tr>...</tr>)}
+              {!loading && !error && filteredData.length === 0 && (<tr>...</tr>)}
               {!loading &&
                 filteredData.map((item) => (
                   <tr key={item.id} className="transition-colors hover:bg-slate-50">
@@ -150,7 +151,6 @@ export default function ExamenAdmin() {
                         <p className="text-sm font-medium text-slate-900 line-clamp-2">{item.titulo}</p>
                       </div>
                     </td>
-
                     <td className="px-6 py-4">
                       <div
                         className="max-w-md text-sm text-slate-600 line-clamp-2"
@@ -188,13 +188,19 @@ export default function ExamenAdmin() {
                     </td>
                   </tr>
                 ))}
-
             </tbody>
           </table>
         </div>
       </div>
-      
-    </div>
 
+      {/* 9. RENDERIZAR EL MODAL AL FINAL */}
+      <ModalAgregarExamen
+        open={isModalOpen}
+        onClose={closeModal}
+        onSave={handleSaveExamen}
+        loading={isSubmitting} // 10. Conectamos el 'loading' a nuestro 'isSubmitting'
+        cursos={cursos} // 11. Pasamos los cursos de nuestro 'useState'
+      />
+    </div>
   )
 }

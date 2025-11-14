@@ -49,3 +49,14 @@ export interface ActualizarEstudianteResponse {
   message: string;
   data: Estudiante;
 }
+
+
+export interface CambiarContraseniaRequest {
+  contrasenia_actual: string;
+  contrasenia_nueva: string;
+}
+
+export interface CambiarContraseniaResponse {
+  message: string;
+  data: Estudiante; 
+}
