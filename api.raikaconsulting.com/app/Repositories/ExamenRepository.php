@@ -131,4 +131,9 @@ class ExamenRepository
     {
         return Examenes::with('curso')->get();
     }
+
+    public function verificarSiCursoTieneExamenes(int $idCurso): bool
+    {
+        return Examenes::where('id_curso', $idCurso)->exists();
+    }
 }

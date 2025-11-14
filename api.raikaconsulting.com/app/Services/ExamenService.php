@@ -26,6 +26,13 @@ class ExamenService
                     'message' => 'El curso especificado no existe.'
                 ];
             }
+            
+            if($this->examenRepository->verificarSiCursoTieneExamenes($dto->id_curso)) {
+                return [
+                    'success' => false,
+                    'message' => 'El curso ya tiene un examen asociado.'
+                ];
+            }
 
             $validacion = $this->validarDatosExamen($dto->toArray());
             if (!$validacion['valido']) {
