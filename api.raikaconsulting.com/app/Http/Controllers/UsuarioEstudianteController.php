@@ -160,4 +160,35 @@ class UsuarioEstudianteController extends Controller
             return UsuarioEstudianteResponse::error('Error al procesar el examen: ' . $e->getMessage());
         }
     }
+
+    public function obtenerHistorialIntentos(int $id, Request $request): JsonResponse
+    {
+        try {
+            $usuario = $request->get('authenticated_user');
+
+            if (!$usuario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no autenticado'
+                ], 401);
+            }
+
+            $data = $this->usuarioEstudianteService->obtenerHistorialIntentos(
+                $usuario->id_usuario,
+                $id
+            );
+
+            if (isset($data['success']) && $data['success'] === false) {
+                if ($data['message'] === 'No tienes acceso a este curso') {
+                    return UsuarioEstudianteResponse::accesoNoAutorizadoCurso();
+                }
+                return UsuarioEstudianteResponse::error($data['message']);
+            }
+
+            return UsuarioEstudianteResponse::historialIntentos($data);
+
+        } catch (\Exception $e) {
+            return UsuarioEstudianteResponse::error('Error al obtener el historial: ' . $e->getMessage());
+        }
+    }
 }

@@ -241,4 +241,13 @@ class CapacitacionResponse
             ]
         ];
     }
+
+    public static function estudiantesConResultados(array $data): array
+    {
+        return [
+            'success' => true,
+            'message' => 'Estudiantes con resultados obtenidos exitosamente.',
+            'data' => $data
+        ];
+    }
 }

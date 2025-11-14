@@ -279,6 +279,63 @@ class CapacitacionService
         }
     }
 
+    public function obtenerEstudiantesConResultados(int $idCapacitacion): array
+    {
+        try {
+            // Verificar que la capacitación existe
+            $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
+            
+            if (!$capacitacion) {
+                return CapacitacionResponse::error('La capacitación especificada no existe.', ['id_capacitacion' => 'No encontrada']);
+            }
+            
+            $estudiantes = $this->capacitacionRepository->obtenerEstudiantesConResultados($idCapacitacion);
+            
+            // Obtener detalles de cursos para cada estudiante
+            foreach ($estudiantes as &$estudiante) {
+                $estudiante->cursos = $this->capacitacionRepository->obtenerDetallesCursosEstudiante(
+                    $idCapacitacion, 
+                    $estudiante->id_usuario
+                );
+            }
+            
+            // Preparar datos de empresa y solicitante
+            $empresaData = null;
+            $solicitanteData = null;
+            
+            if ($capacitacion->solicitante) {
+                $solicitanteData = [
+                    'id_solicitante' => $capacitacion->solicitante->id_solicitante,
+                    'nombre' => $capacitacion->solicitante->nombre,
+                    'apellido' => $capacitacion->solicitante->apellido,
+                    'cargo' => $capacitacion->solicitante->cargo,
+                    'correo' => $capacitacion->solicitante->correo,
+                    'telefono' => $capacitacion->solicitante->telefono
+                ];
+                
+                if ($capacitacion->solicitante->empresa) {
+                    $empresaData = [
+                        'id_empresa' => $capacitacion->solicitante->empresa->id_empresa,
+                        'nombre' => $capacitacion->solicitante->empresa->nombre
+                    ];
+                }
+            }
+            
+            return CapacitacionResponse::estudiantesConResultados([
+                'capacitacion' => [
+                    'id_capacitacion' => $capacitacion->id_capacitacion,
+                    'estado' => $capacitacion->estado
+                ],
+                'empresa' => $empresaData,
+                'solicitante' => $solicitanteData,
+                'estudiantes' => $estudiantes
+            ]);
+            
+        } catch (Exception $e) {
+            return CapacitacionResponse::error('Error al obtener los estudiantes con resultados.', [$e->getMessage()]);
+        }
+    }
+
 
 
 }

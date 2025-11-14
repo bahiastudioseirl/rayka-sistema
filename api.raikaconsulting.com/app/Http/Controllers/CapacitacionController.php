@@ -192,4 +192,24 @@ class CapacitacionController extends Controller
         }
     }
 
+    public function verEstudiantesConResultados(int $id): JsonResponse
+    {
+        try {
+            $resultado = $this->capacitacionService->obtenerEstudiantesConResultados($id);
+            
+            if ($resultado['success']) {
+                return response()->json($resultado, 200);
+            }
+            
+            return response()->json($resultado, 400);
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

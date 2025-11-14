@@ -42,6 +42,7 @@ Route::middleware('auth.estudiante')->prefix('estudiantes')->group(function () {
     Route::get('cursos/{id}', [UsuarioEstudianteController::class, 'mostrarCursoPorId']);
     Route::patch('cursos/{id}/marcar-video-finalizado', [UsuarioEstudianteController::class, 'marcarVideoFinalizado']);
     Route::post('cursos/{id}/rendir-examen', [UsuarioEstudianteController::class, 'rendirExamen']);
+    Route::get('cursos/{id}/historial-intentos', [UsuarioEstudianteController::class, 'obtenerHistorialIntentos']);
 });
 
 // Rutas para administradores autenticados
@@ -83,6 +84,7 @@ Route::middleware('auth.admin')->group(function () {
     Route::post('capacitaciones', [CapacitacionController::class, 'crear']);
     Route::get('capacitaciones', [CapacitacionController::class, 'verCapacitaciones']);
     Route::get('capacitaciones/{id}', [CapacitacionController::class, 'verCapacitacionPorId']);
+    Route::get('capacitaciones/{id}/estudiantes', [CapacitacionController::class, 'verEstudiantesConResultados']);
     Route::post('capacitaciones/{id}/estudiantes/agregar', [CapacitacionController::class, 'agregarEstudiantes']);
     Route::delete('capacitaciones/{id}/estudiantes/eliminar', [CapacitacionController::class, 'eliminarEstudiantes']);
     Route::post('capacitaciones/{id}/cursos/agregar', [CapacitacionController::class, 'agregarCursos']);

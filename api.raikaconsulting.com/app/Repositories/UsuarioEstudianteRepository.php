@@ -274,4 +274,32 @@ class UsuarioEstudianteRepository
             return DB::table('progresos')->insert($datosActualizacion);
         }
     }
+
+    public function registrarIntentoExamen(int $idProgreso, int $numIntento, float $nota, int $respuestasCorrectas, int $totalPreguntas, string $resultado): bool
+    {
+        return DB::table('intentos_examen')->insert([
+            'id_progreso' => $idProgreso,
+            'num_intento' => $numIntento,
+            'nota' => $nota,
+            'respuestas_correctas' => $respuestasCorrectas,
+            'total_preguntas' => $totalPreguntas,
+            'resultado' => $resultado,
+            'fecha_intento' => now()
+        ]);
+    }
+
+    public function obtenerHistorialIntentos(int $idProgreso)
+    {
+        return DB::table('intentos_examen')
+            ->where('id_progreso', $idProgreso)
+            ->orderBy('num_intento', 'asc')
+            ->get();
+    }
+
+    public function obtenerMejorPuntaje(int $idProgreso): ?float
+    {
+        return DB::table('intentos_examen')
+            ->where('id_progreso', $idProgreso)
+            ->max('nota');
+    }
 }

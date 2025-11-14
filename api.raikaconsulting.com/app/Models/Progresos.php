@@ -45,4 +45,10 @@ class Progresos extends Model
     {
         return $this->belongsTo(Cursos::class, 'id_curso', 'id_curso');
     }
+
+    // Un progreso tiene muchos intentos de examen
+    public function intentosExamen()
+    {
+        return $this->hasMany(IntentosExamen::class, 'id_progreso', 'id_progreso');
+    }
 }
