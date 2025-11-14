@@ -41,6 +41,7 @@ Route::middleware('auth.estudiante')->prefix('estudiantes')->group(function () {
     Route::get('cursos', [UsuarioEstudianteController::class, 'listarMisCursos']);
     Route::get('cursos/{id}', [UsuarioEstudianteController::class, 'mostrarCursoPorId']);
     Route::patch('cursos/{id}/marcar-video-finalizado', [UsuarioEstudianteController::class, 'marcarVideoFinalizado']);
+    Route::post('cursos/{id}/rendir-examen', [UsuarioEstudianteController::class, 'rendirExamen']);
 });
 
 // Rutas para administradores autenticados
@@ -94,5 +95,6 @@ Route::middleware('auth.admin')->group(function () {
     Route::patch('examenes/{id}', [ExamenController::class, 'actualizar']);
     Route::post('examenes/{id}/preguntas', [ExamenController::class, 'agregarPreguntas']);
     Route::delete('examenes/{idExamen}/preguntas/{idPregunta}', [ExamenController::class, 'eliminarPregunta']);
+    Route::get('examenes', [ExamenController::class, 'listarExamenesConCursos']);
 
 });

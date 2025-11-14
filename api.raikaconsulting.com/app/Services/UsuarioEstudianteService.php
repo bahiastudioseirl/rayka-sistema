@@ -180,7 +180,6 @@ class UsuarioEstudianteService
 
     public function marcarVideoFinalizado(int $idUsuario, int $idCurso): array
     {
-        // Verificar que el estudiante tenga acceso al curso
         $tieneAcceso = $this->usuarioEstudianteRepository->tieneAccesoAlCurso($idUsuario, $idCurso);
         
         if (!$tieneAcceso) {
@@ -190,7 +189,6 @@ class UsuarioEstudianteService
             ];
         }
 
-        // Marcar el video como finalizado
         $actualizado = $this->usuarioEstudianteRepository->marcarVideoFinalizado($idUsuario, $idCurso);
 
         if (!$actualizado) {
@@ -200,7 +198,6 @@ class UsuarioEstudianteService
             ];
         }
 
-        // Obtener el progreso actualizado
         $progreso = $this->usuarioEstudianteRepository->obtenerProgresoCurso($idUsuario, $idCurso);
 
         return [
@@ -212,6 +209,109 @@ class UsuarioEstudianteService
                 'completado' => $progreso->completado,
                 'nota' => $progreso->nota,
                 'intentos_usados' => $progreso->intentos_usados
+            ]
+        ];
+    }
+
+    public function rendirExamen(int $idUsuario, int $idCurso, array $respuestas): array
+    {
+        $tieneAcceso = $this->usuarioEstudianteRepository->tieneAccesoAlCurso($idUsuario, $idCurso);
+        
+        if (!$tieneAcceso) {
+            return [
+                'success' => false,
+                'message' => 'No tienes acceso a este curso'
+            ];
+        }
+
+        $examen = $this->usuarioEstudianteRepository->obtenerExamenDelCurso($idCurso);
+
+        if (!$examen) {
+            return [
+                'success' => false,
+                'message' => 'Este curso no tiene un examen asociado'
+            ];
+        }
+
+        $progreso = $this->usuarioEstudianteRepository->obtenerProgresoCurso($idUsuario, $idCurso);
+
+        if (!$progreso || !$progreso->video_finalizado) {
+            return [
+                'success' => false,
+                'message' => 'Debes finalizar el video del curso antes de rendir el examen'
+            ];
+        }
+
+        $maxIntentos = $this->usuarioEstudianteRepository->obtenerMaxIntentosCapacitacion($idUsuario, $idCurso);
+        
+        $intentosUsados = $progreso ? $progreso->intentos_usados + 1 : 1;
+
+        if ($maxIntentos && $intentosUsados > $maxIntentos) {
+            return [
+                'success' => false,
+                'message' => "Has alcanzado el máximo de intentos permitidos ({$maxIntentos})"
+            ];
+        }
+
+        $preguntas = $this->usuarioEstudianteRepository->obtenerPreguntasDelExamen($examen->id_examen);
+        $totalPreguntas = count($preguntas);
+
+        if ($totalPreguntas === 0) {
+            return [
+                'success' => false,
+                'message' => 'El examen no tiene preguntas configuradas'
+            ];
+        }
+
+        if (count($respuestas) !== $totalPreguntas) {
+            return [
+                'success' => false,
+                'message' => "Debes responder todas las preguntas ({$totalPreguntas})"
+            ];
+        }
+
+        $respuestasCorrectas = 0;
+        $detalleRespuestas = [];
+
+        foreach ($respuestas as $respuesta) {
+            $esCorrecta = $this->usuarioEstudianteRepository->verificarRespuesta($respuesta['id_respuesta']);
+            
+            if ($esCorrecta) {
+                $respuestasCorrectas++;
+            }
+
+            $detalleRespuestas[] = [
+                'id_pregunta' => $respuesta['id_pregunta'],
+                'id_respuesta' => $respuesta['id_respuesta'],
+                'es_correcta' => $esCorrecta
+            ];
+        }
+
+        $nota = ($respuestasCorrectas / $totalPreguntas) * 20;
+        $nota = round($nota, 2);
+
+        $resultado = $nota >= 10.5 ? 'aprobado' : 'desaprobado';
+
+        $this->usuarioEstudianteRepository->actualizarProgresoExamen(
+            $idUsuario,
+            $idCurso,
+            $nota,
+            $resultado,
+            $intentosUsados
+        );
+
+        return [
+            'success' => true,
+            'message' => $resultado === 'aprobado' ? '¡Felicidades! Has aprobado el examen' : 'No has aprobado el examen',
+            'resultado' => [
+                'nota' => $nota,
+                'resultado' => $resultado,
+                'respuestas_correctas' => $respuestasCorrectas,
+                'total_preguntas' => $totalPreguntas,
+                'porcentaje' => round(($respuestasCorrectas / $totalPreguntas) * 100, 2),
+                'intentos_usados' => $intentosUsados,
+                'intentos_restantes' => $maxIntentos ? ($maxIntentos - $intentosUsados) : null,
+                'detalle_respuestas' => $detalleRespuestas
             ]
         ];
     }

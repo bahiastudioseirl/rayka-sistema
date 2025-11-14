@@ -160,4 +160,22 @@ class ExamenController extends Controller
             );
         }
     }
+
+    public function listarExamenesConCursos(): JsonResponse
+    {
+        try {
+            $resultado = $this->examenService->listarExamenesConCursos();
+
+            return response()->json([
+                'success' => true,
+                'data' => $resultado
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(
+                ExamenResponse::error('Error interno del servidor.'),
+                500
+            );
+        }
+    }
 }

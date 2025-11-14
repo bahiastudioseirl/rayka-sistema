@@ -17,6 +17,7 @@ class Progresos extends Model
         'completado',
         'video_finalizado',
         'nota',
+        'resultado_examen',
         'intentos_usados',
         'fecha_ultimo_intento',
         'id_usuario',
