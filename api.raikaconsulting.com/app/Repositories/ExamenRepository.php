@@ -136,4 +136,34 @@ class ExamenRepository
     {
         return Examenes::where('id_curso', $idCurso)->exists();
     }
+
+    public function obtenerPreguntaPorId(int $idPregunta): ?Preguntas
+    {
+        return Preguntas::with('respuestas')->find($idPregunta);
+    }
+
+    public function obtenerRespuestaPorId(int $idRespuesta): ?Respuestas
+    {
+        return Respuestas::find($idRespuesta);
+    }
+
+    public function agregarRespuestasAPregunta(int $idPregunta, array $respuestas): array
+    {
+        $respuestasCreadas = [];
+        
+        foreach ($respuestas as $respuestaData) {
+            $respuestasCreadas[] = Respuestas::create([
+                'texto' => $respuestaData['texto'],
+                'es_correcta' => $respuestaData['es_correcta'],
+                'id_pregunta' => $idPregunta
+            ]);
+        }
+        
+        return $respuestasCreadas;
+    }
+
+    public function eliminarRespuesta(int $idRespuesta): bool
+    {
+        return Respuestas::where('id_respuesta', $idRespuesta)->delete();
+    }
 }

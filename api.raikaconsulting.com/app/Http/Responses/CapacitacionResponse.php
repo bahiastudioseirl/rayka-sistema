@@ -103,6 +103,8 @@ class CapacitacionResponse
             'max_intentos' => $capacitacion->max_intentos,
             'link_login_unico' => $capacitacion->link_login_unico,
             'fecha_creacion' => $capacitacion->fecha_creacion?->format('Y-m-d H:i:s'),
+            'fecha_inicio' => $capacitacion->fecha_inicio ? (string)$capacitacion->fecha_inicio : null,
+            'fecha_fin' => $capacitacion->fecha_fin ? (string)$capacitacion->fecha_fin : null,
             'estado' => $capacitacion->estado,
             'id_solicitante' => $capacitacion->id_solicitante
         ];
@@ -248,6 +250,17 @@ class CapacitacionResponse
             'success' => true,
             'message' => 'Estudiantes con resultados obtenidos exitosamente.',
             'data' => $data
+        ];
+    }
+
+    public static function actualizada(Capacitaciones $capacitacion): array
+    {
+        return [
+            'success' => true,
+            'message' => 'Capacitación actualizada exitosamente.',
+            'data' => [
+                'capacitacion' => self::formatCapacitacion($capacitacion)
+            ]
         ];
     }
 }

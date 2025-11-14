@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\Capacitaciones\CrearCapacitacionDTO;
+use App\DTOs\Capacitaciones\ActualizarCapacitacionDTO;
 use App\Repositories\CapacitacionRepository;
 use App\Http\Responses\CapacitacionResponse;
 use Illuminate\Database\QueryException;
@@ -282,7 +283,6 @@ class CapacitacionService
     public function obtenerEstudiantesConResultados(int $idCapacitacion): array
     {
         try {
-            // Verificar que la capacitación existe
             $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
             
             if (!$capacitacion) {
@@ -291,7 +291,6 @@ class CapacitacionService
             
             $estudiantes = $this->capacitacionRepository->obtenerEstudiantesConResultados($idCapacitacion);
             
-            // Obtener detalles de cursos para cada estudiante
             foreach ($estudiantes as &$estudiante) {
                 $estudiante->cursos = $this->capacitacionRepository->obtenerDetallesCursosEstudiante(
                     $idCapacitacion, 
@@ -299,7 +298,6 @@ class CapacitacionService
                 );
             }
             
-            // Preparar datos de empresa y solicitante
             $empresaData = null;
             $solicitanteData = null;
             
@@ -333,6 +331,32 @@ class CapacitacionService
             
         } catch (Exception $e) {
             return CapacitacionResponse::error('Error al obtener los estudiantes con resultados.', [$e->getMessage()]);
+        }
+    }
+
+    public function actualizarCapacitacion(int $idCapacitacion, ActualizarCapacitacionDTO $capacitacionDTO): array
+    {
+        try {
+            $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
+            
+            if (!$capacitacion) {
+                return CapacitacionResponse::error('La capacitación especificada no existe.', ['id_capacitacion' => 'No encontrada']);
+            }
+            
+            $datosActualizar = $capacitacionDTO->toArray();
+            
+            if (empty($datosActualizar)) {
+                return CapacitacionResponse::error('No se proporcionaron datos para actualizar.');
+            }
+            
+            $this->capacitacionRepository->actualizar($idCapacitacion, $datosActualizar);
+            
+            $capacitacionActualizada = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
+            
+            return CapacitacionResponse::actualizada($capacitacionActualizada);
+            
+        } catch (Exception $e) {
+            return CapacitacionResponse::error('Error al actualizar la capacitación.', [$e->getMessage()]);
         }
     }
 

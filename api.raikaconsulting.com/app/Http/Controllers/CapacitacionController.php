@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Request\Capacitaciones\CrearCapacitacionRequest;
+use App\Http\Request\Capacitaciones\ActualizarCapacitacionRequest;
 use App\Http\Request\Capacitaciones\AgregarEstudiantesCapacitacionRequest;
 use App\Http\Request\Capacitaciones\EliminarEstudiantesCapacitacionRequest;
 use App\Http\Request\Capacitaciones\AgregarCursosCapacitacionRequest;
 use App\Http\Request\Capacitaciones\EliminarCursosCapacitacionRequest;
 use App\DTOs\Capacitaciones\CrearCapacitacionDTO;
+use App\DTOs\Capacitaciones\ActualizarCapacitacionDTO;
 use App\Services\CapacitacionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -157,32 +159,29 @@ class CapacitacionController extends Controller
         }
     }
 
-    public function cambiarEstado(int $id): JsonResponse
+    public function actualizarCapacitacion(ActualizarCapacitacionRequest $request, int $id): JsonResponse
     {
         try {
-            $resultado = $this->capacitacionService->cambiarEstado($id);
-            
+            $capacitacionDTO = ActualizarCapacitacionDTO::fromRequest($request->validated());
+            $resultado = $this->capacitacionService->actualizarCapacitacion($id, $capacitacionDTO);
             if ($resultado['success']) {
                 return response()->json([
                     'success' => true,
-                    'message' => $resultado['message'],
+                    'message' => $resultado['message'] ?? 'Capacitación actualizada exitosamente.',
                     'data' => $resultado['data'] ?? null
                 ], 200);
             }
-            
             return response()->json([
                 'success' => false,
-                'message' => $resultado['message'],
+                'message' => $resultado['message'] ?? 'Error al actualizar la capacitación.',
                 'errors' => $resultado['errors'] ?? null
             ], 400);
-            
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error de validación.',
                 'errors' => $e->errors()
             ], 422);
-            
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,

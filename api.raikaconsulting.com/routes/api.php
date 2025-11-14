@@ -84,6 +84,7 @@ Route::middleware('auth.admin')->group(function () {
     Route::post('capacitaciones', [CapacitacionController::class, 'crear']);
     Route::get('capacitaciones', [CapacitacionController::class, 'verCapacitaciones']);
     Route::get('capacitaciones/{id}', [CapacitacionController::class, 'verCapacitacionPorId']);
+    Route::patch('capacitaciones/{id}', [CapacitacionController::class, 'actualizarCapacitacion']);
     Route::get('capacitaciones/{id}/estudiantes', [CapacitacionController::class, 'verEstudiantesConResultados']);
     Route::post('capacitaciones/{id}/estudiantes/agregar', [CapacitacionController::class, 'agregarEstudiantes']);
     Route::delete('capacitaciones/{id}/estudiantes/eliminar', [CapacitacionController::class, 'eliminarEstudiantes']);
@@ -97,6 +98,8 @@ Route::middleware('auth.admin')->group(function () {
     Route::patch('examenes/{id}', [ExamenController::class, 'actualizar']);
     Route::post('examenes/{id}/preguntas', [ExamenController::class, 'agregarPreguntas']);
     Route::delete('examenes/{idExamen}/preguntas/{idPregunta}', [ExamenController::class, 'eliminarPregunta']);
+    Route::post('examenes/{idExamen}/preguntas/{idPregunta}/respuestas', [ExamenController::class, 'agregarRespuestas']);
+    Route::delete('examenes/{idExamen}/preguntas/{idPregunta}/respuestas/{idRespuesta}', [ExamenController::class, 'eliminarRespuesta']);
     Route::get('examenes', [ExamenController::class, 'listarExamenesConCursos']);
 
 });

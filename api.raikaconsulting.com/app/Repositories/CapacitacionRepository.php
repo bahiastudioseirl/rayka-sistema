@@ -260,6 +260,12 @@ class CapacitacionRepository
         return $this->obtenerPorId($idCapacitacion);
     }
 
+    public function actualizar(int $idCapacitacion, array $datos): bool
+    {
+        return Capacitaciones::where('id_capacitacion', $idCapacitacion)
+            ->update($datos);
+    }
+
     public function obtenerEstudiantesConResultados(int $idCapacitacion): array
     {
         return DB::table('usuarios_capacitaciones as uc')

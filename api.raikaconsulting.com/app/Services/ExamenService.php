@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\Examenes\ActualizarExamenDTO;
 use App\DTOs\Examenes\AgregarPreguntasDTO;
+use App\DTOs\Examenes\AgregarRespuestasDTO;
 use App\DTOs\Examenes\CrearExamenDTO;
 use App\Repositories\ExamenRepository;
 use Exception;
@@ -326,6 +327,109 @@ class ExamenService
             return [
                 'success' => false,
                 'message' => 'Error al listar los exámenes con sus cursos.',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function agregarRespuestas(int $idPregunta, AgregarRespuestasDTO $dto): array
+    {
+        try {
+            $pregunta = $this->examenRepository->obtenerPreguntaPorId($idPregunta);
+
+            if (!$pregunta) {
+                return [
+                    'success' => false,
+                    'message' => 'Pregunta no encontrada.'
+                ];
+            }
+
+            $tieneCorrecta = collect($dto->respuestas)->contains('es_correcta', true);
+            $respuestasActuales = $pregunta->respuestas;
+            $yaCorrecta = $respuestasActuales->where('es_correcta', true)->count();
+            $nuevasCorrectas = collect($dto->respuestas)->where('es_correcta', true)->count();
+
+            // Solo bloquear si NO hay ninguna respuesta correcta en BD ni en el request
+            if (!$tieneCorrecta && $yaCorrecta === 0) {
+                return [
+                    'success' => false,
+                    'message' => 'Debe haber al menos una respuesta correcta.',
+                    'errors' => [
+                        'respuestas' => ['Debe haber al menos una respuesta correcta.']
+                    ]
+                ];
+            }
+
+            if (($yaCorrecta + $nuevasCorrectas) > 1) {
+                return [
+                    'success' => false,
+                    'message' => 'Solo puede haber una respuesta correcta por pregunta.'
+                ];
+            }
+
+            $respuestasCreadas = $this->examenRepository->agregarRespuestasAPregunta($idPregunta, $dto->respuestas);
+
+            $preguntaActualizada = $this->examenRepository->obtenerPreguntaPorId($idPregunta);
+
+            return [
+                'success' => true,
+                'message' => 'Respuestas agregadas exitosamente.',
+                'data' => [
+                    'id_pregunta' => $preguntaActualizada->id_pregunta,
+                    'texto' => $preguntaActualizada->texto,
+                    'respuestas' => $preguntaActualizada->respuestas->map(function ($respuesta) {
+                        return [
+                            'id_respuesta' => $respuesta->id_respuesta,
+                            'texto' => $respuesta->texto,
+                            'es_correcta' => $respuesta->es_correcta
+                        ];
+                    })->values()->all()
+                ]
+            ];
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error al agregar respuestas.',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function eliminarRespuesta(int $idPregunta, int $idRespuesta): array
+    {
+        try {
+            $pregunta = $this->examenRepository->obtenerPreguntaPorId($idPregunta);
+
+            if (!$pregunta) {
+                return [
+                    'success' => false,
+                    'message' => 'Pregunta no encontrada.'
+                ];
+            }
+
+            $respuesta = $this->examenRepository->obtenerRespuestaPorId($idRespuesta);
+
+            if (!$respuesta || $respuesta->id_pregunta !== $idPregunta) {
+                return [
+                    'success' => false,
+                    'message' => 'Respuesta no encontrada o no pertenece a esta pregunta.'
+                ];
+            }
+
+            // Permitir eliminar cualquier respuesta sin restricciones
+
+            $this->examenRepository->eliminarRespuesta($idRespuesta);
+
+            return [
+                'success' => true,
+                'message' => 'Respuesta eliminada exitosamente.'
+            ];
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error al eliminar la respuesta.',
                 'error' => $e->getMessage()
             ];
         }
