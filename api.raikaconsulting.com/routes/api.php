@@ -95,5 +95,6 @@ Route::middleware('auth.admin')->group(function () {
     Route::patch('examenes/{id}', [ExamenController::class, 'actualizar']);
     Route::post('examenes/{id}/preguntas', [ExamenController::class, 'agregarPreguntas']);
     Route::delete('examenes/{idExamen}/preguntas/{idPregunta}', [ExamenController::class, 'eliminarPregunta']);
+    Route::get('examenes', [ExamenController::class, 'listarExamenesConCursos']);
 
 });

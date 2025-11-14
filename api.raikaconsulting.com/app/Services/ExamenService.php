@@ -302,4 +302,25 @@ class ExamenService
             ];
         }
     }
+
+    public function listarExamenesConCursos(): array
+    {
+        try {
+            $examenes = $this->examenRepository->listarExamenesJuntoConCursos();
+
+            return [
+                'success' => true,
+                'data' => $examenes->map(function ($examen) {
+                    return $this->formatearExamen($examen);
+                })->values()->all()
+            ];
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error al listar los exámenes con sus cursos.',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
 }

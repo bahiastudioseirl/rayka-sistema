@@ -126,4 +126,9 @@ class ExamenRepository
             ->where('id_examen', $idExamen)
             ->exists();
     }
+
+    public function listarExamenesJuntoConCursos()
+    {
+        return Examenes::with('curso')->get();
+    }
 }
