@@ -246,13 +246,27 @@ class ReporteService
 
     private function generarArchivoExcel(array $data, $capacitacion): string
     {
-        $filename = 'reporte_capacitacion_' . $capacitacion->id_capacitacion . '_' . date('Y-m-d_H-i-s') . '.xlsx';
-        $filepath = storage_path('app/public/reportes/' . $filename);
+        $directorioReportes = storage_path('app/public/reportes/');
         
         // Crear directorio si no existe
-        if (!file_exists(dirname($filepath))) {
-            mkdir(dirname($filepath), 0755, true);
+        if (!file_exists($directorioReportes)) {
+            mkdir($directorioReportes, 0755, true);
         }
+        
+        // Buscar archivos existentes de esta capacitación
+        $patronArchivo = 'reporte_capacitacion_' . $capacitacion->id_capacitacion . '_*.xlsx';
+        $archivosExistentes = glob($directorioReportes . $patronArchivo);
+        
+        // Eliminar archivos anteriores de la misma capacitación
+        foreach ($archivosExistentes as $archivoAnterior) {
+            if (file_exists($archivoAnterior)) {
+                unlink($archivoAnterior);
+            }
+        }
+        
+        // Generar nuevo archivo
+        $filename = 'reporte_capacitacion_' . $capacitacion->id_capacitacion . '_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $filepath = $directorioReportes . $filename;
         
         // Generar Excel usando SimpleXLSXGen
         $xlsx = SimpleXLSXGen::fromArray($data);
