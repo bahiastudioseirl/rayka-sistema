@@ -46,3 +46,46 @@ export interface CrearExamenResponse {
   message: string;
   data: Examen;
 }
+
+export interface ExamenEnLista {
+  id_examen: number;
+  titulo: string;
+  curso: CursoResumen; 
+  fecha_creacion: string;
+  total_preguntas: number;
+  preguntas: Pregunta[];
+}
+
+export interface ObtenerExamenesResponse {
+  success: boolean;
+  data: ObtenerExamenesDataAnidada; 
+}
+export interface ObtenerExamenesDataAnidada {
+  success: boolean;
+  data: ExamenEnLista[]; 
+}
+
+export interface ActualizarExamenRequest {
+  titulo: string;
+  id_curso: number;
+}
+
+export interface ActualizarExamenResponse {
+  success: boolean;
+  message: string;
+  data: Examen; 
+}
+
+export interface EliminarPreguntaResponse {
+  success: boolean;
+  message: string;
+}
+export interface AgregarPreguntaRequest {
+  texto: string;
+  respuestas: RespuestaCrearRequest[]; 
+}
+export interface AgregarPreguntaResponse {
+  success: boolean;
+  message: string;
+  data: Pregunta; 
+}

@@ -5,6 +5,7 @@ import LogoRayka from '../../../assets/LogoRayka.png';
 import { UserStore } from './services/UserLoginService';
 import type { UserLoginRequest } from './schemas/UserLoginSchema';
 import { obtenerCapacitacionPorCodigo, type CapacitacionCompleta } from '../../../admin/features/capacticacionAdmin/services/obtenerCapacitacionPorCodigo';
+import { loginEstudiante } from '../../../pages/cursos/services/loginEstudiante';
 
 export const UserLoginForm = () => {
   const [credentials, setCredentials] = useState<UserLoginRequest>({
@@ -60,34 +61,28 @@ export const UserLoginForm = () => {
       return;
     }
 
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (credentials.num_documento.length !== 8) {
+      setError('El DNI debe tener 8 dígitos.');
+      setIsLoading(false);
+      return;
+    }
 
-    // Validación específica para capacitación
-    if (isCapacitacionLogin && capacitacionInfo) {
-      if (credentials.num_documento.length === 8) {
-        // Verificar si el usuario está registrado en esta capacitación
-        const usuarioEnCapacitacion = capacitacionInfo.usuarios_asignados.find(
-          (usuario) => usuario.num_documento === credentials.num_documento
-        );
+    try {
+      // Validación específica para capacitación
+      if (isCapacitacionLogin && capacitacionInfo && codigo) {
+        // Login real con la API
+        const response = await loginEstudiante(codigo, credentials.num_documento);
         
-        if (usuarioEnCapacitacion) {
-          // Guardar datos del usuario con contexto de capacitación
-          UserStore.clearAll();
-          UserStore.setUser(usuarioEnCapacitacion);
-          UserStore.setToken('capacitacion-token-' + Date.now());
-          
-          // Redirigir a los cursos de la capacitación específica
-          navigate(`/capacitacion/${codigo}/cursos`);
-        } else {
-          setError('Tu DNI no está registrado para esta capacitación.');
-        }
-      } else {
-        setError('DNI debe tener 8 dígitos.');
-      }
-    } else if (!isCapacitacionLogin) {
-      // Login general - sin capacitación específica
-      if (credentials.num_documento.length === 8) {
+        // Guardar token y datos del usuario
+        localStorage.setItem('estudiante_token', response.access_token);
+        localStorage.setItem('estudiante_data', JSON.stringify(response.usuario));
+        localStorage.setItem('capacitacion_data', JSON.stringify(response.capacitacion));
+        
+        // Redirigir a los cursos de la capacitación específica
+        navigate(`/capacitacion/${codigo}/cursos`);
+        
+      } else if (!isCapacitacionLogin) {
+        // Login general - sin capacitación específica
         UserStore.clearAll();
         UserStore.setUser({
           id_usuario: 1,
@@ -102,13 +97,18 @@ export const UserLoginForm = () => {
         // Ir a la página de cursos general
         navigate('/');
       } else {
-        setError('DNI no encontrado en el sistema.');
+        setError('No se pudo cargar la información de la capacitación.');
       }
-    } else {
-      setError('No se pudo cargar la información de la capacitación.');
+    } catch (err) {
+      console.error('Error en login:', err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Error al iniciar sesión. Por favor, intenta nuevamente.');
+      }
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -240,13 +240,6 @@ export const UserLoginForm = () => {
                 'Ingresar'
               )}
             </button>
-
-            {/* Demo Info */}
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-xs text-blue-700 text-center">
-                <strong>Demo:</strong> Usa el DNI <code className="bg-blue-100 px-1 rounded">12345678</code> para probar
-              </p>
-            </div>
           </form>
           )}
         </div>
