@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\DTOs\Examenes\ActualizarExamenDTO;
 use App\DTOs\Examenes\AgregarPreguntasDTO;
+use App\DTOs\Examenes\AgregarRespuestasDTO;
 use App\DTOs\Examenes\CrearExamenDTO;
 use App\Http\Request\Examen\AgregarPreguntasRequest;
+use App\Http\Request\Examen\AgregarRespuestasRequest;
 use App\Http\Request\Examen\ActualizarExamenRequest;
 use App\Http\Request\Examen\CrearExamenRequest;
 use App\Http\Responses\ExamenResponse;
@@ -170,6 +172,45 @@ class ExamenController extends Controller
                 'success' => true,
                 'data' => $resultado
             ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(
+                ExamenResponse::error('Error interno del servidor.'),
+                500
+            );
+        }
+    }
+
+    public function agregarRespuestas(AgregarRespuestasRequest $request, int $idPregunta): JsonResponse
+    {
+        try {
+            $dto = AgregarRespuestasDTO::fromRequest($request->validated());
+            $resultado = $this->examenService->agregarRespuestas($idPregunta, $dto);
+
+            if ($resultado['success']) {
+                return response()->json($resultado, 201);
+            }
+
+            return response()->json($resultado, 400);
+
+        } catch (\Exception $e) {
+            return response()->json(
+                ExamenResponse::error('Error interno del servidor.'),
+                500
+            );
+        }
+    }
+
+    public function eliminarRespuesta(int $idPregunta, int $idRespuesta): JsonResponse
+    {
+        try {
+            $resultado = $this->examenService->eliminarRespuesta($idPregunta, $idRespuesta);
+
+            if ($resultado['success']) {
+                return response()->json($resultado, 200);
+            }
+
+            return response()->json($resultado, 400);
 
         } catch (\Exception $e) {
             return response()->json(

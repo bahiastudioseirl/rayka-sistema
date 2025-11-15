@@ -109,6 +109,18 @@ class UsuarioEstudianteResponse
         ], 400);
     }
 
+    public static function historialIntentos(array $data): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Historial de intentos obtenido exitosamente',
+            'data' => [
+                'historial_intentos' => $data['historial_intentos'],
+                'resumen' => $data['resumen']
+            ]
+        ], 200);
+    }
+
     public static function error(string $message = 'Error al procesar la solicitud'): JsonResponse
     {
         return response()->json([

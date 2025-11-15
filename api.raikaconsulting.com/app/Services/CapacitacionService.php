@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\Capacitaciones\CrearCapacitacionDTO;
+use App\DTOs\Capacitaciones\ActualizarCapacitacionDTO;
 use App\Repositories\CapacitacionRepository;
 use App\Http\Responses\CapacitacionResponse;
 use Illuminate\Database\QueryException;
@@ -276,6 +277,86 @@ class CapacitacionService
             
         } catch (Exception $e) {
             return CapacitacionResponse::error('Error al cambiar el estado de la capacitación.', [$e->getMessage()]);
+        }
+    }
+
+    public function obtenerEstudiantesConResultados(int $idCapacitacion): array
+    {
+        try {
+            $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
+            
+            if (!$capacitacion) {
+                return CapacitacionResponse::error('La capacitación especificada no existe.', ['id_capacitacion' => 'No encontrada']);
+            }
+            
+            $estudiantes = $this->capacitacionRepository->obtenerEstudiantesConResultados($idCapacitacion);
+            
+            foreach ($estudiantes as &$estudiante) {
+                $estudiante->cursos = $this->capacitacionRepository->obtenerDetallesCursosEstudiante(
+                    $idCapacitacion, 
+                    $estudiante->id_usuario
+                );
+            }
+            
+            $empresaData = null;
+            $solicitanteData = null;
+            
+            if ($capacitacion->solicitante) {
+                $solicitanteData = [
+                    'id_solicitante' => $capacitacion->solicitante->id_solicitante,
+                    'nombre' => $capacitacion->solicitante->nombre,
+                    'apellido' => $capacitacion->solicitante->apellido,
+                    'cargo' => $capacitacion->solicitante->cargo,
+                    'correo' => $capacitacion->solicitante->correo,
+                    'telefono' => $capacitacion->solicitante->telefono
+                ];
+                
+                if ($capacitacion->solicitante->empresa) {
+                    $empresaData = [
+                        'id_empresa' => $capacitacion->solicitante->empresa->id_empresa,
+                        'nombre' => $capacitacion->solicitante->empresa->nombre
+                    ];
+                }
+            }
+            
+            return CapacitacionResponse::estudiantesConResultados([
+                'capacitacion' => [
+                    'id_capacitacion' => $capacitacion->id_capacitacion,
+                    'estado' => $capacitacion->estado
+                ],
+                'empresa' => $empresaData,
+                'solicitante' => $solicitanteData,
+                'estudiantes' => $estudiantes
+            ]);
+            
+        } catch (Exception $e) {
+            return CapacitacionResponse::error('Error al obtener los estudiantes con resultados.', [$e->getMessage()]);
+        }
+    }
+
+    public function actualizarCapacitacion(int $idCapacitacion, ActualizarCapacitacionDTO $capacitacionDTO): array
+    {
+        try {
+            $capacitacion = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
+            
+            if (!$capacitacion) {
+                return CapacitacionResponse::error('La capacitación especificada no existe.', ['id_capacitacion' => 'No encontrada']);
+            }
+            
+            $datosActualizar = $capacitacionDTO->toArray();
+            
+            if (empty($datosActualizar)) {
+                return CapacitacionResponse::error('No se proporcionaron datos para actualizar.');
+            }
+            
+            $this->capacitacionRepository->actualizar($idCapacitacion, $datosActualizar);
+            
+            $capacitacionActualizada = $this->capacitacionRepository->obtenerPorId($idCapacitacion);
+            
+            return CapacitacionResponse::actualizada($capacitacionActualizada);
+            
+        } catch (Exception $e) {
+            return CapacitacionResponse::error('Error al actualizar la capacitación.', [$e->getMessage()]);
         }
     }
 

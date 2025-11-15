@@ -18,12 +18,16 @@ class Capacitaciones extends Model
         'max_intentos',
         'link_login_unico',
         'fecha_creacion',
+        'fecha_inicio',
+        'fecha_fin',
         'estado',
         'id_solicitante'
     ];
 
     protected $casts = [
         'fecha_creacion' => 'datetime',
+        'fecha_inicio' => 'date',
+        'fecha_fin' => 'date',
         'duracion_examen_min' => 'integer',
         'max_intentos' => 'integer',
     ];

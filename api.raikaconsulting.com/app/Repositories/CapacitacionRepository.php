@@ -259,4 +259,75 @@ class CapacitacionRepository
         
         return $this->obtenerPorId($idCapacitacion);
     }
+
+    public function actualizar(int $idCapacitacion, array $datos): bool
+    {
+        return Capacitaciones::where('id_capacitacion', $idCapacitacion)
+            ->update($datos);
+    }
+
+    public function obtenerEstudiantesConResultados(int $idCapacitacion): array
+    {
+        return DB::table('usuarios_capacitaciones as uc')
+            ->join('usuarios as u', 'uc.id_usuario', '=', 'u.id_usuario')
+            ->leftJoin('progresos as p', function($join) {
+                $join->on('u.id_usuario', '=', 'p.id_usuario');
+            })
+            ->leftJoin('cursos as c', 'p.id_curso', '=', 'c.id_curso')
+            ->where('uc.id_capacitacion', $idCapacitacion)
+            ->select(
+                'u.id_usuario',
+                'u.nombre',
+                'u.apellido',
+                'u.num_documento',
+                DB::raw('COUNT(DISTINCT c.id_curso) as total_cursos'),
+                DB::raw('COUNT(DISTINCT CASE WHEN p.resultado_examen = "aprobado" THEN c.id_curso END) as cursos_aprobados'),
+                DB::raw('CASE 
+                    WHEN COUNT(DISTINCT c.id_curso) = COUNT(DISTINCT CASE WHEN p.resultado_examen = "aprobado" THEN c.id_curso END) 
+                    AND COUNT(DISTINCT c.id_curso) > 0 
+                    THEN "aprobado" 
+                    ELSE "en_progreso" 
+                END as estado_capacitacion')
+            )
+            ->groupBy('u.id_usuario', 'u.nombre', 'u.apellido', 'u.num_documento')
+            ->get()
+            ->toArray();
+    }
+
+    public function obtenerDetallesCursosEstudiante(int $idCapacitacion, int $idUsuario): array
+    {
+        $cursos = DB::table('capacitaciones_cursos as cc')
+            ->join('cursos as c', 'cc.id_curso', '=', 'c.id_curso')
+            ->leftJoin('progresos as p', function($join) use ($idUsuario) {
+                $join->on('c.id_curso', '=', 'p.id_curso')
+                     ->where('p.id_usuario', '=', $idUsuario);
+            })
+            ->where('cc.id_capacitacion', $idCapacitacion)
+            ->select(
+                'c.id_curso',
+                'c.titulo',
+                'p.nota',
+                'p.resultado_examen',
+                'p.completado',
+                'p.video_finalizado',
+                'p.intentos_usados',
+                'p.fecha_ultimo_intento'
+            )
+            ->get()
+            ->toArray();
+
+        // Transformar valores null a "no iniciado"
+        return array_map(function($curso) {
+            return [
+                'id_curso' => $curso->id_curso,
+                'titulo' => $curso->titulo,
+                'nota' => $curso->nota ?? 'no iniciado',
+                'resultado_examen' => $curso->resultado_examen ?? 'no iniciado',
+                'completado' => $curso->completado ?? 0,
+                'video_finalizado' => $curso->video_finalizado ?? 0,
+                'intentos_usados' => $curso->intentos_usados ?? 0,
+                'fecha_ultimo_intento' => $curso->fecha_ultimo_intento ?? 'no iniciado'
+            ];
+        }, $cursos);
+    }
 }

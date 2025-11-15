@@ -14,6 +14,8 @@ return new class extends Migration
             $table->integer('max_intentos')->nullable();
             $table->string('link_login_unico')->unique();
             $table->timestamp('fecha_creacion')->useCurrent();
+            $table->date('fecha_inicio');
+            $table->date('fecha_fin');
             $table->enum('estado', ['activa', 'inactiva', 'finalizada'])->default('activa');
             $table->unsignedBigInteger('id_solicitante');
             

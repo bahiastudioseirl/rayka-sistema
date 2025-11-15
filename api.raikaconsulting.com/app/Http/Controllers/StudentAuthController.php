@@ -30,6 +30,14 @@ class StudentAuthController extends Controller
             ]);
         }
 
+        // Validar que la fecha actual esté dentro del rango de la capacitación
+        $fechaActual = now()->toDateString();
+        if ($fechaActual < $capacitacion->fecha_inicio || $fechaActual > $capacitacion->fecha_fin) {
+            throw ValidationException::withMessages([
+                'num_documento' => ['El acceso a esta capacitación no está disponible en estas fechas.'],
+            ]);
+        }
+
         $usuario = Usuarios::where('num_documento', $request->num_documento)
             ->where('activo', true)
             ->first();

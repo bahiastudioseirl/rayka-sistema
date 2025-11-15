@@ -51,11 +51,15 @@ class CrearCapacitacionRequest extends FormRequest
                 'integer',
                 'exists:cursos,id_curso'
             ],
-            'fecha_fin' => [
-                'sometimes',
-                'nullable',
+            'fecha_inicio' => [
+                'required',
                 'date',
-                'after:today'
+                'after_or_equal:today'
+            ],
+            'fecha_fin' => [
+                'required',
+                'date',
+                'after:fecha_inicio'
             ],
             'observaciones' => [
                 'nullable',
@@ -90,8 +94,13 @@ class CrearCapacitacionRequest extends FormRequest
             'cursos.min' => 'Debe incluir al menos un curso.',
             'cursos.*.exists' => 'Uno o más cursos no existen.',
             
+            'fecha_inicio.required' => 'La fecha de inicio es obligatoria.',
+            'fecha_inicio.date' => 'La fecha de inicio debe ser una fecha válida.',
+            'fecha_inicio.after_or_equal' => 'La fecha de inicio debe ser hoy o posterior.',
+            
+            'fecha_fin.required' => 'La fecha de fin es obligatoria.',
             'fecha_fin.date' => 'La fecha de fin debe ser una fecha válida.',
-            'fecha_fin.after' => 'La fecha de fin debe ser posterior a hoy.',
+            'fecha_fin.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
             
             'observaciones.max' => 'Las observaciones no pueden exceder 1000 caracteres.'
         ];

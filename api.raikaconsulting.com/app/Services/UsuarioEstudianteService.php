@@ -292,6 +292,7 @@ class UsuarioEstudianteService
 
         $resultado = $nota >= 10.5 ? 'aprobado' : 'desaprobado';
 
+        // Actualizar el progreso
         $this->usuarioEstudianteRepository->actualizarProgresoExamen(
             $idUsuario,
             $idCurso,
@@ -299,6 +300,22 @@ class UsuarioEstudianteService
             $resultado,
             $intentosUsados
         );
+
+        // Obtener el ID del progreso para registrar el intento
+        $progresoActualizado = $this->usuarioEstudianteRepository->obtenerProgresoCurso($idUsuario, $idCurso);
+        
+        // Registrar el intento en el historial
+        $this->usuarioEstudianteRepository->registrarIntentoExamen(
+            $progresoActualizado->id_progreso,
+            $intentosUsados,
+            $nota,
+            $respuestasCorrectas,
+            $totalPreguntas,
+            $resultado
+        );
+
+        // Obtener mejor puntaje
+        $mejorPuntaje = $this->usuarioEstudianteRepository->obtenerMejorPuntaje($progresoActualizado->id_progreso);
 
         return [
             'success' => true,
@@ -311,7 +328,61 @@ class UsuarioEstudianteService
                 'porcentaje' => round(($respuestasCorrectas / $totalPreguntas) * 100, 2),
                 'intentos_usados' => $intentosUsados,
                 'intentos_restantes' => $maxIntentos ? ($maxIntentos - $intentosUsados) : null,
+                'mejor_puntaje' => $mejorPuntaje,
                 'detalle_respuestas' => $detalleRespuestas
+            ]
+        ];
+    }
+
+    public function obtenerHistorialIntentos(int $idUsuario, int $idCurso): array
+    {
+        // Verificar acceso
+        $tieneAcceso = $this->usuarioEstudianteRepository->tieneAccesoAlCurso($idUsuario, $idCurso);
+        
+        if (!$tieneAcceso) {
+            return [
+                'success' => false,
+                'message' => 'No tienes acceso a este curso'
+            ];
+        }
+
+        // Obtener progreso
+        $progreso = $this->usuarioEstudianteRepository->obtenerProgresoCurso($idUsuario, $idCurso);
+
+        if (!$progreso) {
+            return [
+                'success' => true,
+                'historial_intentos' => [],
+                'resumen' => [
+                    'mejor_puntaje' => null,
+                    'intentos_usados' => 0,
+                    'intentos_restantes' => null,
+                    'estado' => null
+                ]
+            ];
+        }
+
+        // Obtener historial
+        $intentos = $this->usuarioEstudianteRepository->obtenerHistorialIntentos($progreso->id_progreso);
+        $mejorPuntaje = $this->usuarioEstudianteRepository->obtenerMejorPuntaje($progreso->id_progreso);
+        $maxIntentos = $this->usuarioEstudianteRepository->obtenerMaxIntentosCapacitacion($idUsuario, $idCurso);
+
+        return [
+            'success' => true,
+            'historial_intentos' => $intentos->map(function($intento) {
+                return [
+                    'num_intento' => $intento->num_intento,
+                    'fecha_intento' => $intento->fecha_intento,
+                    'nota' => $intento->nota,
+                    'respuestas_correctas' => "{$intento->respuestas_correctas}/{$intento->total_preguntas}",
+                    'resultado' => $intento->resultado
+                ];
+            })->toArray(),
+            'resumen' => [
+                'mejor_puntaje' => $mejorPuntaje,
+                'intentos_usados' => $progreso->intentos_usados,
+                'intentos_restantes' => $maxIntentos ? ($maxIntentos - $progreso->intentos_usados) : null,
+                'estado' => $progreso->resultado_examen
             ]
         ];
     }
