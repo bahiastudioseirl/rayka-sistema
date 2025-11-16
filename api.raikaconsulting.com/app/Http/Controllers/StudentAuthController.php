@@ -31,8 +31,11 @@ class StudentAuthController extends Controller
         }
 
         // Validar que la fecha actual esté dentro del rango de la capacitación
-        $fechaActual = now()->toDateString();
-        if ($fechaActual < $capacitacion->fecha_inicio || $fechaActual > $capacitacion->fecha_fin) {
+        $fechaActual = now()->startOfDay();
+        $fechaInicio = \Carbon\Carbon::parse($capacitacion->fecha_inicio)->startOfDay();
+        $fechaFin = \Carbon\Carbon::parse($capacitacion->fecha_fin)->endOfDay();
+        
+        if ($fechaActual->lt($fechaInicio) || $fechaActual->gt($fechaFin)) {
             throw ValidationException::withMessages([
                 'num_documento' => ['El acceso a esta capacitación no está disponible en estas fechas.'],
             ]);
