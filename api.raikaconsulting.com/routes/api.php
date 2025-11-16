@@ -10,6 +10,7 @@ use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\SolicitanteController;
 use App\Http\Controllers\CapacitacionController;
 use App\Http\Controllers\ExamenController;
+use App\Http\Controllers\ReporteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,5 +102,8 @@ Route::middleware('auth.admin')->group(function () {
     Route::post('examenes/{idExamen}/preguntas/{idPregunta}/respuestas', [ExamenController::class, 'agregarRespuestas']);
     Route::delete('examenes/{idExamen}/preguntas/{idPregunta}/respuestas/{idRespuesta}', [ExamenController::class, 'eliminarRespuesta']);
     Route::get('examenes', [ExamenController::class, 'listarExamenesConCursos']);
+
+    //Reportes endpoints para administradores
+    Route::get('reportes/capacitaciones/{id}/excel', [ReporteController::class, 'generarReporteCapacitacion']);
 
 });
