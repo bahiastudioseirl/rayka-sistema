@@ -1,43 +1,35 @@
 import { X, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type {
-  CrearExamenRequest,
-  PreguntaCrearRequest,
-  ExamenEnLista,
-  Pregunta,
-  ActualizarExamenRequest,
-  AgregarPreguntaRequest
-} from "../schemas/examenSchema";
+import type { CrearExamenRequest,PreguntaCrearRequest,ExamenEnLista,Pregunta,ActualizarExamenRequest,AgregarPreguntaRequest,RespuestaCrearRequest} from "../schemas/examenSchema";
 import ConfirmModal from "./ConfirmModal";
-
-// --- SERVICIOS ---
-// El modal ahora importa TODOS los servicios que necesita
 import { eliminarPregunta } from '../services/eliminarPregunta';
 import { agregarPregunta } from '../services/agregarPregunta';
-// 1. Asegúrate de importar tu servicio para actualizar el examen
-import { actualizarExamen} from '../services/actualizarExamen'; 
+import { actualizarExamen} from '../services/actualizarExamen';
+import { agregarRespuestas } from '../services/agregarRespuesta';
+import { eliminarRespuesta } from '../services/eliminarRespuesta'; 
 
 export type CursoParaSelect = {
   id_curso: number;
   titulo: string;
 };
 
-// Tipo local para el estado que SÍ guarda el ID
-type PreguntaEnEstado = PreguntaCrearRequest & {
-  id_pregunta?: number; // El ID es opcional (solo para las "viejas")
+type RespuestaEnEstado = RespuestaCrearRequest & {
+  id_respuesta?: number;
 };
 
-// --- CAMBIO EN PROPS ---
-// 2. Cambiamos 'onSave' y 'loading' por 'onSuccess'
-//    El modal ahora se maneja solo.
+type PreguntaEnEstado = {
+  id_pregunta?: number;
+  texto: string;
+  respuestas: RespuestaEnEstado[];
+};
+
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void; // Función para refrescar la tabla
+  onSuccess: () => void; 
   cursos: CursoParaSelect[];
   examenParaEditar: ExamenEnLista | null;
 };
-// --- FIN CAMBIO ---
 
 const nuevaPreguntaInicial: PreguntaEnEstado = {
   texto: "",
@@ -50,12 +42,10 @@ const nuevaPreguntaInicial: PreguntaEnEstado = {
 export default function ModalEditarExamen({
   open,
   onClose,
-  onSuccess, // <-- Prop actualizada
+  onSuccess, 
   cursos,
   examenParaEditar,
 }: Props) {
-  // --- NUEVO ESTADO DE LOADING ---
-  // 3. El modal maneja su propio estado de "guardando"
   const [isSaving, setIsSaving] = useState(false);
   
   const [titulo, setTitulo] = useState("");
@@ -63,12 +53,9 @@ export default function ModalEditarExamen({
   const [preguntas, setPreguntas] = useState<PreguntaEnEstado[]>([]);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  // Estados para modal de confirmación de eliminación
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [preguntaToDelete, setPreguntaToDelete] = useState<number | null>(null);
 
-  // useEffect para cargar los datos (Ahora guarda el id_pregunta)
   useEffect(() => {
     if (open && examenParaEditar) {
       setTitulo(examenParaEditar.titulo);
@@ -76,9 +63,10 @@ export default function ModalEditarExamen({
 
       const preguntasFormateadas: PreguntaEnEstado[] = examenParaEditar.preguntas.map(
         (preg: Pregunta) => ({
-          id_pregunta: preg.id_pregunta, // <-- CONSERVAMOS EL ID
+          id_pregunta: preg.id_pregunta, 
           texto: preg.texto,
           respuestas: preg.respuestas.map((resp) => ({
+            id_respuesta: resp.id_respuesta,
             texto: resp.texto,
             es_correcta: resp.es_correcta,
           })),
@@ -87,11 +75,10 @@ export default function ModalEditarExamen({
       setPreguntas(preguntasFormateadas);
 
       setError("");
-      setIsSaving(false); // Resetea el loading
+      setIsSaving(false); 
       setTimeout(() => inputRef.current?.focus(), 0);
     }
     
-    // Limpieza al cerrar (sin cambios)
     if (!open) {
       setTitulo("");
       setIdCurso("");
@@ -101,33 +88,25 @@ export default function ModalEditarExamen({
     }
   }, [open, examenParaEditar]);
 
-  // useEffect para 'Escape' (sin cambios)
   useEffect(() => {
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && open && onClose();
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
   }, [open, onClose]);
 
-  // --- Handlers ---
-
   const handleAgregarPregunta = () => {
-    // Añade una pregunta SIN id_pregunta (marcandola como "nueva")
     setPreguntas([...preguntas, { ...nuevaPreguntaInicial, respuestas: [
       { texto: "", es_correcta: true },
       { texto: "", es_correcta: false },
     ] }]);
   };
 
-  // 'handleEliminarPregunta' ahora usa modal de confirmación
   const handleEliminarPregunta = (pregIndex: number) => {
     const preguntaAEliminar = preguntas[pregIndex];
-
     if (preguntaAEliminar.id_pregunta && examenParaEditar?.id_examen) {
-      // Mostrar modal de confirmación para preguntas existentes
       setPreguntaToDelete(pregIndex);
       setShowConfirmDelete(true);
     } else {
-      // Eliminar directamente preguntas nuevas
       setPreguntas(preguntas.filter((_, idx) => idx !== pregIndex));
     }
   };
@@ -152,7 +131,6 @@ export default function ModalEditarExamen({
     }
   };
 
-  // El resto de handlers (texto, respuestas) no cambian
   const handlePreguntaTextoChange = (pregIndex: number, texto: string) => {
     const nuevasPreguntas = preguntas.map((preg, idx) => {
       if (idx !== pregIndex) return preg;
@@ -168,7 +146,23 @@ export default function ModalEditarExamen({
     });
     setPreguntas(nuevasPreguntas);
   };
-  const handleEliminarRespuesta = (pregIndex: number, respIndex: number) => {
+  const handleEliminarRespuesta = async (pregIndex: number, respIndex: number) => {
+    const pregunta = preguntas[pregIndex];
+    const respuesta = pregunta.respuestas[respIndex];
+    
+    // Si la respuesta tiene ID y la pregunta también, eliminar del backend
+    if (respuesta.id_respuesta && pregunta.id_pregunta && examenParaEditar?.id_examen) {
+      try {
+        await eliminarRespuesta(examenParaEditar.id_examen, pregunta.id_pregunta);
+      } catch (err) {
+        let errorMessage = "Error al eliminar la respuesta";
+        if (err instanceof Error) errorMessage = err.message;
+        setError(errorMessage);
+        return;
+      }
+    }
+    
+    // Actualizar el estado local
     const nuevasPreguntas = preguntas.map((preg, pIdx) => {
       if (pIdx !== pregIndex) return preg;
       const nuevasRespuestas = preg.respuestas.filter(
@@ -241,30 +235,43 @@ export default function ModalEditarExamen({
       };
       await actualizarExamen(examenParaEditar.id_examen, dataHeader);
 
-      // 4. Llamada 2: Agregar Preguntas Nuevas (todas en una sola llamada)
-      //    Filtramos las preguntas que no tienen ID (son nuevas)
+      // 4. Llamada 2: Agregar Preguntas Nuevas
       const preguntasNuevas = preguntas.filter(p => !p.id_pregunta);
-
-      // Si hay preguntas nuevas, las enviamos todas juntas
       if (preguntasNuevas.length > 0) {
-        // El servicio agregarPregunta ahora maneja el formato correcto
-        // Solo enviamos la primera pregunta ya que el servicio la envuelve en array
-        // MEJOR: Enviamos todas en una sola llamada
         for (const preguntaNueva of preguntasNuevas) {
           const dataPregunta: AgregarPreguntaRequest = {
             texto: preguntaNueva.texto,
-            respuestas: preguntaNueva.respuestas,
+            respuestas: preguntaNueva.respuestas.map(r => ({
+              texto: r.texto,
+              es_correcta: r.es_correcta,
+            })),
           };
           await agregarPregunta(examenParaEditar.id_examen, dataPregunta);
         }
       }
 
+      // 5. Llamada 3: Agregar Respuestas Nuevas a Preguntas Existentes
+      const preguntasExistentes = preguntas.filter(p => p.id_pregunta);
+      for (const pregunta of preguntasExistentes) {
+        // Filtrar respuestas nuevas (sin id_respuesta)
+        const respuestasNuevas = pregunta.respuestas.filter(r => !r.id_respuesta);
+        
+        if (respuestasNuevas.length > 0 && pregunta.id_pregunta) {
+          const dataRespuestas = {
+            respuestas: respuestasNuevas.map(r => ({
+              texto: r.texto,
+              es_correcta: r.es_correcta,
+            })),
+          };
+          await agregarRespuestas(
+            examenParaEditar.id_examen,
+            pregunta.id_pregunta,
+            dataRespuestas
+          );
+        }
+      }
+
       // --- FIN DE LLAMADAS ---
-      
-      // 5. NOTA: ¡Falta la lógica para "Actualizar texto de pregunta existente"!
-      //    Tu API (según lo que me has dado) no tiene un endpoint para esto
-      //    (ej. PUT /examenes/{id}/preguntas/{id}).
-      //    Por ahora, solo se guardan el Título, Curso y Preguntas NUEVAS.
 
       // 6. Si todo salió bien
       setIsSaving(false);

@@ -4,14 +4,15 @@ import { useNavigate } from "react-router-dom";
 import confetti from 'canvas-confetti';
 import type { CursoDetalleResponse, Pregunta, Respuesta } from "../schemas/EstudianteSchema";
 import { API_CONFIG } from "../../../config/api.config";
-import { marcarVideoFinalizado } from "../services/marcarVideoFinalizado";
+import { marcarVideoFinalizado, type MarcarVideoFinalizadoResponse } from "../services/marcarVideoFinalizado";
 import { rendirExamen, type RespuestaExamen } from "../services/rendirExamen";
+import { obtenerHistorialIntentos, type HistorialIntentosResponse } from "../services/obtenerHistorialIntentos";
 
 interface Props {
   cursoData: CursoDetalleResponse['data'];
 }
 
-type ActiveView = "module" | "exam" | "exam-quiz";
+type ActiveView = "module" | "exam" | "exam-quiz" | "history";
 
 export default function CursoSeccionDinamico({ cursoData }: Props) {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
   const [examScore, setExamScore] = useState<number | null>(null);
   const [examResult, setExamResult] = useState<any>(null);
   const [isSubmittingExam, setIsSubmittingExam] = useState(false);
+  const [historialIntentos, setHistorialIntentos] = useState<HistorialIntentosResponse['data'] | null>(null);
   
   // Timer del examen
   const [examTime, setExamTime] = useState(0);
@@ -41,6 +43,29 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
 
   const progressPct = moduleCompleted ? 100 : 0;
   const hasExam = cursoData.examen && cursoData.examen.preguntas.length > 0;
+
+  // Cargar estado de completado al montar el componente
+  useEffect(() => {
+    const progresoGuardado = localStorage.getItem(`progreso_curso_${cursoData.id_curso}`);
+    if (progresoGuardado) {
+      const progreso = JSON.parse(progresoGuardado);
+      if (progreso.video_finalizado === 1) {
+        setModuleCompleted(true);
+        setHasShownModal(true); // Marcar que ya se mostró el modal para no mostrarlo de nuevo
+        
+        // Cargar historial de intentos si hay examen
+        if (hasExam) {
+          obtenerHistorialIntentos(cursoData.id_curso)
+            .then(historial => {
+              setHistorialIntentos(historial.data);
+            })
+            .catch(err => {
+              console.error('Error al cargar historial:', err);
+            });
+        }
+      }
+    }
+  }, [cursoData.id_curso, hasExam]);
 
   useEffect(() => {
     if (moduleCompleted && !hasShownModal && hasExam) {
@@ -80,10 +105,31 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
     
     setIsMarkingCompleted(true);
     try {
-      await marcarVideoFinalizado(cursoData.id_curso);
+      const response = await marcarVideoFinalizado(cursoData.id_curso);
+      
+      // Guardar el progreso en localStorage con todos los datos
+      localStorage.setItem(`progreso_curso_${cursoData.id_curso}`, JSON.stringify({
+        video_finalizado: response.data.video_finalizado,
+        completado: response.data.completado,
+        nota: response.data.nota,
+        intentos_usados: response.data.intentos_usados
+      }));
+      
       setModuleCompleted(true);
+      
+      // Lanzar confetti inmediatamente después de marcar como completado
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      
+      // Mostrar modal si hay examen
       if (hasExam) {
-        setActive("exam");
+        setTimeout(() => {
+          setShowCompletionModal(true);
+          setHasShownModal(true);
+        }, 400);
       }
     } catch (error) {
       console.error('Error al marcar como completado:', error);
@@ -93,7 +139,13 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
     }
   };
 
-  const handleTakeExam = () => {
+  const handleTakeExam = async () => {
+    // Validar que haya intentos disponibles
+    if (historialIntentos && historialIntentos.resumen.intentos_restantes === 0) {
+      alert('Has agotado todos tus intentos para este examen.');
+      return;
+    }
+    
     setShowCompletionModal(false);
     setActive("exam-quiz");
     setCurrentQuestionIndex(0);
@@ -101,6 +153,14 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
     setExamCompleted(false);
     setExamTime(0);
     setIsExamTimerRunning(true);
+    
+    // Cargar historial de intentos al iniciar el examen
+    try {
+      const historial = await obtenerHistorialIntentos(cursoData.id_curso);
+      setHistorialIntentos(historial.data);
+    } catch (error) {
+      console.error('Error al cargar historial:', error);
+    }
   };
 
   const handleAnswerSelect = (questionId: number, answerId: number) => {
@@ -148,6 +208,22 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
         setExamScore(result.data.nota);
         setExamResult(result.data);
         setExamCompleted(true);
+        
+        // Cargar historial de intentos después de completar el examen
+        try {
+          const historial = await obtenerHistorialIntentos(cursoData.id_curso);
+          setHistorialIntentos(historial.data);
+          
+          // Actualizar localStorage con el progreso actualizado
+          localStorage.setItem(`progreso_curso_${cursoData.id_curso}`, JSON.stringify({
+            video_finalizado: 1,
+            completado: result.data.aprobado ? 1 : 0,
+            nota: result.data.nota,
+            intentos_usados: historial.data.resumen.intentos_usados
+          }));
+        } catch (error) {
+          console.error('Error al cargar historial:', error);
+        }
         
         // Confetti si aprobó
         if (result.data.aprobado) {
@@ -344,6 +420,38 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
                           </h4>
                           <p className="text-xs text-slate-600 mt-1">
                             {cursoData.examen.total_preguntas} pregunta{cursoData.examen.total_preguntas !== 1 ? 's' : ''}
+                            {historialIntentos?.resumen && (
+                              <span className="block text-xs font-medium text-blue-600 mt-1">
+                                {historialIntentos.resumen.intentos_usados}/{maxIntentos} intentos usados
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                  )}
+
+                  {/* Historial */}
+                  {hasExam && moduleCompleted && historialIntentos && historialIntentos.historial_intentos.length > 0 && (
+                    <li>
+                      <button
+                        onClick={() => setActive("history")}
+                        className={`w-full flex items-start gap-3 rounded-xl p-3 text-left transition-all
+                          ${active === "history"
+                            ? "bg-[#224666]/10 border border-[#224666]/50 shadow-sm"
+                            : "bg-slate-50 border border-slate-200/50 hover:bg-slate-100 hover:border-slate-300/50"
+                          }`}
+                      >
+                        <div className="shrink-0 mt-0.5">
+                          <Clock className="h-5 w-5 text-[#224666]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-medium text-slate-500">Historial</span>
+                          <h4 className={`font-medium mt-0.5 ${active === "history" ? "text-[#132436]" : "text-[#374151]"}`}>
+                            Mis intentos
+                          </h4>
+                          <p className="text-xs text-slate-600 mt-1">
+                            {historialIntentos.historial_intentos.length} intento{historialIntentos.historial_intentos.length !== 1 ? 's' : ''} realizado{historialIntentos.historial_intentos.length !== 1 ? 's' : ''}
                           </p>
                         </div>
                       </button>
@@ -355,7 +463,140 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
 
             {/* Panel principal */}
             <section className="lg:col-span-8">
-              {active === "exam" && hasExam ? (
+              {active === "history" && historialIntentos ? (
+                <div className="rounded-2xl border border-slate-200/60 bg-white shadow-sm overflow-hidden">
+                  {/* Header */}
+                  <div className="bg-[#132436] text-white p-6">
+                    <h2 className="text-2xl font-bold mb-1">Historial de Exámenes</h2>
+                    <p className="text-slate-300 text-sm">
+                      {historialIntentos.resumen.intentos_usados} de {maxIntentos} intentos utilizados
+                    </p>
+                  </div>
+
+                  {/* Stats Cards */}
+                  <div className="p-6 grid grid-cols-3 gap-4">
+                    <div className="bg-blue-50 rounded-xl p-4 text-center">
+                      <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-2">
+                        <CheckCircle2 className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <p className="text-sm text-slate-600 mb-1">Mejor Puntaje</p>
+                      <p className="text-3xl font-bold text-blue-600">
+                        {historialIntentos.resumen.mejor_puntaje ?? 0}
+                      </p>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-4 text-center">
+                      <div className="inline-flex items-center justify-center w-12 h-12 bg-slate-200 rounded-full mb-2">
+                        <Clock className="w-6 h-6 text-slate-600" />
+                      </div>
+                      <p className="text-sm text-slate-600 mb-1">Intentos Restantes</p>
+                      <p className="text-3xl font-bold text-[#132436]">
+                        {historialIntentos.resumen.intentos_restantes}
+                      </p>
+                    </div>
+                    <div className={`rounded-xl p-4 text-center ${
+                      (historialIntentos.resumen.mejor_puntaje ?? 0) >= 11 ? 'bg-green-50' : 'bg-red-50'
+                    }`}>
+                      <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-2 ${
+                        (historialIntentos.resumen.mejor_puntaje ?? 0) >= 11 ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
+                        {(historialIntentos.resumen.mejor_puntaje ?? 0) >= 11 ? (
+                          <CheckCircle2 className="w-6 h-6 text-green-600" />
+                        ) : (
+                          <AlertTriangle className="w-6 h-6 text-red-600" />
+                        )}
+                      </div>
+                      <p className="text-sm text-slate-600 mb-1">Estado</p>
+                      <p className={`text-xl font-bold ${
+                        (historialIntentos.resumen.mejor_puntaje ?? 0) >= 11 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {(historialIntentos.resumen.mejor_puntaje ?? 0) >= 11 ? 'Aprobado' : 'Reprobado'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Alert si no hay intentos */}
+                  {historialIntentos.resumen.intentos_restantes === 0 && (
+                    <div className="mx-6 mb-6">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-center gap-2 text-blue-800 justify-center">
+                          <AlertTriangle className="w-5 h-5" />
+                          <p className="font-medium">Has agotado todos tus intentos</p>
+                        </div>
+                        <p className="text-sm text-blue-600 mt-2 text-center">
+                          Tu mejor puntaje fue: {historialIntentos.resumen.mejor_puntaje}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Lista de intentos */}
+                  <div className="p-6 pt-0">
+                    <h3 className="font-semibold text-slate-900 mb-4">Historial de Intentos</h3>
+                    <div className="space-y-3">
+                      {historialIntentos.historial_intentos.map((intento, index) => {
+                        const getColorClass = (nota: number) => {
+                          if (nota >= 16) return { bg: 'bg-green-50', border: 'border-green-200', iconBg: 'bg-green-100', icon: 'text-green-600', bar: 'bg-green-500' };
+                          if (nota >= 11) return { bg: 'bg-yellow-50', border: 'border-yellow-200', iconBg: 'bg-yellow-100', icon: 'text-yellow-600', bar: 'bg-yellow-500' };
+                          return { bg: 'bg-red-50', border: 'border-red-200', iconBg: 'bg-red-100', icon: 'text-red-600', bar: 'bg-red-500' };
+                        };
+                        const colors = getColorClass(intento.nota);
+                        
+                        return (
+                        <div
+                          key={intento.id_progreso}
+                          className={`rounded-xl p-5 border-2 ${colors.bg} ${colors.border}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${colors.iconBg}`}>
+                                {intento.nota >= 11 ? (
+                                  <CheckCircle2 className={`w-6 h-6 ${colors.icon}`} />
+                                ) : (
+                                  <AlertTriangle className={`w-6 h-6 ${colors.icon}`} />
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-slate-900">
+                                  Intento #{historialIntentos.historial_intentos.length - index}
+                                </h4>
+                                <p className="text-sm text-slate-600">
+                                  {new Date(intento.fecha_intento).toLocaleDateString('es-ES', {
+                                    day: '2-digit',
+                                    month: 'long',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                                {intento.respuestas_correctas !== undefined && intento.total_preguntas !== undefined && (
+                                  <p className="text-xs text-slate-500 mt-1">
+                                    {intento.respuestas_correctas}/{intento.total_preguntas} correctas
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-4xl font-bold text-[#132436] mb-1">
+                                {intento.nota}
+                              </div>
+                              <div className={`text-xs font-medium ${colors.icon}`}>
+                                {intento.nota >= 11 ? '✓ Aprobado' : '✗ Reprobado'}
+                              </div>
+                            </div>
+                          </div>
+                          {/* Barra de progreso */}
+                          <div className="mt-3 bg-white rounded-full h-2 overflow-hidden">
+                            <div 
+                              className={`h-full transition-all ${colors.bar}`}
+                              style={{ width: `${(intento.nota / 20) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      )})}
+                    </div>
+                  </div>
+                </div>
+              ) : active === "exam" && hasExam ? (
                 <div className="rounded-2xl border border-slate-200/60 bg-white p-8 shadow-sm">
                   <div className="text-center max-w-2xl mx-auto">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
@@ -383,23 +624,47 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
                           </p>
                         </div>
                         <div className="text-left">
-                          <p className="text-slate-600">Intentos máximos</p>
-                          <p className="font-semibold text-[#132436]">{maxIntentos}</p>
+                          <p className="text-slate-600">Intentos restantes</p>
+                          <p className={`font-semibold ${
+                            historialIntentos?.resumen?.intentos_restantes === 0
+                              ? 'text-red-600'
+                              : 'text-green-600'
+                          }`}>
+                            {historialIntentos?.resumen?.intentos_restantes ?? maxIntentos} / {maxIntentos}
+                          </p>
                         </div>
                         <div className="text-left">
-                          <p className="text-slate-600">Título</p>
-                          <p className="font-semibold text-[#132436]">{cursoData.examen.titulo}</p>
+                          <p className="text-slate-600">Mejor puntaje</p>
+                          <p className="font-semibold text-blue-600">
+                            {historialIntentos?.resumen?.mejor_puntaje !== null && historialIntentos?.resumen?.mejor_puntaje !== undefined
+                              ? historialIntentos.resumen.mejor_puntaje
+                              : 'Sin intentos'}
+                          </p>
                         </div>
                       </div>
                     </div>
 
-                    <button
-                      onClick={handleTakeExam}
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#132436] px-8 py-3 text-sm font-medium text-white hover:bg-[#224666] transition-all shadow-sm"
-                    >
-                      Comenzar examen
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
+                    {historialIntentos?.resumen?.intentos_restantes === 0 ? (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div className="flex items-center gap-2 text-blue-800 justify-center">
+                          <AlertTriangle className="w-5 h-5" />
+                          <p className="font-medium">Has agotado todos tus intentos</p>
+                        </div>
+                        <p className="text-sm text-blue-600 mt-2">
+                          Tu mejor puntaje fue: {historialIntentos?.resumen?.mejor_puntaje ?? 0}
+                        </p>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleTakeExam}
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#132436] px-8 py-3 text-sm font-medium text-white hover:bg-[#224666] transition-all shadow-sm"
+                      >
+                        {historialIntentos && historialIntentos.historial_intentos.length > 0 
+                          ? 'Volver a intentar' 
+                          : 'Comenzar examen'}
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ) : active === "exam-quiz" && hasExam ? (
@@ -425,7 +690,7 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
                             <p className="text-sm text-slate-600 mb-1">Tu puntuación</p>
-                            <p className="text-4xl font-bold text-[#132436]">{examScore}%</p>
+                            <p className="text-4xl font-bold text-[#132436]">{examScore}</p>
                           </div>
                           <div>
                             <p className="text-sm text-slate-600 mb-1">Tiempo empleado</p>
@@ -449,6 +714,7 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
                           )}
                         </div>
                       </div>
+                      
                       <button
                         onClick={handleBackToCourse}
                         className="inline-flex items-center gap-2 rounded-lg bg-[#132436] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#224666] transition-all shadow-sm"
@@ -638,6 +904,20 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
             <p className="text-slate-600 mb-6">
               Has completado el curso. Ahora puedes rendir el examen final.
             </p>
+            
+            {/* Validar intentos restantes */}
+            {historialIntentos?.resumen?.intentos_restantes === 0 ? (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-2 text-blue-800 justify-center">
+                  <AlertTriangle className="w-5 h-5" />
+                  <p className="font-medium text-sm">Has agotado todos tus intentos</p>
+                </div>
+                <p className="text-xs text-blue-600 mt-2">
+                  Tu mejor puntaje fue: {historialIntentos?.resumen?.mejor_puntaje ?? 0}
+                </p>
+              </div>
+            ) : null}
+            
             <div className="flex gap-3">
               <button
                 onClick={() => setShowCompletionModal(false)}
@@ -645,12 +925,14 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
               >
                 Ver más tarde
               </button>
-              <button
-                onClick={handleTakeExam}
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#132436] rounded-lg hover:bg-[#224666] transition-colors"
-              >
-                Ir al examen
-              </button>
+              {(!historialIntentos || !historialIntentos.resumen || historialIntentos.resumen.intentos_restantes > 0) && (
+                <button
+                  onClick={handleTakeExam}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#132436] rounded-lg hover:bg-[#224666] transition-colors"
+                >
+                  Ir al examen
+                </button>
+              )}
             </div>
           </div>
         </div>

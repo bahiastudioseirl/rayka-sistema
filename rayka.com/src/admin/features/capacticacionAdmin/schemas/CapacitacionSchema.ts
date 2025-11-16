@@ -24,6 +24,8 @@ export interface Capacitacion {
   max_intentos: number;
   link_login_unico: string;
   fecha_creacion: string;
+  fecha_inicio: string;
+  fecha_fin: string;
   estado: string;
   id_solicitante: number;
   solicitante?: Solicitante;
@@ -34,6 +36,8 @@ export interface Capacitacion {
 export interface CrearCapacitacionRequest {
   duracion_examen_min: number;
   max_intentos: number;
+  fecha_inicio?: string;
+  fecha_fin?: string;
   id_solicitante: number;
   usuarios_estudiantes: number[];
   cursos: number[];
@@ -45,6 +49,8 @@ export interface CrearCapacitacionResponse {
   data: {
     capacitacion: Capacitacion;
     usuarios_asignados: Usuario[];
+    fecha_inicio: string;
+    fecha_fin: string;
     cursos_asignados: Curso[];
     solicitante: Solicitante;
     resumen: {
@@ -63,6 +69,8 @@ export interface CapacitacionConDetalles {
     id_capacitacion: number;
     duracion_examen_min: number;
     max_intentos: number;
+    fecha_inicio: string;
+    fecha_fin: string;
     link_login_unico: string;
     fecha_creacion: string;
     estado: string;
@@ -89,6 +97,36 @@ export interface CapacitacionConDetalles {
 export interface ObtenerCapacitacionesResponse {
   success: boolean;
   data: CapacitacionConDetalles[];
+}
+
+export interface CapacitacionDetalleCompleto {
+  capacitacion: {
+    id_capacitacion: number;
+    duracion_examen_min: number;
+    max_intentos: number;
+    fecha_inicio: string;
+    fecha_fin: string;
+    link_login_unico: string;
+    fecha_creacion: string;
+    estado: string;
+    id_solicitante: number;
+  };
+  solicitante: {
+    id_solicitante: number;
+    nombre: string;
+    apellido: string;
+    correo: string;
+    telefono: string;
+    cargo: string;
+    id_empresa: number;
+  };
+  usuarios_asignados: Usuario[];
+  cursos_asignados: Curso[];
+}
+
+export interface ObtenerCapacitacionPorIdResponse {
+  success: boolean;
+  data: CapacitacionDetalleCompleto;
 }
 
 export interface ObtenerUsuariosResponse {

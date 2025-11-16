@@ -140,13 +140,6 @@ export const LoginForm = () => {
               )}
             </button>
 
-            {/* Demo Info */}
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-600 text-center">
-                <strong>Demo:</strong> admin@rayka.com | Admin10@rayka.com
-              </p>
-            </div>
-
             {/* Link to User Login */}
             <div className="text-center">
               <button

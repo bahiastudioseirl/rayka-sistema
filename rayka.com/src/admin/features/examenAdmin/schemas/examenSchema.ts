@@ -80,11 +80,25 @@ export interface EliminarPreguntaResponse {
   success: boolean;
   message: string;
 }
+export interface EliminarRespuestaResponse {
+  success: boolean;
+  message: string;
+}
 export interface AgregarPreguntaRequest {
   texto: string;
   respuestas: RespuestaCrearRequest[]; 
 }
 export interface AgregarPreguntaResponse {
+  success: boolean;
+  message: string;
+  data: Pregunta; 
+}
+
+export interface AgregarRespuestasRequest {
+  respuestas: RespuestaCrearRequest[]; 
+}
+
+export interface AgregarRespuestasResponse {
   success: boolean;
   message: string;
   data: Pregunta; 

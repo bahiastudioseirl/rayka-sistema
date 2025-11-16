@@ -1,7 +1,12 @@
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { CapacitacionConDetalles, Usuario, Curso, CrearCapacitacionRequest } from "../schemas/CapacitacionSchema";
 import type { Solicitante } from "../../solicitanteAdmin/schemas/SolicitanteSchema";
+import { obtenerCapacitacionPorId } from "../services/obtenerCapacitacionPorId";
+import { agregarEstudiante } from "../services/agregarEstudiante";
+import { eliminarEstudiante } from "../services/eliminarEstudiante";
+import { agregarCurso } from "../services/agregarCurso";
+import { eliminarCurso } from "../services/eliminarCurso";
 
 type Props = {
   open: boolean;
@@ -21,26 +26,49 @@ export default function ModalEditar({ open, capacitacion, onClose, onSave, loadi
   const [usuariosSeleccionados, setUsuariosSeleccionados] = useState<number[]>([]);
   const [cursosSeleccionados, setCursosSeleccionados] = useState<number[]>([]);
   const [error, setError] = useState<string>("");
+  const [cargandoDetalles, setCargandoDetalles] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open && capacitacion) {
-      setDuracionExamen(capacitacion.capacitacion.duracion_examen_min.toString());
-      setMaxIntentos(capacitacion.capacitacion.max_intentos.toString());
-      setIdSolicitante(capacitacion.solicitante.id_solicitante.toString());
-      // TODO: Obtener estudiantes y cursos asociados desde el backend
-      setUsuariosSeleccionados([]);
-      setCursosSeleccionados([]);
-      setError("");
-      setTimeout(() => inputRef.current?.focus(), 0);
-    } else if (open) {
-      setDuracionExamen("");
-      setMaxIntentos("");
-      setIdSolicitante("");
-      setUsuariosSeleccionados([]);
-      setCursosSeleccionados([]);
-      setError("");
-    }
+    const cargarDetallesCapacitacion = async () => {
+      if (open && capacitacion) {
+        setCargandoDetalles(true);
+        try {
+          // Cargar detalles completos de la capacitación desde el backend
+          const response = await obtenerCapacitacionPorId(capacitacion.capacitacion.id_capacitacion);
+          const detalles = response.data;
+
+          setDuracionExamen(detalles.capacitacion.duracion_examen_min.toString());
+          setMaxIntentos(detalles.capacitacion.max_intentos.toString());
+          setIdSolicitante(detalles.solicitante.id_solicitante.toString());
+          
+          // Marcar los estudiantes que están asignados a esta capacitación
+          const idsEstudiantes = detalles.usuarios_asignados.map(est => est.id_usuario);
+          setUsuariosSeleccionados(idsEstudiantes);
+          
+          // Marcar los cursos que están asignados a esta capacitación
+          const idsCursos = detalles.cursos_asignados.map(curso => curso.id_curso);
+          setCursosSeleccionados(idsCursos);
+          
+          setError("");
+        } catch (err) {
+          console.error("Error cargando detalles de capacitación:", err);
+          setError("No se pudieron cargar los detalles de la capacitación");
+        } finally {
+          setCargandoDetalles(false);
+          setTimeout(() => inputRef.current?.focus(), 0);
+        }
+      } else if (open) {
+        setDuracionExamen("");
+        setMaxIntentos("");
+        setIdSolicitante("");
+        setUsuariosSeleccionados([]);
+        setCursosSeleccionados([]);
+        setError("");
+      }
+    };
+
+    cargarDetallesCapacitacion();
   }, [open, capacitacion]);
 
   useEffect(() => {
@@ -49,16 +77,54 @@ export default function ModalEditar({ open, capacitacion, onClose, onSave, loadi
     return () => window.removeEventListener("keydown", onEsc);
   }, [open, onClose]);
 
-  const toggleUsuario = (id: number) => {
-    setUsuariosSeleccionados(prev =>
-      prev.includes(id) ? prev.filter(uid => uid !== id) : [...prev, id]
-    );
+  const toggleUsuario = async (id: number) => {
+    if (!capacitacion) return;
+    
+    const estaSeleccionado = usuariosSeleccionados.includes(id);
+    
+    try {
+      if (estaSeleccionado) {
+        // Eliminar estudiante
+        await eliminarEstudiante(capacitacion.capacitacion.id_capacitacion, {
+          usuarios_estudiantes: [id]
+        });
+        setUsuariosSeleccionados(prev => prev.filter(uid => uid !== id));
+      } else {
+        // Agregar estudiante
+        await agregarEstudiante(capacitacion.capacitacion.id_capacitacion, {
+          usuarios_estudiantes: [id]
+        });
+        setUsuariosSeleccionados(prev => [...prev, id]);
+      }
+    } catch (err) {
+      console.error("Error al actualizar estudiante:", err);
+      setError("Error al actualizar el estudiante. Intenta nuevamente.");
+    }
   };
 
-  const toggleCurso = (id: number) => {
-    setCursosSeleccionados(prev =>
-      prev.includes(id) ? prev.filter(cid => cid !== id) : [...prev, id]
-    );
+  const toggleCurso = async (id: number) => {
+    if (!capacitacion) return;
+    
+    const estaSeleccionado = cursosSeleccionados.includes(id);
+    
+    try {
+      if (estaSeleccionado) {
+        // Eliminar curso
+        await eliminarCurso(capacitacion.capacitacion.id_capacitacion, {
+          cursos: [id]
+        });
+        setCursosSeleccionados(prev => prev.filter(cid => cid !== id));
+      } else {
+        // Agregar curso
+        await agregarCurso(capacitacion.capacitacion.id_capacitacion, {
+          cursos: [id]
+        });
+        setCursosSeleccionados(prev => [...prev, id]);
+      }
+    } catch (err) {
+      console.error("Error al actualizar curso:", err);
+      setError("Error al actualizar el curso. Intenta nuevamente.");
+    }
   };
 
   const handleSave = async () => {
@@ -126,8 +192,17 @@ export default function ModalEditar({ open, capacitacion, onClose, onSave, loadi
         </div>
 
         <div className="px-5 py-4 space-y-4">
-          {/* Duración del Examen */}
-          <div>
+          {/* Spinner mientras carga los detalles */}
+          {cargandoDetalles && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            </div>
+          )}
+
+          {!cargandoDetalles && (
+            <>
+              {/* Duración del Examen */}
+              <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Duración del examen (minutos)
             </label>
@@ -256,6 +331,8 @@ export default function ModalEditar({ open, capacitacion, onClose, onSave, loadi
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
+            </>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-200 sticky bottom-0 bg-white">

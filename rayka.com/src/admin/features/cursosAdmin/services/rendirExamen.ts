@@ -2,23 +2,36 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
-export interface MarcarVideoFinalizadoResponse {
+export interface RespuestaExamen {
+  id_pregunta: number;
+  id_respuesta: number;
+}
+
+export interface RendirExamenRequest {
+  respuestas: RespuestaExamen[];
+}
+
+export interface RendirExamenResponse {
   success: boolean;
   message: string;
   data: {
-    id_progreso: number;
-    video_finalizado: number;
-    completado: number;
-    nota: number | null;
-    intentos_usados: number;
+    nota: number;
+    aprobado: boolean;
+    respuestas_correctas: number;
+    total_preguntas: number;
+    intentos_restantes: number;
   };
 }
 
 /**
- * Marca el video del curso como finalizado
+ * Envía las respuestas del examen para ser calificado
  * @param idCurso - ID del curso
+ * @param respuestas - Array de respuestas del estudiante
  */
-export const marcarVideoFinalizado = async (idCurso: number): Promise<MarcarVideoFinalizadoResponse> => {
+export const rendirExamen = async (
+  idCurso: number,
+  respuestas: RespuestaExamen[]
+): Promise<RendirExamenResponse> => {
   try {
     const token = localStorage.getItem('estudiante_token');
     
@@ -26,9 +39,9 @@ export const marcarVideoFinalizado = async (idCurso: number): Promise<MarcarVide
       throw new Error('No hay sesión activa. Por favor, inicia sesión nuevamente.');
     }
 
-    const response = await axios.patch<MarcarVideoFinalizadoResponse>(
-      `${API_BASE_URL}/estudiantes/cursos/${idCurso}/marcar-video-finalizado`,
-      {},
+    const response = await axios.post<RendirExamenResponse>(
+      `${API_BASE_URL}/estudiantes/cursos/${idCurso}/rendir-examen`,
+      { respuestas },
       {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -36,7 +49,7 @@ export const marcarVideoFinalizado = async (idCurso: number): Promise<MarcarVide
         },
       }
     );
-    
+
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -44,7 +57,7 @@ export const marcarVideoFinalizado = async (idCurso: number): Promise<MarcarVide
         localStorage.removeItem('estudiante_token');
         throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
       }
-      const message = error.response?.data?.message || 'Error al marcar el video como finalizado';
+      const message = error.response?.data?.message || 'Error al rendir el examen';
       throw new Error(message);
     }
     throw new Error('Error de conexión con el servidor');

@@ -59,14 +59,32 @@ export default function CursosPage() {
 	}
 
 	// Convertir cursos a formato de CourseCard
-	const coursesWithNavigation: CourseCardProps[] = cursos.map(curso => ({
-		title: curso.titulo,
-		description: curso.descripcion,
-		progressPct: 0, // Por ahora en 0, en el futuro se puede rastrear el progreso
-		imageUrl: curso.url_imagen ? API_CONFIG.getFullUrl(curso.url_imagen) : undefined,
-		ctaText: 'Ver curso',
-		onClick: () => handleCursoClick(curso.id_curso)
-	}))
+	const coursesWithNavigation: CourseCardProps[] = cursos.map(curso => {
+		// Obtener el progreso guardado en localStorage
+		const progresoGuardado = localStorage.getItem(`progreso_curso_${curso.id_curso}`);
+		let progressPct = 0;
+		
+		if (progresoGuardado) {
+			try {
+				const progreso = JSON.parse(progresoGuardado);
+				// Si video_finalizado es 1, el progreso es 100%
+				if (progreso.video_finalizado === 1) {
+					progressPct = 100;
+				}
+			} catch (e) {
+				console.error('Error parsing progreso:', e);
+			}
+		}
+		
+		return {
+			title: curso.titulo,
+			description: curso.descripcion,
+			progressPct,
+			imageUrl: curso.url_imagen ? API_CONFIG.getFullUrl(curso.url_imagen) : undefined,
+			ctaText: 'Ver curso',
+			onClick: () => handleCursoClick(curso.id_curso)
+		};
+	});
 
 	return (
 		<Layout>

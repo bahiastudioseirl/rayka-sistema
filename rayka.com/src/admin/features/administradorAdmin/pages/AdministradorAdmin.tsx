@@ -73,7 +73,7 @@ export default function AdministradorAdmin() {
                 contrasenia,
                 id_rol: 1,
             });
-            setAdministradores((prev) => [res.data, ...prev]); // prepend
+            setAdministradores((prev) => [res.data, ...prev]);
             closeModal();
         } catch (e: any) {
             setError(e?.response?.data?.message ?? "No se pudo crear el estudiante.");
@@ -86,7 +86,7 @@ export default function AdministradorAdmin() {
         setLoading(true);
         setError("");
         try {
-            const res = await actualizarAdministrador(id, payload); // { message, data }
+            const res = await actualizarAdministrador(id, payload); 
             const updated = res.data;
             setAdministradores(prev =>
                 prev.map(e => e.id_usuario === id ? updated : e)
@@ -136,14 +136,9 @@ export default function AdministradorAdmin() {
         setPwdSaving(true);
         setError("");
         try {
-            // Llama a tu service Axios
             await cambiarContrasenia(pwdUserId, payload);
-            // (Opcional) podrías refrescar la fila si lo deseas; el endpoint ya devuelve el usuario.
-            // const res = await cambiarContrasenia(pwdUserId, payload);
-            // setEstudiantes(prev => prev.map(e => e.id_usuario === pwdUserId ? res.data : e));
 
             closePwd();
-            // aquí dispara tu toast de éxito si tienes uno
         } catch (e: any) {
             setError(e?.response?.data?.message ?? "No se pudo cambiar la contraseña.");
         } finally {

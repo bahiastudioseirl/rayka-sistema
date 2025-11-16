@@ -3,8 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import ModalAgregar from "../components/ModalAgregar";
 import ModalEditarEstudiante from "../components/ModalEditar";
 import { crearEstudiante, obtenerEstudiantes, actualizarEstudiante, cambiarEstadoEstudiante, cambiarContrasenia } from "../services/index";
-import type { CambiarContraseniaRequest, ActualizarEstudianteRequest, Estudiante } from "../schemas/EstudianteSchemas";
-import ModalCambiarContrasenia from "../components/ModalCambiarContrasenia";
+import type {  ActualizarEstudianteRequest, Estudiante } from "../schemas/EstudianteSchemas";
 
 type SavePayload = { nombre: string; apellido: string; num_documento: string };
 export default function EstudiantesAdmin() {
@@ -14,13 +13,6 @@ export default function EstudiantesAdmin() {
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
-
-  // Modal Cambiar Contraseña
-  const [pwdOpen, setPwdOpen] = useState(false);
-  const [pwdSaving, setPwdSaving] = useState(false);
-  const [pwdUserId, setPwdUserId] = useState<number | null>(null);
-
-  // Estados de edición
   const [editOpen, setEditOpen] = useState(false);
   const [estudianteSel, setEstudianteSel] = useState<Estudiante | null>(null);
 
@@ -115,37 +107,8 @@ export default function EstudiantesAdmin() {
     }
   };
 
-  const openPwd = (s: Estudiante) => {
-    setPwdUserId(s.id_usuario);
-    setPwdOpen(true);
-  };
 
-  const closePwd = () => {
-    setPwdOpen(false);
-    setPwdUserId(null);
-  };
-
-  const onSavePwd = async (payload: CambiarContraseniaRequest) => {
-    if (!pwdUserId) return;
-    setPwdSaving(true);
-    setError("");
-    try {
-      // Llama a tu service Axios
-      await cambiarContrasenia(pwdUserId, payload);
-      // (Opcional) podrías refrescar la fila si lo deseas; el endpoint ya devuelve el usuario.
-      // const res = await cambiarContrasenia(pwdUserId, payload);
-      // setEstudiantes(prev => prev.map(e => e.id_usuario === pwdUserId ? res.data : e));
-
-      closePwd();
-      // aquí dispara tu toast de éxito si tienes uno
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? "No se pudo cambiar la contraseña.");
-    } finally {
-      setPwdSaving(false);
-    }
-  };
-
-
+  
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -276,13 +239,7 @@ export default function EstudiantesAdmin() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-1">
-                      <button
-                        className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50"
-                        title="Cambiar contraseña"
-                        onClick={() => openPwd(s)} // ⬅️ abre modal
-                      >
-                        <KeySquare className="w-4 h-4" />
-                      </button>
+                    
                       <button
                         className="p-2 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
                         onClick={() => openEdit(s)}
@@ -321,13 +278,7 @@ export default function EstudiantesAdmin() {
         loading={loading}
       />
 
-      {/* Modal Cambiar Contraseña */}
-      <ModalCambiarContrasenia
-        open={pwdOpen}
-        onClose={closePwd}
-        onSave={onSavePwd}
-        loading={pwdSaving}
-      />
+   
 
     </div>
   );

@@ -1,5 +1,5 @@
 // empresaAdmin/pages/EmpresaAdmin.tsx
-import { Edit, Plus, Search, Trash2, Eye, FileText,Building } from "lucide-react";
+import { Edit, Plus, Search, FileText,Building } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ModalAgregar from "../components/ModalAgregar";
 import ModalEditar from "../components/ModalEditar";
@@ -226,18 +226,12 @@ export default function EmpresaAdmin() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center space-x-2">
-                          <button className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50" title="Ver">
-                            <Eye className="w-4 h-4" />
-                          </button>
                           <button
                             onClick={() => handleEditClick(empresa)}
                             className="p-2 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
                             title="Editar"
                           >
                             <Edit className="w-4 h-4" />
-                          </button>
-                          <button className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50" title="Eliminar">
-                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>

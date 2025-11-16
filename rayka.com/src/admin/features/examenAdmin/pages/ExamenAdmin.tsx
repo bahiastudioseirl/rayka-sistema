@@ -280,12 +280,7 @@ export default function ExamenAdmin() {
                     {/* 8. Botones de acción conectados */}
                     <td className="px-6 py-4 whitespace-nowrap">
                        <div className="flex items-center space-x-1">
-                        <button
-                          className="p-2 transition-colors rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50"
-                          title="Ver elemento"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
+                      
                         <button
                           className="p-2 transition-colors rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
                           onClick={() => openModalEditar(item)} // 9. Conectado
@@ -293,13 +288,7 @@ export default function ExamenAdmin() {
                         >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button
-                          className="p-2 transition-colors rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(item)}
-                          title="Eliminar elemento"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                       
                       </div>
                     </td>
                   </tr>

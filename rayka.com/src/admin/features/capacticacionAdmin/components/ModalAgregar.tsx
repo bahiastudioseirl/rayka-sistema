@@ -13,18 +13,20 @@ type Props = {
   solicitantes: Solicitante[];
   usuarios: Usuario[];
   cursos: Curso[];
-  onUsuarioCreado?: () => Promise<void>; 
+  onUsuarioCreado?: () => Promise<void>;
 };
 
 export default function ModalAgregar({ open, onClose, onSave, loading, solicitantes, usuarios, cursos, onUsuarioCreado }: Props) {
   const [duracionExamen, setDuracionExamen] = useState("");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
   const [maxIntentos, setMaxIntentos] = useState("");
   const [idSolicitante, setIdSolicitante] = useState("");
   const [usuariosSeleccionados, setUsuariosSeleccionados] = useState<number[]>([]);
   const [cursosSeleccionados, setCursosSeleccionados] = useState<number[]>([]);
   const [error, setError] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   // Estado para modal de agregar estudiante
   const [isModalEstudianteOpen, setIsModalEstudianteOpen] = useState(false);
   const [savingEstudiante, setSavingEstudiante] = useState(false);
@@ -33,6 +35,8 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
     if (open) {
       setDuracionExamen("");
       setMaxIntentos("");
+      setFechaInicio("");
+      setFechaFin("");
       setIdSolicitante("");
       setUsuariosSeleccionados([]);
       setCursosSeleccionados([]);
@@ -62,28 +66,28 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
   const handleSaveEstudiante = async (data: { nombre: string; apellido: string; num_documento: string }) => {
     setSavingEstudiante(true);
     try {
-   
+
       const response = await crearEstudiante({
         nombre: data.nombre,
         apellido: data.apellido,
         num_documento: data.num_documento,
-        id_rol: 2, 
+        id_rol: 2,
         activo: true
       });
 
       console.log("Estudiante creado:", response.data);
-      
+
       // Cerrar el modal de estudiante
       setIsModalEstudianteOpen(false);
-      
+
       // Recargar la lista de usuarios
       if (onUsuarioCreado) {
         await onUsuarioCreado();
       }
-      
+
       // Auto-seleccionar el nuevo estudiante
       setUsuariosSeleccionados(prev => [...prev, response.data.id_usuario]);
-      
+
     } catch (error) {
       console.error("Error al crear estudiante:", error);
       alert("Error al crear el estudiante. Intenta nuevamente.");
@@ -109,6 +113,14 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
       setError("Selecciona un solicitante.");
       return;
     }
+    if (!fechaInicio) {
+      setError("Selecciona una fecha de inicio.");
+      return;
+    }
+    if (!fechaFin) {
+      setError("Selecciona una fecha de fin.");
+      return;
+    }
 
     if (usuariosSeleccionados.length === 0) {
       setError("Selecciona al menos un estudiante.");
@@ -123,6 +135,8 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
     const data: CrearCapacitacionRequest = {
       duracion_examen_min: duracion,
       max_intentos: intentos,
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
       id_solicitante: parseInt(idSolicitante),
       usuarios_estudiantes: usuariosSeleccionados,
       cursos: cursosSeleccionados,
@@ -171,6 +185,37 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
               placeholder="Ej. 60"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+
+            {/* Fecha de Inicio */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de Inicio</label>
+              <input
+                type="date"
+                value={fechaInicio}
+                onChange={(e) => {
+                  setFechaInicio(e.target.value);
+                  setError("");
+                }}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Fecha de Fin */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de Fin</label>
+              <input
+                type="date"
+                value={fechaFin}
+                onChange={(e) => {
+                  setFechaFin(e.target.value);
+                  setError("");
+                }}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
           </div>
 
           {/* Máximo de Intentos */}
@@ -312,7 +357,7 @@ export default function ModalAgregar({ open, onClose, onSave, loading, solicitan
           </button>
         </div>
       </div>
-      
+
       {/* Modal para agregar estudiante */}
       <ModalAgregarEstudiante
         open={isModalEstudianteOpen}

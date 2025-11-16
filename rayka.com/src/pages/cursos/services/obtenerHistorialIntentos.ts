@@ -2,23 +2,35 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
-export interface MarcarVideoFinalizadoResponse {
+export interface IntentoExamen {
+  id_progreso: number;
+  fecha_intento: string;
+  nota: number;
+  aprobado: boolean;
+  tiempo_empleado?: number;
+  respuestas_correctas?: number;
+  total_preguntas?: number;
+}
+
+export interface HistorialIntentosResponse {
   success: boolean;
   message: string;
   data: {
-    id_progreso: number;
-    video_finalizado: number;
-    completado: number;
-    nota: number | null;
-    intentos_usados: number;
+    historial_intentos: IntentoExamen[];
+    resumen: {
+      mejor_puntaje: number | null;
+      intentos_usados: number;
+      intentos_restantes: number;
+      estado: 'aprobado' | 'reprobado' | null;
+    };
   };
 }
 
 /**
- * Marca el video del curso como finalizado
+ * Obtiene el historial de intentos de examen para un curso
  * @param idCurso - ID del curso
  */
-export const marcarVideoFinalizado = async (idCurso: number): Promise<MarcarVideoFinalizadoResponse> => {
+export const obtenerHistorialIntentos = async (idCurso: number): Promise<HistorialIntentosResponse> => {
   try {
     const token = localStorage.getItem('estudiante_token');
     
@@ -26,9 +38,8 @@ export const marcarVideoFinalizado = async (idCurso: number): Promise<MarcarVide
       throw new Error('No hay sesión activa. Por favor, inicia sesión nuevamente.');
     }
 
-    const response = await axios.patch<MarcarVideoFinalizadoResponse>(
-      `${API_BASE_URL}/estudiantes/cursos/${idCurso}/marcar-video-finalizado`,
-      {},
+    const response = await axios.get<HistorialIntentosResponse>(
+      `${API_BASE_URL}/estudiantes/cursos/${idCurso}/historial-intentos`,
       {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -36,7 +47,7 @@ export const marcarVideoFinalizado = async (idCurso: number): Promise<MarcarVide
         },
       }
     );
-    
+
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -44,7 +55,7 @@ export const marcarVideoFinalizado = async (idCurso: number): Promise<MarcarVide
         localStorage.removeItem('estudiante_token');
         throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
       }
-      const message = error.response?.data?.message || 'Error al marcar el video como finalizado';
+      const message = error.response?.data?.message || 'Error al obtener el historial de intentos';
       throw new Error(message);
     }
     throw new Error('Error de conexión con el servidor');
