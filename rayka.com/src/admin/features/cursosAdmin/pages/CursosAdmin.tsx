@@ -325,12 +325,7 @@ export default function CursosAdmin() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-1">
-                          <button
-                            className="p-2 transition-colors rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50"
-                            title="Ver curso"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
+                       
                           <button
                             className="p-2 transition-colors rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
                             title="Editar curso"
