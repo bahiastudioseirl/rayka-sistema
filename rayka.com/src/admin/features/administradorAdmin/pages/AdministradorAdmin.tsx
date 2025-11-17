@@ -167,7 +167,7 @@ export default function AdministradorAdmin() {
                             onClick={openModal}
                         >
                             <Plus className="w-4 h-4" />
-                            <span>Nuevo estudiante</span>
+                            <span>Nuevo Administrador</span>
                         </button>
                     </div>
                 </div>
