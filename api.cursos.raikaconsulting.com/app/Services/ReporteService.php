@@ -194,7 +194,7 @@ class ReporteService
 
     private function generarLinkCompleto(string $linkLoginUnico): string
     {
-        $frontendUrl = config('app.frontend.url', 'https://www.rayka.com');
+        $frontendUrl = config('app.frontend.url', 'https://cursos.raikaconsulting.com');
         $loginPath = config('app.frontend.capacitacion_login_path', '/login');
         
         return $frontendUrl . $loginPath . '/' . $linkLoginUnico;

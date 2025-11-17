@@ -134,7 +134,7 @@ return [
     */
 
     'frontend' => [
-        'url' => env('FRONTEND_URL', 'https://www.rayka.com'),
+        'url' => env('FRONTEND_URL', 'https://cursos.raikaconsulting.com'),
         'capacitacion_login_path' => env('CAPACITACION_LOGIN_PATH', '/login'),
     ],
 

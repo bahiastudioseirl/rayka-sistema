@@ -1,5 +1,5 @@
 {
-  "name": "rayka.com",
+  "name": "cursos.raikaconsulting.com",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -14,6 +14,7 @@
     "@tailwindcss/vite": "^4.1.16",
     "@tanstack/react-query": "^5.90.8",
     "@types/react-router-dom": "^5.3.3",
+    "axios": "^1.13.2",
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^0.552.0",
     "react": "^19.1.1",
