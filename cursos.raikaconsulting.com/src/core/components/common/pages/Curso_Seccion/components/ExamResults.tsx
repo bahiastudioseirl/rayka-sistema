@@ -23,30 +23,32 @@ export const ExamResults = ({
   canRetakeExam,
   onRetakeExam
 }: ExamResultsProps) => {
-  const getScoreColor = (percentage: number) => {
-    if (percentage >= 80) return 'text-green-600';
-    if (percentage >= 70) return 'text-blue-600';
-    if (percentage >= 50) return 'text-yellow-600';
+  const getScoreColor = (score: number) => {
+    if (score >= 11) return 'text-green-600';
+    if (score >= 8) return 'text-blue-600';
+    if (score >= 5) return 'text-yellow-600';
     return 'text-red-600';
   };
 
-  const getScoreBgColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-50 border-green-200';
-    if (percentage >= 70) return 'bg-blue-50 border-blue-200';
-    if (percentage >= 50) return 'bg-yellow-50 border-yellow-200';
+  const getScoreBgColor = (score: number) => {
+    if (score >= 11) return 'bg-green-50 border-green-200';
+    if (score >= 8) return 'bg-blue-50 border-blue-200';
+    if (score >= 5) return 'bg-yellow-50 border-yellow-200';
     return 'bg-red-50 border-red-200';
   };
+
+  const isPassed = result.score >= 11;
 
   return (
     <div className="rounded-2xl border border-slate-200/60 bg-white shadow-sm overflow-hidden">
       {/* Header con resultado */}
       <div className={`p-8 text-center ${
-        result.passed 
+        result.score >= 11
           ? 'bg-linear-to-br from-green-500 to-green-600' 
           : 'bg-linear-to-br from-red-500 to-red-600'
       }`}>
         <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full mb-4">
-          {result.passed ? (
+          {result.score >= 11 ? (
             <Trophy className="h-10 w-10 text-white" />
           ) : (
             <XCircle className="h-10 w-10 text-white" />
@@ -54,11 +56,11 @@ export const ExamResults = ({
         </div>
         
         <h2 className="text-3xl font-bold text-white mb-2">
-          {result.passed ? '¡Felicidades!' : '¡Sigue intentando!'}
+          {result.score >= 11 ? '¡Felicidades!' : '¡Sigue intentando!'}
         </h2>
         
         <p className="text-white/90 text-lg mb-4">
-          {result.passed 
+          {result.score >= 11
             ? 'Has aprobado el examen exitosamente' 
             : 'No alcanzaste el puntaje mínimo requerido'
           }
@@ -74,10 +76,10 @@ export const ExamResults = ({
 
       {/* Puntuación detallada */}
       <div className="p-8">
-        <div className={`rounded-2xl border-2 p-6 mb-8 ${getScoreBgColor(result.percentage)}`}>
+        <div className={`rounded-2xl border-2 p-6 mb-8 ${getScoreBgColor(result.score)}`}>
           <div className="text-center">
-            <div className={`text-5xl font-bold mb-2 ${getScoreColor(result.percentage)}`}>
-              {result.percentage}%
+            <div className={`text-5xl font-bold mb-2 ${getScoreColor(result.score)}`}>
+              {result.score}/20
             </div>
             <p className="text-slate-600 mb-4">
               {result.score} de {result.totalQuestions} respuestas correctas
@@ -85,20 +87,20 @@ export const ExamResults = ({
             <div className="w-full bg-slate-200 rounded-full h-3">
               <div
                 className={`h-3 rounded-full transition-all duration-500 ${
-                  result.passed ? 'bg-green-500' : 'bg-red-500'
+                  result.score >= 11 ? 'bg-green-500' : 'bg-red-500'
                 }`}
-                style={{ width: `${result.percentage}%` }}
+                style={{ width: `${(result.score / 20) * 100}%` }}
               />
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              Puntaje mínimo para aprobar: 70%
+              Puntaje mínimo para aprobar: 11/20
             </p>
           </div>
         </div>
 
         {/* Mensaje adicional según el resultado */}
         <div className="mb-8">
-          {result.passed ? (
+          {result.score >= 11 ? (
             <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
               <h3 className="text-lg font-semibold text-green-900 mb-2">
                 ¡Excelente trabajo!
@@ -117,7 +119,7 @@ export const ExamResults = ({
                 Te recomendamos revisar el material del curso antes de tu próximo intento.
               </p>
               <p className="text-sm text-red-600">
-                Puntaje mínimo requerido: 70% • Tu puntaje: {result.percentage}%
+                Puntaje mínimo requerido: 11/20 • Tu puntaje: {result.score}/20
               </p>
             </div>
           )}
@@ -133,7 +135,7 @@ export const ExamResults = ({
             Volver al curso
           </button>
 
-          {!result.passed && canRetakeExam && (
+          {result.score < 11 && canRetakeExam && (
             <button
               onClick={onRetakeExam}
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#132436] text-white hover:bg-[#224666] rounded-lg transition-colors"
