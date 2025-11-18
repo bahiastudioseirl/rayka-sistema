@@ -35,13 +35,19 @@ export class AuthStore {
   }
   
   static clearAll(): void {
-   
+ 
     sessionStorage.clear();
-    
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('authToken');
     localStorage.removeItem('admin_auth_token');
     localStorage.removeItem('userSession');
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('estudiante_token');
+    localStorage.removeItem('estudiante_data');
+    localStorage.removeItem('capacitacion_data');
+
+    const keysToRemove = Object.keys(localStorage).filter(key => key.startsWith('progreso_curso_'));
+    keysToRemove.forEach(key => localStorage.removeItem(key));
   }
 }

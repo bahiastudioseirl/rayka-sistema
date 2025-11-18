@@ -1,12 +1,12 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { LogOut, User } from 'lucide-react';
+import { AuthStore } from '../../core/components/auth/services/AuthStore';
 
 export const AdminLayout = () => {
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userRole');
-    window.location.href = '/';
+    AuthStore.clearAll();
+    window.location.href = '/admin';
   };
 
   return (
