@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import LogoRayka from '../../../assets/LogoRayka.png';
 import { iniciarSesion } from './services/IniciarSesion';
 import { AuthStore } from './services/AuthStore';
@@ -12,6 +13,7 @@ export const LoginForm = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,16 +24,10 @@ export const LoginForm = () => {
     try {
       const response = await iniciarSesion(credentials);
       
-      // Limpiar tokens antiguos primero (por si quedaron de sesiones anteriores)
       AuthStore.clearAll();
-      
-      // Solo guardar el token en localStorage
       localStorage.setItem('authToken', response.access_token);
-      
-      // Guardar datos del usuario en sessionStorage (más seguro)
       AuthStore.setUser(response.usuario);
       
-      // Redirigir según el rol
       if (response.usuario.rol.nombre === 'Administrador') {
         navigate('/administrator');
       } else {
@@ -57,7 +53,6 @@ export const LoginForm = () => {
       ...credentials,
       [e.target.name]: e.target.value
     });
-    // Limpiar error al escribir
     if (error) setError('');
   };
 
@@ -99,16 +94,26 @@ export const LoginForm = () => {
                 <label htmlFor="contrasenia" className="block text-sm font-medium text-gray-700 mb-1">
                   Contraseña
                 </label>
-                <input
-                  id="contrasenia"
-                  name="contrasenia"
-                  type="password"
-                  required
-                  value={credentials.contrasenia}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#224666] focus:border-[#224666] focus:z-10 sm:text-sm"
-                  placeholder="Ingresa tu contraseña"
-                />
+                <div className="relative">
+                  <input
+                    id="contrasenia"
+                    name="contrasenia"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={credentials.contrasenia}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#224666] focus:border-[#224666] focus:z-10 sm:text-sm"
+                    placeholder="Ingresa tu contraseña"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
             </div>
 

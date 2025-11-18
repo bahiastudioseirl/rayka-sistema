@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type SavePayload = {
@@ -17,6 +17,8 @@ export default function ModalCambiarContrasenia({ open, onClose, onSave, loading
   const [actual, setActual] = useState("");
   const [nueva, setNueva] = useState("");
   const [error, setError] = useState("");
+  const [showActual, setShowActual] = useState(false);
+  const [showNueva, setShowNueva] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // reset + focus
@@ -81,34 +83,54 @@ export default function ModalCambiarContrasenia({ open, onClose, onSave, loading
           {/* Contraseña actual */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña actual</label>
-            <input
-              ref={inputRef}
-              type="password"
-              value={actual}
-              onKeyDown={handleEnter}
-              onChange={(e) => {
-                setActual(e.target.value);
-                setError("");
-              }}
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <div className="relative">
+              <input
+                ref={inputRef}
+                type={showActual ? "text" : "password"}
+                value={actual}
+                onKeyDown={handleEnter}
+                onChange={(e) => {
+                  setActual(e.target.value);
+                  setError("");
+                }}
+                placeholder="••••••••"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setShowActual(!showActual)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                aria-label={showActual ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showActual ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           {/* Nueva contraseña */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Nueva contraseña</label>
-            <input
-              type="password"
-              value={nueva}
-              onKeyDown={handleEnter}
-              onChange={(e) => {
-                setNueva(e.target.value);
-                setError("");
-              }}
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <div className="relative">
+              <input
+                type={showNueva ? "text" : "password"}
+                value={nueva}
+                onKeyDown={handleEnter}
+                onChange={(e) => {
+                  setNueva(e.target.value);
+                  setError("");
+                }}
+                placeholder="••••••••"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNueva(!showNueva)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                aria-label={showNueva ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showNueva ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             <p className="mt-1 text-xs text-slate-500">
               Recomendado: 8+ caracteres, mayúsculas, minúsculas, números y símbolo.
             </p>

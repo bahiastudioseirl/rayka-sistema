@@ -27,9 +27,9 @@ export const NavbarSection = () => {
     <>
       <Navbar
         appName="Rayka Academy"
-        subtitle="Bienvenido"
+        subtitle="Plataforma de Cursos"
         logoSrc="{logo}"
-        userName="Juan García"
+        userName="Plataforma de Cursos"
         onLogout={() => console.log("logout")}
         tabs={currentTabs}
       />

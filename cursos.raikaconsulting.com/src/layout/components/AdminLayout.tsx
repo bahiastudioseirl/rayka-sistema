@@ -6,6 +6,7 @@ export const AdminLayout = () => {
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('authToken');
     window.location.href = '/';
   };
 

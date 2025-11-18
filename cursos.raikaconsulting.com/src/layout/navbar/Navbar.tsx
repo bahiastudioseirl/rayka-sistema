@@ -26,10 +26,10 @@ export const Navbar: FC<NavbarProps> = ({
   const isActive = (href: string) =>
     location.pathname === href || location.pathname.startsWith(href + "/");
 
-  // 👇 redirige al login manteniendo a dónde quería volver el usuario
   const handleLogout = async () => {
     try {
-      await onLogout?.(); // limpia sesión en backend/local
+      await onLogout?.(); 
+      localStorage.removeItem('authToken');
     } catch (e) {
       console.error("Error al cerrar sesión", e);
     } finally {
