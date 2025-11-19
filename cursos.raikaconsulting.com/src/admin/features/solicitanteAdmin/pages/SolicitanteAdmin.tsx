@@ -129,12 +129,12 @@ export default function SolicitanteAdmin() {
                 <UserPlus className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Gestión de Solicitantes</h1>
-                <p className="mt-1 text-slate-600">Administra los solicitantes del sistema Rayka Academia</p>
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Gestión de Solicitantes</h1>
+                <p className=" hidden md:table-cell text-xs sm:text-sm mt-1 text-slate-600">Administra los solicitantes del sistema Rayka Academia</p>
               </div>
             </div>
             <button
-              className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
+              className="w-full sm:w-auto flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
               onClick={() => setIsModalAgregarOpen(true)}
             >
               <Plus className="w-4 h-4" />

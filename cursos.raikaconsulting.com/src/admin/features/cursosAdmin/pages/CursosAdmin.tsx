@@ -1,4 +1,4 @@
-import { Edit, Plus, Search, Power, Eye, FileText, Link, Video, Book } from "lucide-react";
+import { Edit, Plus, Search, Power, FileText, Link, Video, Book } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ModalAgregar from "../components/ModalAgregar";
 import ModalEditar from "../components/ModalEditar";
@@ -168,12 +168,13 @@ export default function CursosAdmin() {
                 <Book className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Gestión de Cursos</h1>
-                <p className="mt-1 text-slate-600">Administra los elementos del sistema Rayka Academia</p>
+                {/* Título más pequeño en móvil (text-lg) y normal en desktop (sm:text-2xl) */}
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Gestión de Cursos</h1>
+                <p className=" hidden md:table-cell text-xs sm:text-sm mt-1 text-slate-600">Administra los elementos del sistema Rayka Academia</p>
               </div>
             </div>
             <button
-              className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
+              className="w-full sm:w-auto flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 space-x-2 text-xs sm:text-sm text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
               onClick={openModal}
             >
               <Plus className="w-4 h-4" />
@@ -325,7 +326,7 @@ export default function CursosAdmin() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-1">
-                       
+
                           <button
                             className="p-2 transition-colors rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
                             title="Editar curso"
@@ -335,8 +336,8 @@ export default function CursosAdmin() {
                           </button>
                           <button
                             className={`p-2 transition-colors rounded-lg ${curso.activo
-                                ? 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'
-                                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                              ? 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'
+                              : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
                               }`}
                             title={curso.activo ? "Desactivar curso" : "Activar curso"}
                             onClick={() => handleToggleEstado(curso.id_curso)}
@@ -374,8 +375,8 @@ export default function CursosAdmin() {
                       key={page}
                       onClick={() => setCurrentPage(page)}
                       className={`px-3 py-1.5 text-sm font-medium rounded-lg ${currentPage === page
-                          ? "bg-[#132436] text-white"
-                          : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+                        ? "bg-[#132436] text-white"
+                        : "border border-slate-300 text-slate-700 hover:bg-slate-50"
                         }`}
                     >
                       {page}

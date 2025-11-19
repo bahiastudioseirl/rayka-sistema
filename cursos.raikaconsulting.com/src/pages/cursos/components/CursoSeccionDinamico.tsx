@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Play, CheckCircle2, ChevronRight, Lock, BookOpen, Clock, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import confetti from 'canvas-confetti';
-import type { CursoDetalleResponse, Pregunta, Respuesta } from "../schemas/EstudianteSchema";
+import type { CursoDetalleResponse,  Respuesta } from "../schemas/EstudianteSchema";
 import { API_CONFIG } from "../../../config/api.config";
-import { marcarVideoFinalizado, type MarcarVideoFinalizadoResponse } from "../services/marcarVideoFinalizado";
+import { marcarVideoFinalizado, } from "../services/marcarVideoFinalizado";
 import { rendirExamen, type RespuestaExamen } from "../services/rendirExamen";
 import { obtenerHistorialIntentos, type HistorialIntentosResponse } from "../services/obtenerHistorialIntentos";
 
@@ -85,7 +85,7 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
 
   // Timer del examen
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isExamTimerRunning && !examCompleted) {
       interval = setInterval(() => {
         setExamTime(prev => prev + 1);

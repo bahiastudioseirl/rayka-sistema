@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type {
   CrearExamenRequest,
   PreguntaCrearRequest,
-} from "../schemas/examenSchema";
+} from "../schemas/ExamenSchema";
 
 export type CursoParaSelect = {
   id_curso: number;

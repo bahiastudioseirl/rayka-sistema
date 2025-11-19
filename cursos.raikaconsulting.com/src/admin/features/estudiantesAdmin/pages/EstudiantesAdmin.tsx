@@ -1,8 +1,8 @@
-import { Edit, Plus, Search, Power, Eye, AlertCircle, FileText, KeySquare } from "lucide-react";
+import { Edit, Plus, Search, Power,  AlertCircle, FileText} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ModalAgregar from "../components/ModalAgregar";
 import ModalEditarEstudiante from "../components/ModalEditar";
-import { crearEstudiante, obtenerEstudiantes, actualizarEstudiante, cambiarEstadoEstudiante, cambiarContrasenia } from "../services/index";
+import { crearEstudiante, obtenerEstudiantes, actualizarEstudiante, cambiarEstadoEstudiante } from "../services/index";
 import type {  ActualizarEstudianteRequest, Estudiante } from "../schemas/EstudianteSchemas";
 
 type SavePayload = { nombre: string; apellido: string; num_documento: string };
@@ -119,13 +119,14 @@ export default function EstudiantesAdmin() {
               <div className="p-2 rounded-lg bg-blue-50">
                 <FileText className="w-6 h-6 text-red-600" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">Gestión de Estudiantes</h1>
-                <p className="mt-1 text-slate-600">Administra los estudiantes de Rayka Academia</p>
+             <div>
+                {/* Título más pequeño en móvil (text-lg) y normal en desktop (sm:text-2xl) */}
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Gestión de Estudiante</h1>
+                <p className=" hidden md:table-cell text-xs sm:text-sm mt-1 text-slate-600">Administra a los estudiantes</p>
               </div>
             </div>
             <button
-              className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
+              className="w-full sm:w-auto flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 space-x-2 text-xs sm:text-sm text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
               onClick={openModal}
             >
               <Plus className="w-4 h-4" />

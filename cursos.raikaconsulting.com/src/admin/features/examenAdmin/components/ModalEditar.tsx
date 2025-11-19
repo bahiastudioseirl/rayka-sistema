@@ -1,6 +1,6 @@
 import { X, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { CrearExamenRequest,PreguntaCrearRequest,ExamenEnLista,Pregunta,ActualizarExamenRequest,AgregarPreguntaRequest,RespuestaCrearRequest} from "../schemas/examenSchema";
+import type { ExamenEnLista,Pregunta,ActualizarExamenRequest,AgregarPreguntaRequest,RespuestaCrearRequest} from "../schemas/ExamenSchema";
 import ConfirmModal from "./ConfirmModal";
 import { eliminarPregunta } from '../services/eliminarPregunta';
 import { agregarPregunta } from '../services/agregarPregunta';

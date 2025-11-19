@@ -1,5 +1,5 @@
 import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
-import type { EliminarPreguntaResponse } from '../schemas/examenSchema';
+import type { EliminarPreguntaResponse } from '../schemas/ExamenSchema';
 
 export const eliminarPregunta = async (
   idExamen: number,

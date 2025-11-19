@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Play, CheckCircle2, ChevronRight, Lock, History } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate,} from "react-router-dom";
 import { CourseCompletionModal, ExamReadyPanel, ExamQuiz, ExamHistory } from "./components";
 
 type Module = {
@@ -51,7 +51,7 @@ const COURSE: CourseDetail = {
 
 export default function CursoSeccion() {
   const navigate = useNavigate();
-  const { cursoId } = useParams<{ cursoId: string }>();
+
 
   // Estado del único módulo
   const [moduleCompleted, setModuleCompleted] = useState<boolean>(!!COURSE.modules[0].completed);

@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8000/api';
+import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
 
 export interface RespuestaExamen {
   id_pregunta: number;
@@ -33,32 +31,15 @@ export const rendirExamen = async (
   respuestas: RespuestaExamen[]
 ): Promise<RendirExamenResponse> => {
   try {
-    const token = localStorage.getItem('estudiante_token');
-    
-    if (!token) {
-      throw new Error('No hay sesión activa. Por favor, inicia sesión nuevamente.');
-    }
-
-    const response = await axios.post<RendirExamenResponse>(
-      `${API_BASE_URL}/estudiantes/cursos/${idCurso}/rendir-examen`,
-      { respuestas },
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await axiosWithoutMultipart.post<RendirExamenResponse>(
+      `/estudiantes/cursos/${idCurso}/rendir-examen`,
+      { respuestas }
     );
 
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 401) {
-        localStorage.removeItem('estudiante_token');
-        throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-      }
-      const message = error.response?.data?.message || 'Error al rendir el examen';
-      throw new Error(message);
+    if (error instanceof Error) {
+      throw error;
     }
     throw new Error('Error de conexión con el servidor');
   }

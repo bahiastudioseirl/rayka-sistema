@@ -14,8 +14,7 @@ export interface NavbarProps {
 }
 
 export const Navbar: FC<NavbarProps> = ({
-  appName,
-  logoSrc,
+
   userName,
   onLogout,
   tabs,

@@ -3,7 +3,7 @@ import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
 import type {
   ActualizarExamenRequest,
   ActualizarExamenResponse,
-} from '../schemas/examenSchema';
+} from '../schemas/ExamenSchema';
 
 export const actualizarExamen = async (
   idExamen: number,

@@ -1,6 +1,4 @@
-// Esquemas para las respuestas de la API de estudiantes
 
-// Login de estudiante
 export interface LoginEstudianteResponse {
   access_token: string;
   token_type: string;

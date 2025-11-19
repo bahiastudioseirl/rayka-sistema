@@ -37,7 +37,7 @@ export const ExamResults = ({
     return 'bg-red-50 border-red-200';
   };
 
-  const isPassed = result.score >= 11;
+
 
   return (
     <div className="rounded-2xl border border-slate-200/60 bg-white shadow-sm overflow-hidden">

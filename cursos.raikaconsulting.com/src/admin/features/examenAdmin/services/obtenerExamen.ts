@@ -1,6 +1,6 @@
 import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
 
-import type {ObtenerExamenesResponse,ExamenEnLista,} from '../schemas/examenSchema';
+import type {ObtenerExamenesResponse,ExamenEnLista,} from '../schemas/ExamenSchema';
 
 type GetExamenesParams = {
   search?: string;

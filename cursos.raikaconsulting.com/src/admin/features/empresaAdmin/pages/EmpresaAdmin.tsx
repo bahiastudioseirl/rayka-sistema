@@ -137,13 +137,14 @@ export default function EmpresaAdmin() {
                 <Building className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Gestión de Empresas</h1>
-                <p className="mt-1 text-slate-600">Administra empresas y responsables</p>
+                {/* Título más pequeño en móvil (text-lg) y normal en desktop (sm:text-2xl) */}
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Gestión de Empresas</h1>
+                <p className="hidden md:table-cell text-xs sm:text-sm mt-1 text-slate-600">Administra las empresas</p>
               </div>
             </div>
             <button
+              className="w-full sm:w-auto flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 space-x-2 text-xs sm:text-sm text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
               onClick={openModal}
-              className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
             >
               <Plus className="w-4 h-4" />
               <span>Nueva empresa</span>

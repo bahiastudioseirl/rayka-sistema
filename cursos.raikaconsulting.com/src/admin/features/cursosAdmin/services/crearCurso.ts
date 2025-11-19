@@ -1,6 +1,6 @@
 import { axiosInstance } from '../../../../api/axiosInstance';
 import type { CrearCursoRequest, CrearCursoResponse } from '../schemas/CursoSchema';
-const url_data = "http://localhost:8000/";
+
 
 export const crearCurso = async (data: CrearCursoRequest): Promise<CrearCursoResponse> => {
   const formData = new FormData();

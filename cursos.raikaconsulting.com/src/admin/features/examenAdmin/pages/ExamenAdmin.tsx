@@ -1,10 +1,10 @@
-import { Edit, Plus, Search, Trash2, Eye, FileText, AlertCircle } from "lucide-react"
+import { Edit, Plus, Search,  FileText, AlertCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { obtenerExamenes } from "../services/obtenerExamen"
-import type { ExamenEnLista } from "../schemas/examenSchema"
+import type { ExamenEnLista } from "../schemas/ExamenSchema"
 import ModalAgregarExamen from "../components/ModalAgregar"
 import { crearExamen } from "../services/crearExamen"
-import type { CrearExamenRequest } from "../schemas/examenSchema"
+import type { CrearExamenRequest } from "../schemas/ExamenSchema"
 import { obtenerCursos } from "../../cursosAdmin/services/obtenerCursos"
 import type { CursoParaSelect } from "../components/ModalAgregar"
 import ModalEditarExamen from "../components/ModalEditar"
@@ -30,15 +30,16 @@ export default function ExamenAdmin() {
   const [examenAEditar, setExamenAEditar] = useState<ExamenEnLista | null>(null);
   
   // Estados para modales de confirmación y éxito
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState({ title: "", message: "" });
+  const [, setShowSuccessModal] = useState(false);
+  const [, setSuccessMessage] = useState({ title: "", message: "" });
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
+  const [confirmAction, ] = useState<(() => void) | null>(null);
   
   const [cursos, setCursos] = useState<CursoParaSelect[]>([])
   const [currentPage, setCurrentPage] = useState(1);
 
-  // useEffect para cargar cursos (sin cambios)
+
+
   useEffect(() => {
     const cargarCursos = async () => {
       try {
@@ -125,20 +126,7 @@ export default function ExamenAdmin() {
     setShowSuccessModal(true);
   };
 
-  const handleDelete = (examen: ExamenEnLista) => {
-    setConfirmAction(() => () => {
-      // Aquí iría la lógica de eliminación
-      console.log("Eliminar examen:", examen.id_examen);
-      // TODO: Llamar al servicio de eliminar examen
-      setSuccessMessage({
-        title: "Eliminado",
-        message: "El examen ha sido eliminado correctamente."
-      });
-      setShowSuccessModal(true);
-      setRefreshTrigger(prev => prev + 1);
-    });
-    setShowConfirmModal(true);
-  }
+
   
   // Lógica de paginación (sin cambios)
   const totalExamenes = examenes.length;
@@ -158,19 +146,19 @@ export default function ExamenAdmin() {
                 <div className="p-2 rounded-lg bg-blue-50">
                   <FileText className="w-6 h-6 text-red-600" />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-900">Gestión de Exámenes</h1>
-                  <p className="mt-1 text-slate-600">Administra los elementos del sistema Rayka Academia</p>
-                </div>
+              <div>
+                {/* Título más pequeño en móvil (text-lg) y normal en desktop (sm:text-2xl) */}
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Gestión de Examenes</h1>
+                <p className=" hidden md:table-cell text-xs sm:text-sm mt-1 text-slate-600">Administra los examenes</p>
               </div>
-              <button
-                className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
-                // --- CAMBIO ---
-                onClick={openModalAgregar} // 7. onClick actualizado
-              >
-                <Plus className="w-4 h-4" />
-                <span>Nuevo Examen</span>
-              </button>
+            </div>
+            <button
+              className="w-full sm:w-auto flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 space-x-2 text-xs sm:text-sm text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
+              onClick={openModalAgregar}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nuevo examen</span>
+            </button>
             </div>
         </div>
         {/* ... (Barra de búsqueda y paginación sin cambios) ... */}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { CheckCircle2, Trophy, Award } from "lucide-react"
+import { CheckCircle2,  Award } from "lucide-react"
 
 interface CourseCompletionModalProps {
   isOpen: boolean
@@ -61,7 +61,7 @@ export const CourseCompletionModal = ({
           </div>
 
           {/* Estadísticas */}
-          <div className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-xl p-4 mb-6">
+          <div className="bg-linear-to-br from-emerald-50 to-blue-50 rounded-xl p-4 mb-6">
             <div className="flex items-center justify-center gap-6">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
@@ -132,7 +132,7 @@ const Confetti = () => {
   }))
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[60] overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-60 overflow-hidden">
       {confettiPieces.map((piece) => (
         <div
           key={piece.id}

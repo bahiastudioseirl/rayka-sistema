@@ -9,15 +9,13 @@ export const NavbarSection = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
 
-  // Determinar qué tabs mostrar según la página actual
+
   const getTabsForCurrentPage = () => {
-    // Si estamos en la página principal (lista de cursos), no mostrar tabs
+
     if (location.pathname === '/') {
-      return homeTabs // Array vacío
+      return homeTabs 
     }
-    // Si estamos dentro de un curso, mostrar navegación con "Mis Cursos"
-    
-    // Por defecto, no mostrar tabs
+  
     return homeTabs
   }
 

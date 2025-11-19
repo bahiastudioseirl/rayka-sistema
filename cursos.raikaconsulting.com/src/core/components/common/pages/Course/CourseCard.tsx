@@ -1,5 +1,5 @@
 import type { FC } from "react"
-import { Info } from "lucide-react"
+
 
 export interface CourseCardProps {
   title: string;

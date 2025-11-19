@@ -2,7 +2,7 @@ import { axiosWithoutMultipart } from '../../../../api/axiosInstance';
 import type {
   AgregarPreguntaRequest,
   AgregarPreguntaResponse,
-} from '../schemas/examenSchema';
+} from '../schemas/ExamenSchema';
 
 export const agregarPregunta = async (
   idExamen: number,

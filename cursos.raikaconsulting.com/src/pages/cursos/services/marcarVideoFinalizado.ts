@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8000/api';
+import { axiosEstudiante } from '../../../api/axiosInstance';
 
 export interface MarcarVideoFinalizadoResponse {
   success: boolean;
@@ -14,38 +12,17 @@ export interface MarcarVideoFinalizadoResponse {
   };
 }
 
-/**
- * Marca el video del curso como finalizado
- * @param idCurso - ID del curso
- */
 export const marcarVideoFinalizado = async (idCurso: number): Promise<MarcarVideoFinalizadoResponse> => {
   try {
-    const token = localStorage.getItem('estudiante_token');
-    
-    if (!token) {
-      throw new Error('No hay sesión activa. Por favor, inicia sesión nuevamente.');
-    }
-
-    const response = await axios.patch<MarcarVideoFinalizadoResponse>(
-      `${API_BASE_URL}/estudiantes/cursos/${idCurso}/marcar-video-finalizado`,
-      {},
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await axiosEstudiante.patch<MarcarVideoFinalizadoResponse>(
+      `/estudiantes/cursos/${idCurso}/marcar-video-finalizado`,
+      {}
     );
     
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 401) {
-        localStorage.removeItem('estudiante_token');
-        throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-      }
-      const message = error.response?.data?.message || 'Error al marcar el video como finalizado';
-      throw new Error(message);
+    if (error instanceof Error) {
+      throw error;
     }
     throw new Error('Error de conexión con el servidor');
   }

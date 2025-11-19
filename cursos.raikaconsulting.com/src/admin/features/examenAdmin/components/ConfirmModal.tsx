@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle, X } from "lucide-react";
+import { AlertCircle,  X } from "lucide-react";
 
 type ConfirmModalProps = {
   open: boolean;

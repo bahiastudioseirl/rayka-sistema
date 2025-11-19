@@ -177,34 +177,34 @@ export default function CapacitacionAdmin() {
       openEdit(capacitacion);
     }
   };
-    const handleToggleEstado = async (id: number) => {
-      try {
-        const response = await cambiarEstadoCapacitacion(id);
-        setCapacitaciones((prev) => {
-          const nuevaLista = prev.map((c) => {
-            if (c.capacitacion.id_capacitacion === id) {
-              return {
-                ...c,
-                capacitacion: response.data
-              };
-            }
-            return c;
-          });
-          return nuevaLista;
+  const handleToggleEstado = async (id: number) => {
+    try {
+      const response = await cambiarEstadoCapacitacion(id);
+      setCapacitaciones((prev) => {
+        const nuevaLista = prev.map((c) => {
+          if (c.capacitacion.id_capacitacion === id) {
+            return {
+              ...c,
+              capacitacion: response.data
+            };
+          }
+          return c;
         });
-      } catch (err: any) {
-        console.error("❌ Error al cambiar estado:", err);
-        console.error("❌ Error response:", err?.response);
-        const msg =
-          err?.response?.data?.message ||
-          err?.message ||
-          "No se pudo cambiar el estado.";
-        setError(msg);
-      }
-    };
+        return nuevaLista;
+      });
+    } catch (err: any) {
+      console.error("❌ Error al cambiar estado:", err);
+      console.error("❌ Error response:", err?.response);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "No se pudo cambiar el estado.";
+      setError(msg);
+    }
+  };
 
   const handleCopyLink = (id: number, codigo: string) => {
-    navigator.clipboard.writeText(`http://localhost:5173/login/${codigo}`);
+    navigator.clipboard.writeText(`https://cursos.raikaconsulting.com/login/${codigo}`);
     setCopiedId(id);
     setTimeout(() => {
       setCopiedId(null);
@@ -222,14 +222,14 @@ export default function CapacitacionAdmin() {
                 <ClipboardCheck className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Gestión de Capacitaciones</h1>
-                <p className="mt-1 text-slate-600">Administra las capacitaciones del sistema Rayka Academia</p>
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Gestión de Capacitaciones</h1>
+                <p className=" hidden md:table-cell text-xs sm:text-sm mt-1 text-slate-600">Administra las capacitaciones del sistema Rayka Academia</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
 
               <button
-                className="flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
+                className="w-full sm:w-auto flex items-center px-4 py-2 space-x-2 text-white transition-colors bg-[#132436] rounded-lg shadow-sm hover:bg-[#224666]"
                 onClick={openModal}
               >
                 <Plus className="w-4 h-4" />
@@ -367,11 +367,11 @@ export default function CapacitacionAdmin() {
                           {item.capacitacion.estado}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="pl-6 pr-12 py-4">
                         <div className="max-w-sm">
                           <div className="flex items-center gap-2">
-                            <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-800 ">
-                              http://localhost:5173/login/{item.resumen.codigo_unico}
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-800 max-w-[150px] truncate inline-block align-middle" title={`https://cursos.raikaconsulting.com/login/${item.resumen.codigo_unico}`}>
+                              {`https://cursos.raikaconsulting.com/login/${item.resumen.codigo_unico}`}
                             </code>
                             <div className="relative">
                               <button
@@ -394,8 +394,8 @@ export default function CapacitacionAdmin() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-1">
+                      <td className="pl-8 pr-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-3">
                           <button
                             className="p-2 transition-colors rounded-lg text-slate-400 hover:text-green-600 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Exportar detalle"

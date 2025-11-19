@@ -1,6 +1,6 @@
-import { Link, Upload, X, Image } from "lucide-react"; // Queda igual
+import { Link, Upload, X, Image } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { TipoContenido } from "../schemas/CursoSchema";
+import { type TipoContenido, validateCurso } from "../schemas/CursoSchema"; // Importamos validateCurso
 
 type Props = {
   open: boolean;
@@ -10,14 +10,13 @@ type Props = {
     tipo_contenido: TipoContenido;
     contenido?: string;
     archivo?: File;
-    descripcion: string; // Ya no es opcional
+    descripcion: string;
     url_imagen?: File;
   }) => Promise<void> | void;
   loading?: boolean;
 };
 
 export default function ModalAgregar({ open, onClose, onSave, loading }: Props) {
-  // Todos los estados quedan igual
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [tipoContenido, setTipoContenido] = useState<TipoContenido>("link");
@@ -26,12 +25,10 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
   const [imagenArchivo, setImagenArchivo] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
 
-  // Todos los refs quedan igual
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imagenInputRef = useRef<HTMLInputElement>(null);
 
-  // El useEffect de 'open' queda igual
   useEffect(() => {
     if (open) {
       setTitulo("");
@@ -45,19 +42,22 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
     }
   }, [open]);
 
-  // El useEffect de 'onEsc' queda igual
   useEffect(() => {
     const onEsc = (e: KeyboardEvent) => e.key === "Escape" && open && onClose();
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
   }, [open, onClose]);
 
-  // handleFileChange (video) queda igual
+  // --- MANEJO DE VIDEO CON VALIDACIÓN DEL SCHEMA ---
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith("video/")) {
-        setError("Por favor selecciona un archivo de video válido");
+      // Usamos la validación centralizada
+      const errorMsg = validateCurso.video(file);
+      if (errorMsg) {
+        setError(errorMsg);
+        // Limpiamos el input para permitir seleccionar el mismo archivo si se corrige algo (raro en videos, pero buena práctica)
+        e.target.value = ""; 
         return;
       }
       setArchivo(file);
@@ -65,14 +65,15 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
     }
   };
 
-  // handleImagenChange (imagen) queda igual
+  // --- MANEJO DE IMAGEN CON VALIDACIÓN DEL SCHEMA ---
   const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith("image/")) {
-        setError(
-          "Por favor selecciona un archivo de imagen válido (JPG, PNG, WebP)"
-        );
+      // Usamos la validación centralizada
+      const errorMsg = validateCurso.imagen(file);
+      if (errorMsg) {
+        setError(errorMsg);
+        e.target.value = "";
         return;
       }
       setImagenArchivo(file);
@@ -80,49 +81,56 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
     }
   };
 
-  // handleSave se MODIFICA
+  // --- GUARDAR CON VALIDACIONES DEL SCHEMA ---
   const handleSave = async () => {
-    const tituloValue = titulo.trim();
-    if (!tituloValue) {
-      setError("Ingresa el título del curso.");
+    setError(""); // Limpiar errores previos
+
+    // 1. Validar Título
+    const errorTitulo = validateCurso.titulo(titulo);
+    if (errorTitulo) {
+      setError(errorTitulo);
       return;
     }
 
-    const descripcionValue = descripcion.trim();
-    // 'imagenArchivo' es el estado interno que contiene el File
+    // 2. Validar Descripción
+    const errorDescripcion = validateCurso.descripcion(descripcion);
+    if (errorDescripcion) {
+      setError(errorDescripcion);
+      return;
+    }
 
+    // 3. Validar Contenido según el tipo
     if (tipoContenido === "link") {
-      const linkValue = contenidoLink.trim();
-      if (!linkValue) {
-        setError("Ingresa el link del video.");
+      // Validar URL
+      const errorUrl = validateCurso.url(contenidoLink);
+      if (errorUrl) {
+        setError(errorUrl);
         return;
       }
-      try {
-        new URL(linkValue);
-      } catch {
-        setError("Ingresa una URL válida.");
-        return;
-      }
-      
+
       await onSave({
-        titulo: tituloValue,
+        titulo: titulo.trim(),
         tipo_contenido: "link",
-        contenido: linkValue,
-        descripcion: descripcionValue,
-        url_imagen: imagenArchivo || undefined, // MODIFICADO: Enviamos el File bajo la key 'url_imagen'
+        contenido: contenidoLink.trim(),
+        descripcion: descripcion.trim(),
+        url_imagen: imagenArchivo || undefined,
       });
+
     } else {
+      // Validar Archivo de Video
       if (!archivo) {
         setError("Selecciona un archivo de video.");
         return;
       }
-      
+      // Nota: El archivo ya pasó validación de tipo/peso en handleFileChange,
+      // pero podríamos volver a llamar a validateCurso.video(archivo) si quisiéramos ser estrictos.
+
       await onSave({
-        titulo: tituloValue,
+        titulo: titulo.trim(),
         tipo_contenido: "carga_archivo",
         archivo,
-        descripcion: descripcionValue,
-        url_imagen: imagenArchivo || undefined, // MODIFICADO: Enviamos el File bajo la key 'url_imagen'
+        descripcion: descripcion.trim(),
+        url_imagen: imagenArchivo || undefined,
       });
     }
   };
@@ -130,8 +138,6 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
   if (!open) return null;
 
   return (
-    // Todo el JSX (HTML) es exactamente el mismo que en la respuesta anterior
-    // Incluyendo el scroll, el límite de caracteres y el botón de subir imagen.
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       {/* Overlay */}
       <div
@@ -171,7 +177,7 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
             />
           </div>
 
-          {/* Descripción (con límite y sin resize) */}
+          {/* Descripción */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Descripción
@@ -183,12 +189,12 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
                 setError("");
               }}
               rows={3}
-              maxLength={200}
+              maxLength={1000} // Actualizado a 1000 según tu schema (aunque puedes dejarlo en 200 visualmente si prefieres)
               placeholder="Describe brevemente el contenido del curso..."
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             />
             <p className="text-xs text-slate-500 text-right mt-1">
-              {descripcion.length} / 200
+              {descripcion.length} / 1000
             </p>
           </div>
 
@@ -259,7 +265,7 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="video/*"
+                  accept="video/*" // Esto filtra en el explorador de archivos, la validación real la hace handleFileChange
                   onChange={handleFileChange}
                   className="hidden"
                 />
@@ -308,7 +314,7 @@ export default function ModalAgregar({ open, onClose, onSave, loading }: Props) 
               <input
                 ref={imagenInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*" // Filtro visual
                 onChange={handleImagenChange}
                 className="hidden"
               />
