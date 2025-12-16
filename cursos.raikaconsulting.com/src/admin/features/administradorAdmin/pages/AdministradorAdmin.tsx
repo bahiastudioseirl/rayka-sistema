@@ -111,14 +111,22 @@ export default function AdministradorAdmin() {
                 });
                 return nuevaLista;
             });
+            setError("");
         } catch (err: any) {
             console.error("❌ Error al cambiar estado:", err);
             console.error("❌ Error response:", err?.response);
-            const msg =
-                err?.response?.data?.message ||
-                err?.message ||
-                "No se pudo cambiar el estado.";
-            setError(msg);
+            
+            let errorMessage = "No se pudo cambiar el estado del usuario.";
+            
+            if (err?.response?.data?.error) {
+                errorMessage = err.response.data.error;
+            } else if (err?.response?.data?.message) {
+                errorMessage = err.response.data.message;
+            } else if (err?.message) {
+                errorMessage = err.message;
+            }
+            
+            setError(errorMessage);
         }
     };
     const openPwd = (s: Administrador) => {
