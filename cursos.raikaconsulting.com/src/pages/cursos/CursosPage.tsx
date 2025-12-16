@@ -80,7 +80,7 @@ export default function CursosPage() {
 			title: curso.titulo,
 			description: curso.descripcion,
 			progressPct,
-			imageUrl: curso.url_imagen ? API_CONFIG.getFullUrl(curso.url_imagen) : undefined,
+			imageUrl: curso.url_imagen ? API_CONFIG.getMediaUrl(curso.url_imagen) : undefined,
 			ctaText: 'Ver curso',
 			onClick: () => handleCursoClick(curso.id_curso)
 		};

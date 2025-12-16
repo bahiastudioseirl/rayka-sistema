@@ -102,6 +102,14 @@ class UsuarioService
 
         $nuevoEstado = !$usuario->activo;
 
+        // Verificar si se está intentando desactivar el último usuario activo
+        if ($usuario->activo && !$nuevoEstado) {
+            $usuariosActivos = Usuarios::where('activo', true)->count();
+            if ($usuariosActivos <= 1) {
+                throw new \Exception('No se puede desactivar el último usuario activo del sistema');
+            }
+        }
+
         $actualizado = $this->usuarioRepository->actualizar($id, ['activo' => $nuevoEstado]);
         
         if (!$actualizado) {

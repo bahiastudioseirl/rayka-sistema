@@ -293,7 +293,7 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
       return (
         <div className="aspect-video rounded-xl overflow-hidden bg-slate-900">
           <video
-            src={API_CONFIG.getFullUrl(cursoData.contenido)}
+            src={API_CONFIG.getMediaUrl(cursoData.contenido)}
             className="w-full h-full"
             controls
             controlsList="nodownload"
@@ -331,7 +331,7 @@ export default function CursoSeccionDinamico({ cursoData }: Props) {
                 {cursoData.url_imagen && (
                   <div className="mb-4 rounded-lg overflow-hidden">
                     <img
-                      src={API_CONFIG.getFullUrl(cursoData.url_imagen)}
+                      src={API_CONFIG.getMediaUrl(cursoData.url_imagen)}
                       alt={cursoData.titulo}
                       className="w-full h-32 object-cover"
                     />

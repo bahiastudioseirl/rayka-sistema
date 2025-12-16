@@ -4,11 +4,11 @@ import ModalAgregar from "../components/ModalAgregar";
 import ModalEditar from "../components/ModalEditar";
 import { crearCurso } from "../services/crearCurso";
 import { obtenerCursos } from "../services/obtenerCursos";
-import { actualizarCurso } from "../services/actualizarCurso";
+import { actualizarCurso } from "../services/actualizarCurso";  
 import { cambiarEstadoCurso } from "../services/estadoCurso";
 import type { CrearCursoRequest, Curso, ActualizarCursoRequest } from "../schemas/CursoSchema";
+import { API_CONFIG } from "../../../../config/api.config";
 
-const storageBaseUrl = "https://api.cursos.raikaconsulting.com/storage.php?path=";
 export default function CursosAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -277,7 +277,7 @@ export default function CursosAdmin() {
                         <div className="max-w-xs">
                           {curso.url_imagen ? (
                             <img
-                              src={storageBaseUrl + curso.url_imagen}
+                              src={API_CONFIG.getMediaUrl(curso.url_imagen)}
                               alt={"Imagen del curso"}
                               className="h-16 w-16 object-cover rounded-md shadow-sm border border-slate-200"
                             />
